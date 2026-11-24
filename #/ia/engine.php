@@ -724,7 +724,7 @@ function amx_ia_responder(string $msg, array $ctx = []): array {
         if ($presetMp) $actions[] = ['t' => 'world', 'preset' => $presetMp];
         $actions[] = ['t' => 'multiplayer', 'on' => true];
         return amx_resposta_final(
-            'Ativei o **multiplayer por IP**. Cada jogador recebe um ID baseado no IP + navegador, aparece na lista de online e sincroniza posição, skin e chat. O **mapa compartilhado** fica salvo no servidor: quem entrar pelo mesmo endereço vê o mesmo mundo. Abra em outro celular/PC e teste.',
+            'Ativei o **multiplayer por conta**. Cada jogador entra com usuário e senha, recebe um ID ligado à conta e aparece na lista de online sincronizando posição, skin e chat. O **mundo é único e infinito**: o mapa compartilhado fica salvo no servidor e todo mundo vê o mesmo chão verde sob o céu azul. Abra em outro celular/PC, entre com outra conta e teste.',
             $actions, $modelo, $mem, 'multiplayer'
         );
     }

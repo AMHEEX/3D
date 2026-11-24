@@ -3,18 +3,66 @@
 **AMHEEX GAME** é um jogo 3D que roda inteiro no seu servidor (PHP + Babylon.js
 local). A inteligência do jogo é a **AMHEEX AI**: ela entende português, cria
 **qualquer coisa 3D** (prédios, casas, móveis, animais, personagens, objetos
-inventados), monta **elementos de tela** (título, contador, mira, barra de vida),
-gera **personagens realistas com skin procedural**, adiciona **controles**
-(andar, correr, pular, câmera em 1ª/3ª pessoa, modo tiro) e ativa o
-**multiplayer por IP com mapa compartilhado e chat**.
+inventados), edita o **mapa global** e o **seu personagem** — e nunca o
+personagem de outro jogador.
 
-O estado inicial é **fixo e limpo**: só o chão verde, a bola vermelha e o ícone
-flutuante da AMHEEX AI. Nada mais aparece até você pedir (ex.: **“crie game”**).
+O mundo é **único e infinito**: chão verde sob céu azul, sem borda, e a
+comunidade constrói junto. Não existe mais editor de personagem na tela
+inicial: você entra com **usuário e senha** e o personagem padrão da conta
+aparece direto no mundo. Quem muda o visual é a IA, pelo chat.
 
 A AMHEEX AI é **local e adaptativa**: ela guarda o que você ensina em
 `ia/aprendizado.json`, consulta a base `ia/knowledge.json` e nunca depende de um
 LLM externo. A voz usa a **API Fish Audio** com a voz clonada da AMHEEX (chave
 mantida no servidor), com fallback para `espeak-ng` e para o navegador.
+
+## O que mudou nesta versão (Fase 4)
+
+- **Telas separadas**: carregamento (boot com logo + barra RGB), **login** e
+  **registro** são telas independentes, cada uma com seu formulário.
+- **Sem editor de personagem na entrada**: o personagem padrão da conta entra
+  direto no mundo.
+- **Sem botões laterais empilhados** (LOJA/SKINS/INVENTÁRIO/CONFIG./SAIR) e
+  **sem menu flutuante da IA**: o ícone da IA agora está embutido no jogo.
+- **Chat único com a AMHEEX AI** (sem abas “Aqui/Global”): você escreve ou cola a
+  pergunta e a IA responde e executa. O microfone ativa o **modo conversa em
+  tempo real** (escuta, responde e fala), não é só gravação.
+- **Controles estilo Roblox**: joystick de mover à **esquerda**, botão de pulo à
+  **direita**, botão de câmera e arraste para girar o ângulo.
+- **Personagem com esqueleto articulado**: quadril, joelho, tornozelo, ombro,
+  cotovelo, mão, tronco e cabeça animados (caminhada, corrida, respiração,
+  parado), com câmera que segue e se alinha atrás do personagem.
+- **Ícones SVG** no lugar de emojis em todos os botões e abas.
+- **Código modular**: cada sistema tem seu próprio arquivo (motor 3D, interface
+  e IA), montados pelo `build.sh`.
+
+## Arquitetura dos arquivos
+
+```
+src/
+  top.php          API PHP (login, registro, perfil, chat, tts, mp_*, rtc_*)
+  head.html        CSS + HTML das telas e do HUD
+  game/            motor 3D (um arquivo por sistema)
+    01-core.js       qualidade adaptativa, materiais, helpers de malha
+    02-build.js      construtor de personagem com juntas reais
+    03-world.js      mundo, terreno, objetos, presets
+    04-player.js     jogador, controles, câmera
+    05-scene.js      loop de animação, câmera e mundo infinito
+    06-actors.js     NPC seguidor e skin do jogador
+    07-loop.js       multiplayer, chat e persistência
+  ui/              interface (um arquivo por sistema)
+    01-base.js       helpers, estado, boot
+    02-auth.js       telas de login e registro
+    03-hud.js        joystick, pulo, câmera, botões do HUD
+    04-chat.js       chat único com a IA
+    05-settings.js   configurações (5 abas)
+    06-voice.js      voz por proximidade (WebRTC)
+    07-main.js       inicialização da interface
+  ai/              AMHEEX AI no cliente
+    01-speech.js     voz (Fish Audio) e reconhecimento de fala
+    02-engine.js     motor de conversa e aplicação de ações
+build.sh           concatena tudo em index.php e valida com php -l
+```
 
 ---
 

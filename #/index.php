@@ -671,8 +671,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 #health .bar{width:110px;height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}#health .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#4ade80)}
 
 /* ---------- AMHEEX GAME: multiplayer ---------- */
-#mpPanel{position:fixed;right:16px;top:16px;z-index:9;width:min(300px,calc(100vw - 32px));display:none;flex-direction:column;background:rgba(10,14,24,.82);border:1px solid var(--bd);border-radius:16px;backdrop-filter:blur(14px);box-shadow:0 20px 60px -20px #000;overflow:hidden}
-#mpPanel.on{display:flex}
 #mpHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--bd);font-size:12px;font-weight:800;color:#fff}
 #mpHead small{font-weight:500;color:var(--mut);font-size:10.5px}
 #mpPlayers{max-height:150px;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
@@ -684,9 +682,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 #mpForm{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--bd)}
 #mpForm input{flex:1;min-width:0;background:#0a0e18;border:1px solid var(--bd);border-radius:9px;color:#e8eefc;padding:7px 9px;font-size:12px;font-family:inherit;outline:none}
 #mpForm button{border:1px solid rgba(79,124,255,.5);background:rgba(79,124,255,.2);color:#fff;border-radius:9px;padding:0 10px;font-size:12px;font-weight:700;cursor:pointer}
-#mpBtn{position:fixed;right:16px;top:16px;z-index:8;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid rgba(34,211,238,.4);background:rgba(34,211,238,.14);color:#9fe9f7;font-size:11.5px;font-weight:700;backdrop-filter:blur(10px);cursor:pointer}
-#mpBtn.on{display:inline-flex}
-#mpBtn b{color:#fff}
 #mpToast{position:fixed;left:50%;top:18px;transform:translate(-50%,-16px);z-index:20;padding:10px 16px;border-radius:12px;background:rgba(10,14,24,.9);border:1px solid rgba(34,211,238,.45);color:#dff6fb;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100vw - 32px);text-align:center;backdrop-filter:blur(12px)}
 #mpToast.on{opacity:1;transform:translate(-50%,0)}
 .mp-player{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#c7d2e8}
@@ -695,90 +690,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 .mp-player b{color:#fff;font-size:11.5px}.mp-player small{color:#7c89a8;margin-left:auto;font-size:10px}
 .mp-msg{color:#dbe4f7}.mp-msg b{color:#22d3ee}
 
-@media (max-width:560px){#controls .dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}#controls .dpad button{width:48px;height:48px}#controls .acts button{width:56px;height:44px}#mpPanel{top:auto;bottom:90px;right:8px;width:calc(100vw - 16px)}#mpBtn{top:auto;bottom:88px;right:10px}}
-
-/* ---------- FAB (ícone flutuante extraído do AMHEEX DRIVE) ---------- */
-#amxai-root{position:fixed;inset:0;z-index:2147483000;pointer-events:none;font-family:var(--font)}
-#amxai-root *{box-sizing:border-box}
-#amxai-fab{pointer-events:auto;position:fixed;right:18px;bottom:18px;width:60px;height:60px;border-radius:17px;border:1px solid rgba(255,255,255,.16);padding:0;cursor:pointer;background:#0a0c14;box-shadow:0 16px 40px rgba(0,0,0,.55),0 0 0 3px rgba(255,255,255,.06),0 0 32px -6px var(--acc);display:grid;place-items:center;transition:transform .18s,box-shadow .18s;overflow:visible;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
-#amxai-fab:hover{transform:translateY(-3px) scale(1.03)}
-#amxai-fab:active{transform:scale(.97)}
-#amxai-fab img{width:100%;height:100%;object-fit:cover;border-radius:14px;display:block}
-#amxai-fab .amxai-ping{position:absolute;right:-2px;top:-2px;width:13px;height:13px;border-radius:50%;background:var(--ok);border:2px solid #fff;box-shadow:0 0 10px var(--ok)}
-#amxai-root[data-open="1"] #amxai-fab{opacity:0;pointer-events:none;transform:scale(.7)}
-#amxai-root[data-mode="fixed"] #amxai-fab{right:0;top:50%;bottom:auto;transform:translateY(-50%);width:48px;height:88px;border-radius:16px 0 0 16px;background:linear-gradient(160deg,#0a0c14,#171b2a);box-shadow:-8px 0 30px rgba(0,0,0,.3)}
-#amxai-root[data-mode="fixed"] #amxai-fab img{display:none}
-#amxai-root[data-mode="fixed"] #amxai-fab .amxai-pro{display:grid}
-#amxai-fab .amxai-pro{display:none;place-items:center;width:100%;height:100%;color:#fff}
-
-#amxai-panel{pointer-events:auto;position:fixed;right:18px;bottom:18px;width:min(404px,calc(100vw - 24px));height:min(660px,calc(100dvh - 40px));display:flex;flex-direction:column;background:linear-gradient(180deg,#0d1220,#0a0d16 60%);border:1px solid var(--bd);border-radius:20px;box-shadow:0 40px 100px -20px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.03) inset;overflow:hidden;color:var(--tx);animation:amxaiIn .18s ease both}
-#amxai-panel[hidden]{display:none!important}
-@keyframes amxaiIn{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
-#amxai-root[data-mode="fixed"] #amxai-panel{right:0;bottom:0;top:0;width:min(430px,100vw);height:100dvh;border-radius:0;border-right:0}
-#amxai-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 12px 12px 14px;background:linear-gradient(180deg,rgba(255,255,255,.05),transparent);border-bottom:1px solid var(--bd);cursor:grab;touch-action:none;flex:0 0 auto}
-#amxai-root[data-mode="fixed"] #amxai-head{cursor:default}
-.amxai-id{display:flex;align-items:center;gap:10px;min-width:0}
-.amxai-avatar{width:34px;height:34px;border-radius:10px;overflow:hidden;background:#0a0c14;border:1px solid rgba(255,255,255,.14);flex:0 0 auto;display:grid;place-items:center}
-.amxai-avatar img{width:100%;height:100%;object-fit:cover}
-.amxai-id b{display:block;font-size:13.5px;font-weight:800;letter-spacing:.01em}
-.amxai-id small{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--mut);margin-top:1px}
-.amxai-id small i{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 8px var(--ok);display:inline-block}
-.amxai-head-btns{display:flex;align-items:center;gap:4px;flex:0 0 auto}
-.amxai-head-btns button{width:32px;height:32px;border-radius:9px;border:1px solid transparent;background:transparent;color:var(--mut);display:grid;place-items:center;cursor:pointer;font-size:20px;line-height:1;transition:.15s;padding:0}
-.amxai-head-btns button:hover{background:rgba(255,255,255,.08);color:#fff;border-color:var(--bd)}
-#amxai-pin.on{color:var(--acc2);background:rgba(34,211,238,.12);border-color:rgba(34,211,238,.35)}
-#amxai-close{font-size:22px!important}
-
-#amxai-msgs{flex:1 1 auto;overflow-y:auto;overflow-x:hidden;padding:14px 12px 6px;display:flex;flex-direction:column;gap:12px;scrollbar-width:thin;scrollbar-color:#2a3350 transparent}
-#amxai-msgs::-webkit-scrollbar{width:7px}
-#amxai-msgs::-webkit-scrollbar-thumb{background:#2a3350;border-radius:8px}
-.amxai-msg{display:flex;flex-direction:column;max-width:100%;animation:msgIn .18s ease both}
-@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.amxai-msg.user{align-items:flex-end}
-.amxai-msg.bot{align-items:flex-start}
-.amxai-bubble{max-width:92%;padding:10px 12px;border-radius:14px;font-size:13.2px;line-height:1.55;word-wrap:break-word;overflow-wrap:anywhere}
-.amxai-msg.user .amxai-bubble{background:linear-gradient(135deg,#3b63f0,#5b8bff);color:#fff;border-bottom-right-radius:5px;white-space:pre-wrap}
-.amxai-msg.bot .amxai-bubble{background:#151b2b;border:1px solid var(--bd);color:var(--tx);border-bottom-left-radius:5px;max-width:100%;width:100%}
-.amxai-bubble code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;color:#a5d6ff}
-.amxai-bubble b{color:#fff}
-.amxai-acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.amxai-act{font-size:11px;padding:4px 8px;border-radius:7px;background:rgba(34,211,238,.10);border:1px solid rgba(34,211,238,.30);color:#9fe9f7;display:inline-flex;align-items:center;gap:5px}
-.amxai-act.ok{background:rgba(34,197,94,.10);border-color:rgba(34,197,94,.32);color:#9df0bb}
-.amxai-act.er{background:rgba(239,68,68,.10);border-color:rgba(239,68,68,.32);color:#ffb4b4}
-.amxai-typing{display:inline-flex;gap:4px;padding:3px 2px}
-.amxai-typing i{width:6px;height:6px;border-radius:50%;background:#7f8db3;animation:tp 1.1s infinite}
-.amxai-typing i:nth-child(2){animation-delay:.15s}
-.amxai-typing i:nth-child(3){animation-delay:.3s}
-@keyframes tp{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
-
-#amxai-chips{display:flex;gap:6px;overflow-x:auto;padding:6px 12px 8px;flex:0 0 auto;scrollbar-width:none}
-#amxai-chips::-webkit-scrollbar{display:none}
-#amxai-chips button{white-space:nowrap;font-size:11.5px;padding:7px 10px;border-radius:9px;border:1px solid var(--bd);background:rgba(255,255,255,.04);color:#c3cfe8;cursor:pointer;transition:.15s;font-family:inherit}
-#amxai-chips button:hover{background:rgba(79,124,255,.16);border-color:rgba(79,124,255,.45);color:#fff}
-
-#amxai-form{display:flex;align-items:flex-end;gap:6px;padding:8px 10px 10px;border-top:1px solid var(--bd);background:rgba(0,0,0,.18);flex:0 0 auto}
-#amxai-input{flex:1 1 auto;resize:none;max-height:110px;min-height:40px;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);background:#0a0e18;color:var(--tx);font-size:13.5px;font-family:inherit;line-height:1.4;outline:none;transition:border-color .15s}
-#amxai-input:focus{border-color:rgba(79,124,255,.65);box-shadow:0 0 0 3px rgba(79,124,255,.14)}
-#amxai-input::placeholder{color:#64719a}
-#amxai-form button{width:40px;height:40px;border-radius:12px;border:1px solid var(--bd);background:#111827;color:#cfd8ee;display:grid;place-items:center;cursor:pointer;transition:.15s;flex:0 0 auto;padding:0}
-#amxai-form button:hover{background:#1a2338;color:#fff}
-#amxai-form button svg{width:18px;height:18px}
-#amxai-mic.listening{background:rgba(239,68,68,.18);border-color:rgba(239,68,68,.55);color:#ff9d9d;animation:micPulse 1.2s infinite}
-@keyframes micPulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.35)}50%{box-shadow:0 0 0 7px rgba(239,68,68,0)}}
-#amxai-send{background:linear-gradient(135deg,#3b63f0,#5b8bff)!important;border-color:transparent!important;color:#fff!important}
-#amxai-send:disabled{opacity:.45;cursor:not-allowed}
-
-.amxai-foot{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 12px 9px;font-size:10.5px;color:#6b7899;flex:0 0 auto}
-.amxai-foot .sw{display:inline-flex;align-items:center;gap:5px;cursor:pointer;border:1px solid var(--bd);background:rgba(255,255,255,.03);border-radius:8px;padding:4px 7px;color:#93a1c2;font-size:10.5px;font-family:inherit}
-.amxai-foot .sw.on{color:#9fe9f7;border-color:rgba(34,211,238,.4);background:rgba(34,211,238,.10)}
-.amxai-foot .sw svg{width:12px;height:12px}
-.amxai-foot .left{display:flex;gap:5px;align-items:center}
-@media (max-width:560px){
-  #amxai-panel{right:8px;bottom:8px;width:calc(100vw - 16px);height:min(72dvh,620px);border-radius:18px}
-  #amxai-fab{right:14px;bottom:14px;width:56px;height:56px}
-  #amxai-chips button{font-size:11px}
-}
-
+@media (max-width:560px){#controls .dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}#controls .dpad button{width:48px;height:48px}#controls .acts button{width:56px;height:44px}}
 /* ================= AMHEEX GAME 3.1 — boot, menu, HUD estilo Roblox ================= */
 #boot{position:fixed;inset:0;z-index:9000;background:radial-gradient(120% 120% at 50% 0%,#101a33 0%,#05070d 60%,#000 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s}
 #boot.off{opacity:0;pointer-events:none}
@@ -869,9 +781,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 #loginCard h1{margin:12px 0 2px;font-size:25px;letter-spacing:.06em;font-weight:900;
   background:linear-gradient(90deg,#00e0ff,#7a5cff,#ff3d81);-webkit-background-clip:text;background-clip:text;color:transparent}
 #loginCard .sub{margin:0 0 16px;font-size:12px;color:#93a1c2}
-#loginTabs{display:flex;gap:6px;background:rgba(255,255,255,.05);border-radius:12px;padding:4px;margin-bottom:14px}
-#loginTabs button{flex:1;padding:9px;border:0;border-radius:9px;background:transparent;color:#9aa8c7;font:800 11.5px var(--font);letter-spacing:.06em;cursor:pointer}
-#loginTabs button.on{background:linear-gradient(180deg,#2b6cff,#1b4fd8);color:#fff;box-shadow:0 8px 20px -8px #2b6cff}
 #loginCard label{display:block;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#7f8db0;margin:10px 0 5px}
 #loginCard input{width:100%;padding:12px 13px;border-radius:11px;border:1px solid rgba(255,255,255,.13);
   background:#0a0f1c;color:#eaf0ff;font:600 14px var(--font);outline:none}
@@ -900,7 +809,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 .avBtns{display:flex;gap:8px;margin-top:14px}
 .avBtns button{flex:1;padding:11px 6px;border-radius:11px;border:1px solid rgba(255,255,255,.16);
   background:rgba(255,255,255,.07);color:#e8eefc;font:800 11px var(--font);letter-spacing:.05em;cursor:pointer}
-.avBtns #avPlay{background:linear-gradient(90deg,#00c2ff,#2b6cff);border:0;color:#fff;font-size:12px}
 #avHint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:11px;color:#c3cfe8;
   background:rgba(8,12,22,.7);padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1)}
 
@@ -921,40 +829,53 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   backdrop-filter:blur(8px);font-size:12px;color:#cfe0ff;font-weight:800}
 .rbStat b{color:#fff;font-size:13px}
 
-#rbChat{position:absolute;left:12px;top:62px;width:min(330px,calc(100vw - 100px));pointer-events:auto;display:none;
-  background:rgba(8,12,22,.78);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;backdrop-filter:blur(12px)}
+/* chat = conversa direta com a AMHEEX AI (sem abas) */
+#rbChat{position:absolute;left:12px;top:62px;width:min(368px,calc(100vw - 24px));pointer-events:auto;display:none;
+  background:rgba(8,12,22,.88);border:1px solid rgba(255,255,255,.12);border-radius:14px;overflow:hidden;
+  backdrop-filter:blur(14px);box-shadow:0 24px 60px -24px #000}
 #rbChat.on{display:block}
-#rbChatTabs{display:flex;background:rgba(255,255,255,.05)}
-#rbChatTabs button{flex:1;padding:8px;border:0;background:transparent;color:#93a1c2;font:800 11px var(--font);cursor:pointer}
-#rbChatTabs button.on{background:rgba(255,255,255,.1);color:#fff}
-#rbChatLog{height:150px;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:5px;font-size:11.5px;line-height:1.4;color:#dbe4f7}
+#rbChatHead{display:flex;align-items:center;gap:8px;padding:9px 11px;
+  background:linear-gradient(90deg,rgba(43,108,255,.24),rgba(122,92,255,.14));border-bottom:1px solid rgba(255,255,255,.08)}
+#rbChatHead img{width:22px;height:22px;border-radius:7px;object-fit:cover}
+#rbChatHead b{font-size:12px;color:#fff;letter-spacing:.04em}
+#rbChatHead small{margin-left:auto;font-size:9.5px;color:#8fe6c0;font-weight:700;display:flex;align-items:center;gap:4px}
+#rbChatHead small i{width:6px;height:6px;border-radius:50%;background:#3ee08a;box-shadow:0 0 8px #3ee08a}
+#rbChatLog{height:196px;overflow:auto;padding:9px 11px;display:flex;flex-direction:column;gap:6px;font-size:11.5px;line-height:1.45;color:#dbe4f7}
 #rbChatLog .m b{color:#22d3ee}
 #rbChatLog .m.me b{color:#3ee08a}
+#rbChatLog .m.ia{background:rgba(43,108,255,.12);border:1px solid rgba(43,108,255,.22);border-radius:9px;padding:6px 8px}
 #rbChatLog .sys{color:#7f8db3;font-style:italic}
-#rbChatForm{display:flex;gap:6px;padding:7px;border-top:1px solid rgba(255,255,255,.08)}
-#rbChatForm input{flex:1;min-width:0;padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+#rbChatLog .acts{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+#rbChatLog .acts span{font-size:9.5px;padding:2px 6px;border-radius:6px;background:rgba(62,224,138,.16);color:#8ff0bd}
+#rbChatLog .acts span.er{background:rgba(255,90,110,.18);color:#ffb3bd}
+#rbChatForm{display:flex;gap:5px;padding:7px;border-top:1px solid rgba(255,255,255,.08);align-items:center}
+#rbChatForm input{flex:1;min-width:0;padding:9px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
   background:#0a0f1c;color:#eaf0ff;font:500 12px var(--font);outline:none}
-#rbChatForm button{width:36px;border:0;border-radius:9px;background:#2b6cff;color:#fff;font-size:14px;cursor:pointer}
+#rbChatForm button{width:34px;height:34px;flex:0 0 auto;border:0;border-radius:9px;background:rgba(255,255,255,.08);
+  color:#dfe7ff;cursor:pointer;display:grid;place-items:center;padding:0}
+#rbChatForm button svg{width:16px;height:16px}
+#rbChatForm #rbSend{background:linear-gradient(135deg,#2b6cff,#7a5cff);color:#fff}
+#rbChatForm #rbMic.on{background:rgba(239,68,68,.3);color:#ffb4b4;box-shadow:0 0 0 2px rgba(239,68,68,.4)}
+#rbChatForm #rbLive.on{background:rgba(62,224,138,.26);color:#9df5c4;box-shadow:0 0 0 2px rgba(62,224,138,.45)}
+#rbChatFoot{display:flex;gap:5px;padding:0 7px 7px;flex-wrap:wrap}
+#rbChatFoot button{font-size:9.5px;padding:4px 7px;border-radius:7px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.05);color:#b9c6e2;cursor:pointer;font-family:var(--font)}
 
-#rbLeft{position:absolute;left:12px;bottom:96px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
-.rbSide{width:118px;padding:9px 8px;border:0;border-radius:9px;cursor:pointer;color:#fff;font:900 11.5px var(--font);
-  letter-spacing:.05em;text-align:center;box-shadow:0 6px 16px -8px #000,0 0 0 2px rgba(0,0,0,.28) inset;transform:skewX(-4deg)}
-.rbSide:active{transform:skewX(-4deg) scale(.96)}
-.rbSide.loja{background:linear-gradient(180deg,#39d353,#1f9d3a)}
-.rbSide.skin{background:linear-gradient(180deg,#b06bff,#7a3fd6)}
-.rbSide.inv{background:linear-gradient(180deg,#c9d1de,#8d97a8);color:#20283a}
-.rbSide.cfg{background:linear-gradient(180deg,#4f8cff,#2b5fd6)}
-.rbSide.sair{background:linear-gradient(180deg,#ff5a6e,#c92b40)}
-
-#rbJoy{position:absolute;right:22px;bottom:74px;width:96px;height:96px;border-radius:50%;pointer-events:auto;
-  background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.28);backdrop-filter:blur(6px);touch-action:none}
-#rbJoyKnob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
-  background:rgba(255,255,255,.85);box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .06s linear}
-#rbJump{position:absolute;right:34px;bottom:186px;width:62px;height:62px;border-radius:50%;pointer-events:auto;
-  border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer;backdrop-filter:blur(6px)}
-#rbJump:active{background:rgba(255,255,255,.32);transform:scale(.94)}
-#rbCam{position:absolute;right:150px;bottom:86px;width:44px;height:44px;border-radius:50%;pointer-events:auto;
-  border:2px solid rgba(255,255,255,.28);background:rgba(10,14,24,.5);color:#fff;font-size:17px;cursor:pointer;backdrop-filter:blur(6px)}
+/* joystick à esquerda, pulo à direita — igual ao Roblox */
+#rbJoy{position:absolute;left:24px;bottom:78px;width:106px;height:106px;border-radius:50%;pointer-events:auto;
+  background:radial-gradient(circle at 50% 40%,rgba(255,255,255,.16),rgba(255,255,255,.06));
+  border:2px solid rgba(255,255,255,.30);backdrop-filter:blur(6px);touch-action:none}
+#rbJoyKnob{position:absolute;left:50%;top:50%;width:52px;height:52px;margin:-26px 0 0 -26px;border-radius:50%;
+  background:radial-gradient(circle at 40% 35%,#fff,#c9d4ea);box-shadow:0 6px 18px rgba(0,0,0,.4);transition:transform .06s linear}
+#rbJump{position:absolute;right:30px;bottom:80px;width:76px;height:76px;border-radius:50%;pointer-events:auto;
+  border:2px solid rgba(255,255,255,.4);background:rgba(255,255,255,.16);color:#fff;cursor:pointer;backdrop-filter:blur(6px);
+  display:grid;place-items:center}
+#rbJump svg{width:34px;height:34px}
+#rbJump:active{background:rgba(255,255,255,.34);transform:scale(.94)}
+#rbCam{position:absolute;right:124px;bottom:92px;width:46px;height:46px;border-radius:50%;pointer-events:auto;
+  border:2px solid rgba(255,255,255,.28);background:rgba(10,14,24,.5);color:#fff;cursor:pointer;backdrop-filter:blur(6px);
+  display:grid;place-items:center}
+#rbCam svg{width:20px;height:20px}
 #rbBottom{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:8px;pointer-events:auto}
 #rbBottom button{padding:10px 18px;border-radius:10px;border:1px solid rgba(255,255,255,.18);
   background:rgba(10,14,24,.6);color:#e8eefc;font:800 11px var(--font);letter-spacing:.06em;cursor:pointer;backdrop-filter:blur(8px)}
@@ -998,14 +919,39 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 #rbReportGo{margin-top:10px;width:100%;padding:11px;border:0;border-radius:9px;background:#c92b40;color:#fff;font:800 12px var(--font);cursor:pointer}
 
 @media (max-width:560px){
-  #rbLeft{bottom:92px;gap:5px}
-  .rbSide{width:104px;font-size:10.5px;padding:8px 6px}
-  #rbJoy{width:88px;height:88px;right:16px;bottom:70px}
-  #rbJump{right:28px;bottom:172px;width:56px;height:56px}
-  #rbCam{right:132px;bottom:78px}
-  #avPanel{left:10px;right:10px;top:auto;bottom:56px;transform:none;width:auto}
-  #avHint{bottom:12px}
+  #rbJoy{width:92px;height:92px;left:16px;bottom:70px}
+  #rbJoyKnob{width:46px;height:46px;margin:-23px 0 0 -23px}
+  #rbJump{right:20px;bottom:74px;width:66px;height:66px}
+  #rbCam{right:96px;bottom:84px;width:42px;height:42px}
+  #rbChat{top:58px;width:calc(100vw - 20px);left:10px}
+  #rbChatLog{height:150px}
+  #rbSettings{padding:8px}
+  #rbSetCard{border-radius:12px}
 }
+
+/* telas de conta: carregamento, entrar e criar conta são telas separadas */
+#register{position:fixed;inset:0;z-index:99990;display:none;align-items:center;justify-content:center;padding:18px;
+  background:radial-gradient(120% 100% at 50% 0%,#1b2a5e 0%,#0b1330 45%,#05070d 100%);font-family:var(--font)}
+#register.on{display:flex}
+#registerCard{width:min(392px,100%);background:linear-gradient(170deg,rgba(18,25,42,.97),rgba(8,12,22,.98));
+  border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px 22px 20px;text-align:center;
+  box-shadow:0 40px 90px -30px #000,0 0 0 1px rgba(255,255,255,.04) inset}
+#registerLogo{width:78px;height:78px;border-radius:20px;object-fit:cover;box-shadow:0 14px 40px -12px rgba(122,92,255,.6)}
+#registerCard h1{margin:12px 0 2px;font-size:25px;letter-spacing:.06em;font-weight:900;
+  background:linear-gradient(90deg,#7a5cff,#00e0ff,#3ee08a);-webkit-background-clip:text;background-clip:text;color:transparent}
+#registerCard .sub{margin:0 0 16px;font-size:12px;color:#93a1c2}
+#registerCard label{display:block;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#7f8db0;margin:10px 0 5px}
+#registerCard input{width:100%;padding:12px 13px;border-radius:11px;border:1px solid rgba(255,255,255,.13);
+  background:#0a0f1c;color:#eaf0ff;font:600 14px var(--font);outline:none}
+#registerCard input:focus{border-color:#7a5cff;box-shadow:0 0 0 3px rgba(122,92,255,.18)}
+#registerMsg{min-height:18px;margin:10px 0 4px;font-size:12px;font-weight:700;color:#ff7a8a}
+#registerMsg.ok{color:#3ee08a}
+#registerGo{width:100%;padding:13px;border:0;border-radius:12px;cursor:pointer;color:#fff;font:900 14px var(--font);letter-spacing:.08em;
+  background:linear-gradient(90deg,#7a5cff,#2b6cff 55%,#00c2ff);box-shadow:0 16px 34px -14px #7a5cff}
+#registerGo:active{transform:scale(.985)}
+#registerCard .tiny{margin-top:10px;font-size:10.5px;color:#6f7d9e;line-height:1.5}
+.acctSwap{margin-top:12px;font-size:11.5px;color:#9fb0d4}
+.acctSwap button{border:0;background:none;color:#6ea8ff;font:800 11.5px var(--font);cursor:pointer;text-decoration:underline}
 
 
 /* ---- legado escondido: HUD Roblox substitui ---- */
@@ -1029,100 +975,115 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   <div id="bootTip">Preparando o mundo, carregando a AMHEEX AI…</div>
 </div>
 
-<!-- ================= LOGIN / REGISTRO ================= -->
+<!-- ================= TELA: ENTRAR ================= -->
 <div id="login">
   <div id="loginCard">
     <img id="loginLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
     <h1>AMHEEX GAME</h1>
     <p class="sub">Entre na sua conta para jogar no mundo global</p>
-    <div id="loginTabs">
-      <button type="button" data-tab="entrar" class="on">ENTRAR</button>
-      <button type="button" data-tab="criar">CRIAR CONTA</button>
-    </div>
     <label for="loginUser">Usuário</label>
     <input id="loginUser" maxlength="18" autocomplete="username" placeholder="seu usuário">
     <label for="loginPass">Senha</label>
     <input id="loginPass" type="password" maxlength="40" autocomplete="current-password" placeholder="sua senha">
-    <div id="loginNomeWrap" hidden>
-      <label for="loginNome">Nome no jogo</label>
-      <input id="loginNome" maxlength="18" placeholder="como quer aparecer">
-    </div>
     <div id="loginMsg"></div>
     <button id="loginGo" type="button">ENTRAR NO MUNDO</button>
+    <div class="acctSwap">Ainda não tem conta? <button id="goRegister" type="button">CRIAR CONTA</button></div>
     <div class="tiny">Sua conta guarda personagem, skin e posição no mapa global.</div>
   </div>
 </div>
 
-<!-- ================= EDITOR DE PERSONAGEM ================= -->
-<div id="avatar">
-  <div id="avHead">
-    <b>EDITOR DE PERSONAGEM</b>
-    <small>Monte seu avatar antes de entrar no mundo</small>
+<!-- ================= TELA: CRIAR CONTA ================= -->
+<div id="register">
+  <div id="registerCard">
+    <img id="registerLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
+    <h1>CRIAR CONTA</h1>
+    <p class="sub">Escolha usuário e senha. Depois é só entrar no mundo.</p>
+    <label for="regUser">Usuário</label>
+    <input id="regUser" maxlength="18" autocomplete="username" placeholder="3 a 18 caracteres">
+    <label for="regNome">Nome no jogo</label>
+    <input id="regNome" maxlength="18" placeholder="como quer aparecer">
+    <label for="regPass">Senha</label>
+    <input id="regPass" type="password" maxlength="40" autocomplete="new-password" placeholder="mínimo 4 caracteres">
+    <div id="registerMsg"></div>
+    <button id="registerGo" type="button">CRIAR CONTA E JOGAR</button>
+    <div class="acctSwap">Já tem conta? <button id="goLogin" type="button">ENTRAR</button></div>
+    <div class="tiny">Sem nível e sem “upa”: a conta guarda o personagem e a posição no mundo.</div>
   </div>
-  <div id="avPanel">
-    <div class="avRow"><span>Tom de pele</span><div class="sw" id="avPele"></div></div>
-    <div class="avRow"><span>Camisa</span><div class="sw" id="avCamisa"></div></div>
-    <div class="avRow"><span>Calça</span><div class="sw" id="avCalca"></div></div>
-    <div class="avRow"><span>Cabelo</span><div class="sw" id="avCabelo"></div></div>
-    <div class="avBtns">
-      <button id="avRandom" type="button">🎲 ALEATÓRIO</button>
-      <button id="avPlay" type="button">▶ JOGAR</button>
-    </div>
-  </div>
-  <div id="avHint">Arraste para girar o personagem</div>
 </div>
 
-<!-- ================= HUD ESTILO ROBLOX ================= -->
+<!-- ================= HUD (joystick esquerda / pulo direita) ================= -->
 <div id="rblx">
   <div id="rbTopLeft">
-    <button id="rbMenu" class="rbCircle" type="button" title="Menu">☰</button>
-    <button id="rbChatBtn" class="rbCircle" type="button" title="Chat">💬</button>
+    <button id="rbMenu" class="rbCircle" type="button" title="Configurações" aria-label="Configurações">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg>
+    </button>
+    <button id="rbChatBtn" class="rbCircle" type="button" title="AMHEEX AI" aria-label="AMHEEX AI">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.5 9.5 0 0 1-2.9-.45L4 21l1.5-4.1A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>
+    </button>
     <div id="rbAccount"><i id="rbAvatarDot"></i><b id="rbUser">Jogador</b></div>
   </div>
 
   <div id="rbStats">
-    <div class="rbStat"><span>👥</span><b id="rbOnline">0</b></div>
-    <div class="rbStat"><span>💬</span><b id="rbChatCount">0</b></div>
+    <div class="rbStat">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <b id="rbOnline">0</b>
+    </div>
+    <div class="rbStat">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9.5 9.5 0 0 1-2.9-.45L4 21l1.5-4.1A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/></svg>
+      <b id="rbChatCount">0</b>
+    </div>
   </div>
 
   <div id="rbChat">
-    <div id="rbChatTabs">
-      <button type="button" data-tab="aqui" class="on">Aqui</button>
-      <button type="button" data-tab="global">Global</button>
+    <div id="rbChatHead">
+      <img src="assets/ia-icon.png" alt="" onerror="this.style.display='none'">
+      <b>AMHEEX AI</b>
+      <small><i></i><span id="rbChatStatus">online</span></small>
     </div>
     <div id="rbChatLog"></div>
     <form id="rbChatForm" autocomplete="off">
-      <input id="rbChatInput" maxlength="180" placeholder="Toque aqui para escrever">
-      <button type="submit">➤</button>
+      <input id="rbChatInput" maxlength="300" placeholder="Fale com a AMHEEX AI…">
+      <button id="rbMic" type="button" title="Microfone" aria-label="Microfone">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3M8 21h8"/></svg>
+      </button>
+      <button id="rbLive" type="button" title="Conversa ao vivo" aria-label="Conversa ao vivo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M3 12h2l2-6 3 12 3-9 2 3h6"/></svg>
+      </button>
+      <button id="rbSend" type="submit" title="Enviar" aria-label="Enviar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2.5-6.5L4 12z"/></svg>
+      </button>
     </form>
-  </div>
-
-  <div id="rbLeft">
-    <button class="rbSide loja" type="button" data-open="loja">LOJA</button>
-    <button class="rbSide skin" type="button" data-open="skin">SKINS</button>
-    <button class="rbSide inv" type="button" data-open="inv">INVENTÁRIO</button>
-    <button class="rbSide cfg" type="button" data-open="config">CONFIG.</button>
-    <button class="rbSide sair" type="button" data-open="sair">SAIR</button>
+    <div id="rbChatFoot">
+      <button type="button" data-sug="crie uma torre">crie uma torre</button>
+      <button type="button" data-sug="faça uma casa">faça uma casa</button>
+      <button type="button" data-sug="deixe minha camisa vermelha">camisa vermelha</button>
+    </div>
   </div>
 
   <div id="rbJoy"><div id="rbJoyKnob"></div></div>
-  <button id="rbJump" type="button" title="Pular">⬆</button>
-  <button id="rbCam" type="button" title="Câmera">🎥</button>
+  <button id="rbJump" type="button" title="Pular" aria-label="Pular">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V5M6 11l6-6 6 6"/></svg>
+  </button>
+  <button id="rbCam" type="button" title="Câmera" aria-label="Câmera">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2.5"/></svg>
+  </button>
   <div id="rbBottom">
     <button id="rbRun" type="button">CORRER</button>
     <button id="rbAction" type="button">AÇÃO</button>
   </div>
 </div>
 
+<script src="https://sites.super.myninja.ai/_assets/ninja-daytona-script.js"></script>
+
 <!-- ================= CONFIGURAÇÕES ESTILO ROBLOX ================= -->
 <div id="rbSettings">
   <div id="rbSetCard">
     <div id="rbSetTabs">
-      <button type="button" data-t="pessoas">👥 Pessoas</button>
-      <button type="button" data-t="config" class="on">⚙ Config.</button>
-      <button type="button" data-t="galeria">🖼 Galeria</button>
-      <button type="button" data-t="denunciar">🚩 Denunciar</button>
-      <button type="button" data-t="ajuda">❓ Ajuda</button>
+      <button type="button" data-t="pessoas"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Pessoas</button>
+      <button type="button" data-t="config" class="on"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H9a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V9a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.51 1z"/></svg> Config.</button>
+      <button type="button" data-t="galeria"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2.5"/><circle cx="8.5" cy="8.5" r="1.8"/><path d="M21 15l-5-5L5 21"/></svg> Galeria</button>
+      <button type="button" data-t="denunciar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V4s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg> Denunciar</button>
+      <button type="button" data-t="ajuda"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.3-2.8 4"/><path d="M12 17.4h.01"/></svg> Ajuda</button>
     </div>
 
     <div class="rbSetBody on" data-body="config">
@@ -1137,7 +1098,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       <div class="rbRow"><span>Sensibilidade</span><input id="rbSens" type="range" min="20" max="200" value="100"><b id="rbSensV">100</b></div>
       <div class="rbRow"><span>Mostrar nomes</span><select id="rbNames"><option value="on" selected>Sim</option><option value="off">Não</option></select></div>
       <h4>Microfone</h4>
-      <div class="rbRow"><span>Voz por proximidade</span><button id="rbMic" type="button">LIGAR (V)</button></div>
+      <div class="rbRow"><span>Voz por proximidade</span><button id="rbMicSet" type="button">LIGAR (V)</button></div>
     </div>
 
     <div class="rbSetBody" data-body="pessoas">
@@ -1162,105 +1123,30 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 
     <div class="rbSetBody" data-body="ajuda">
       <h4>Como jogar</h4>
-      <p class="rbHint"><b>Mover:</b> WASD/setas ou o joystick flutuante. <b>Pular:</b> Espaço ou botão ⬆. <b>Correr:</b> Shift ou CORRER. <b>Câmera:</b> arraste na tela ou botão 🎥.</p>
-      <p class="rbHint"><b>IA:</b> toque no ícone da AMHEEX AI e peça em português. Ela cria formas 3D no mapa, mas nunca edita o personagem de outro jogador.</p>
+      <p class="rbHint"><b>Mover:</b> WASD/setas ou o joystick flutuante. <b>Pular:</b> Espaço ou botão de pulo. <b>Correr:</b> Shift ou CORRER. <b>Câmera:</b> arraste na tela ou botão de câmera.</p>
+      <p class="rbHint"><b>IA:</b> abra o chat da AMHEEX AI e peça em português. Ela cria formas 3D no mapa, mas nunca edita o personagem de outro jogador.</p>
       <p class="rbHint"><b>Voz:</b> tecla V liga/desliga. Só quem está perto escuta, como no Roblox.</p>
     </div>
 
     <div id="rbSetFooter">
       <button id="rbSair" type="button">Sair</button>
-      <button id="rbRegen" type="button">Regenerar</button>
+      <button id="rbRegen" type="button">Novo visual</button>
       <button id="rbCont" type="button">Continuar</button>
     </div>
   </div>
-</div>
-
-<div id="crosshair"></div>
-<div id="health"><span>HP</span><div class="bar"><i id="healthBar"></i></div><b id="healthN">100</b></div>
-<button id="mpBtn" type="button">🌐 <b id="mpCount">0</b> online</button>
-<div id="mpPanel">
-  <div id="mpHead"><span>MULTIPLAYER <small>por IP</small></span><button id="mpClose" type="button" style="background:none;border:0;color:#8b97b4;font-size:18px;cursor:pointer">×</button></div>
-  <div id="mpPlayers"></div>
-  <div id="mpChat"></div>
-  <form id="mpForm" autocomplete="off"><input id="mpMsg" maxlength="180" placeholder="Chat do mundo…"><button type="submit">Enviar</button></form>
-</div>
-<div id="controls">
-  <div class="dpad">
-    <button type="button" class="up" data-move="f">▲</button>
-    <button type="button" class="left" data-move="l">◀</button>
-    <button type="button" class="down" data-move="b">▼</button>
-    <button type="button" class="right" data-move="r">▶</button>
-  </div>
-  <div class="acts">
-    <button type="button" class="run" data-act="run">CORRER</button>
-    <button type="button" class="jump" data-act="jump">PULAR</button>
-    <button type="button" class="fire" data-act="fire">ATIRAR</button>
-  </div>
-  <div class="cam"><button type="button" id="camToggle">CÂMERA</button></div>
-</div>
-
-<div id="hint" class="off" style="display:none">Arraste para girar a câmera · toque no chão para mover a bola · fale com a IA no ícone</div>
-
-<div id="amxai-root" data-mode="float" data-open="0">
-  <button id="amxai-fab" type="button" aria-label="Abrir AMHEEX AI" title="AMHEEX AI">
-    <img src="assets/ia-icon.png" alt="AMHEEX AI" onerror="this.style.display='none'">
-    <span class="amxai-pro" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span>
-    <span class="amxai-ping"></span>
-  </button>
-
-  <section id="amxai-panel" hidden aria-label="AMHEEX AI">
-    <header id="amxai-head">
-      <div class="amxai-id">
-        <span class="amxai-avatar"><img src="assets/ia-icon.png" alt="" onerror="this.style.display='none'"></span>
-        <div><b>AMHEEX AI</b><small><i></i><span id="amxai-status">Online · motor local</span></small></div>
-      </div>
-      <div class="amxai-head-btns">
-        <button id="amxai-pin" type="button" title="Fixar / voltar a flutuar" aria-label="Fixar painel">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4h6l-1 6 4 3v2H6v-2l4-3-1-6z"/><path d="M12 15v6"/></svg>
-        </button>
-        <button id="amxai-clear" type="button" title="Limpar conversa" aria-label="Limpar conversa">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"><path d="M4 7h16M9 7V5h6v2M7 7l1 13h8l1-13"/></svg>
-        </button>
-        <button id="amxai-close" type="button" title="Fechar" aria-label="Fechar chat">&times;</button>
-      </div>
-    </header>
-    <div id="amxai-msgs" aria-live="polite"></div>
-    <div id="amxai-chips"></div>
-    <form id="amxai-form" autocomplete="off">
-      <textarea id="amxai-input" rows="1" placeholder="Fale ou escreva: “crie game”, “ative o multiplayer”…" aria-label="Mensagem para a IA"></textarea>
-      <button id="amxai-mic" type="button" aria-label="Falar com a IA" title="Falar com a IA" aria-pressed="false">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/><path d="M8.5 21h7"/></svg>
-      </button>
-      <button id="amxai-send" type="submit" aria-label="Enviar">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-      </button>
-    </form>
-    <div class="amxai-foot">
-      <div class="left">
-        <button type="button" class="sw on" id="amxai-voice" title="Ligar/desligar a voz da IA">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5L6 9H3v6h3l5 4V5z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
-          <span>voz</span>
-        </button>
-        <button type="button" class="sw" id="amxai-live" title="Conversa em tempo real (microfone contínuo)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.5"/><path d="M6.5 6.5a7.8 7.8 0 0 0 0 11M17.5 6.5a7.8 7.8 0 0 1 0 11"/></svg>
-          <span>tempo real</span>
-        </button>
-      </div>
-      <span id="amxai-count">0 msg</span>
-    </div>
-  </section>
-</div>
 <script src="lib/babylon.js"></script>
 <script src="lib/babylonjs.loaders.min.js"></script>
 <script>
-/* =====================================================================
-   AMHEEX GAME — motor do mundo (Babylon.js local) + AMHEEX AI
-   Chão verde + bola vermelha por padrão. A IA adiciona tudo por comandos.
-   Qualidade adaptativa por hardware + watchdog de FPS.
-   ===================================================================== */
 (function () {
   'use strict';
-  if (!window.BABYLON) { document.getElementById('hint').textContent = 'Babylon.js não carregou (lib/babylon.js).'; return; }
+/* ===== src/game/01-core.js ===== */
+/* AMHEEX GAME — núcleo: qualidade adaptativa, materiais e helpers de malha. */
+  if (!window.BABYLON) {
+    var _h = document.getElementById('hint');
+    if (_h) _h.textContent = 'Babylon.js não carregou (lib/babylon.js).';
+    console.error('Babylon.js não carregou (lib/babylon.js).');
+    return;
+  }
 
   var canvas = document.getElementById('game');
   var $ = function (id) { return document.getElementById(id); };
@@ -1329,6 +1215,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 
   /* ---------------- materiais ---------------- */
   var matCache = {};
+/* ===== src/game/02-build.js ===== */
+/* AMHEEX GAME — construtor procedural: primitivas, personagem humanoide e texturas de skin. */
   function mat(hex, opt) {
     opt = opt || {};
     var key = hex + '|' + (opt.emissive || 0) + '|' + (opt.alpha == null ? 1 : opt.alpha) + '|' + (opt.spec == null ? 0.18 : opt.spec);
@@ -1498,15 +1386,26 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     var detalhe = mat('#e2e8f0');
     var S = 24, SP = 28;
 
-    /* pernas articuladas: coxa, joelho, canela, pé */
-    cyl('coxaE', .26, .23, .62, r, -.20, .92, 0, calca, S);
-    cyl('coxaD', .26, .23, .62, r, .20, .92, 0, calca, S);
-    sph('joelhoE', .21, r, -.20, .60, 0, calca, 16);
-    sph('joelhoD', .21, r, .20, .60, 0, calca, 16);
-    cyl('pernaE', .20, .17, .52, r, -.20, .30, 0, pele, S);
-    cyl('pernaD', .20, .17, .52, r, .20, .30, 0, pele, S);
-    box('peE', .28, .15, .46, r, -.20, .08, .09, sapato);
-    box('peD', .28, .15, .46, r, .20, .08, .09, sapato);
+    /* ---- esqueleto com juntas reais: quadril, joelho, ombro, cotovelo ---- */
+    function pivot(nome, pai, x, y, z) {
+      var n = new BABYLON.TransformNode(nome, scene);
+      n.parent = pai; n.position.set(x, y, z);
+      return n;
+    }
+    var hipE = pivot('hipE', r, -.20, 1.23, 0);
+    var hipD = pivot('hipD', r, .20, 1.23, 0);
+    cyl('coxaE', .26, .23, .62, hipE, 0, -.31, 0, calca, S);
+    cyl('coxaD', .26, .23, .62, hipD, 0, -.31, 0, calca, S);
+    var kneeE = pivot('kneeE', hipE, 0, -.62, 0);
+    var kneeD = pivot('kneeD', hipD, 0, -.62, 0);
+    sph('joelhoE', .21, kneeE, 0, 0, 0, calca, 16);
+    sph('joelhoD', .21, kneeD, 0, 0, 0, calca, 16);
+    cyl('pernaE', .20, .17, .52, kneeE, 0, -.26, 0, pele, S);
+    cyl('pernaD', .20, .17, .52, kneeD, 0, -.26, 0, pele, S);
+    var ankleE = pivot('ankleE', kneeE, 0, -.52, 0);
+    var ankleD = pivot('ankleD', kneeD, 0, -.52, 0);
+    box('peE', .28, .15, .46, ankleE, 0, -.06, .09, sapato);
+    box('peD', .28, .15, .46, ankleD, 0, -.06, .09, sapato);
     /* quadril e cintura */
     cyl('quadril', .58, .52, .34, r, 0, 1.20, 0, calca, S);
     cyl('cintura', .55, .57, .16, r, 0, 1.39, 0, detalhe, S);
@@ -1514,21 +1413,26 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     cyl('torso', .63, .55, .78, r, 0, 1.80, 0, roupa, S);
     sph('peitoE', .30, r, -.17, 1.92, .16, roupa, 18).scaling.set(1, .8, .55);
     sph('peitoD', .30, r, .17, 1.92, .16, roupa, 18).scaling.set(1, .8, .55);
-    /* ombros e braços articulados */
-    sph('ombroE', .24, r, -.50, 2.05, 0, roupa, 18);
-    sph('ombroD', .24, r, .50, 2.05, 0, roupa, 18);
-    cyl('bracoE', .18, .16, .52, r, -.52, 1.76, 0, pele, S);
-    cyl('bracoD', .18, .16, .52, r, .52, 1.76, 0, pele, S);
-    sph('cotoveloE', .16, r, -.52, 1.49, 0, pele, 14);
-    sph('cotoveloD', .16, r, .52, 1.49, 0, pele, 14);
-    cyl('antebracoE', .15, .13, .46, r, -.52, 1.24, 0, pele, S);
-    cyl('antebracoD', .15, .13, .46, r, .52, 1.24, 0, pele, S);
-    sph('maoE', .20, r, -.52, .98, 0, pele, 16).scaling.set(.85, 1.15, .6);
-    sph('maoD', .20, r, .52, .98, 0, pele, 16).scaling.set(.85, 1.15, .6);
-    /* dedos (geometria fina) */
+    /* braços: ombro -> braço -> cotovelo -> antebraço -> mão */
+    var shE = pivot('ombroPivE', r, -.50, 2.05, 0);
+    var shD = pivot('ombroPivD', r, .50, 2.05, 0);
+    sph('ombroE', .24, shE, 0, 0, 0, roupa, 18);
+    sph('ombroD', .24, shD, 0, 0, 0, roupa, 18);
+    cyl('bracoE', .18, .16, .52, shE, 0, -.28, 0, pele, S);
+    cyl('bracoD', .18, .16, .52, shD, 0, -.28, 0, pele, S);
+    var elbE = pivot('cotoveloPivE', shE, 0, -.56, 0);
+    var elbD = pivot('cotoveloPivD', shD, 0, -.56, 0);
+    sph('cotoveloE', .16, elbE, 0, 0, 0, pele, 14);
+    sph('cotoveloD', .16, elbD, 0, 0, 0, pele, 14);
+    cyl('antebracoE', .15, .13, .46, elbE, 0, -.23, 0, pele, S);
+    cyl('antebracoD', .15, .13, .46, elbD, 0, -.23, 0, pele, S);
+    var handE = pivot('maoPivE', elbE, 0, -.46, 0);
+    var handD = pivot('maoPivD', elbD, 0, -.46, 0);
+    sph('maoE', .20, handE, 0, 0, 0, pele, 16).scaling.set(.85, 1.15, .6);
+    sph('maoD', .20, handD, 0, 0, 0, pele, 16).scaling.set(.85, 1.15, .6);
     for (var f = 0; f < 4; f++) {
-      cyl('dedoE' + f, .028, .024, .16, r, -.60 + f * .055, .84, .02, pele, 8);
-      cyl('dedoD' + f, .028, .024, .16, r, .44 + f * .055, .84, .02, pele, 8);
+      cyl('dedoE' + f, .028, .024, .16, handE, -.08 + f * .055, -.14, .02, pele, 8);
+      cyl('dedoD' + f, .028, .024, .16, handD, -.08 + f * .055, -.14, .02, pele, 8);
     }
     /* pescoço e cabeça */
     cyl('pescoco', .21, .24, .22, r, 0, 2.30, 0, pele, S);
@@ -1562,7 +1466,11 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     box('labioInf', .17, .045, .05, r, 0, 2.455, .312, boca);
     sph('orelhaE', .13, r, -.33, 2.70, 0, pele, 14).scaling.z = .55;
     sph('orelhaD', .13, r, .33, 2.70, 0, pele, 14).scaling.z = .55;
-    r.metadata = { humanoid: true, seed: seed, pele: peleHex, cor: roupaHex, calca: calcaHex, cabelo: cabeloCor };
+    r.metadata = {
+      humanoid: true, seed: seed, pele: peleHex, cor: roupaHex, calca: calcaHex, cabelo: cabeloCor,
+      joints: { hipE: hipE, hipD: hipD, kneeE: kneeE, kneeD: kneeD, ankleE: ankleE, ankleD: ankleD,
+                shE: shE, shD: shD, elbE: elbE, elbD: elbD, handE: handE, handD: handD }
+    };
     return r;
   };
 
@@ -1904,7 +1812,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   };
   var seq = 0;
   var animated = [];
-
+/* ===== src/game/03-world.js ===== */
+/* AMHEEX GAME — mundo: entidades, terreno, céu, clima e partículas. */
   function registerShadows(mesh) {
     if (!shadowGen) return;
     if (mesh.getTotalVertices && mesh.getTotalVertices() > 0) shadowGen.addShadowCaster(mesh, false);
@@ -2204,7 +2113,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     if (k === 'f') doFire();
   });
   window.addEventListener('keyup', function (e) { keys[e.key.toLowerCase()] = false; });
-
+/* ===== src/game/04-player.js ===== */
+/* AMHEEX GAME — jogador: controles, câmera, pulo, tiro, layout e avatar. */
   function updateHealth() {
     var bar = $('healthBar'), n = $('healthN'), box = $('health');
     if (bar) bar.style.width = Math.max(0, Math.min(100, player.health)) + '%';
@@ -2481,6 +2391,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   }
 
   /* ---------------- presets de mundo ---------------- */
+/* ===== src/game/05-scene.js ===== */
+/* AMHEEX GAME — cena: presets de mundo, salvar e restaurar. */
   function buildWorld(preset) {
     if (preset === 'surpresa' || !preset) {
       var _opts = ['plataforma', 'corrida', 'labirinto', 'fazenda', 'cidade', 'ilha', 'floresta', 'deserto', 'espaco', 'medieval'];
@@ -2646,8 +2558,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       var targetRot = Math.atan2(dirX, dirZ);
       node.rotation.y += (targetRot - node.rotation.y) * Math.min(1, dt * 10);
     }
-    ballTarget.x = BABYLON.Scalar.Clamp(ballTarget.x, -70, 70);
-    ballTarget.z = BABYLON.Scalar.Clamp(ballTarget.z, -70, 70);
+    /* mundo infinito: o mapa não tem borda, só um limite técnico bem largo */
+    ballTarget.x = BABYLON.Scalar.Clamp(ballTarget.x, -560, 560);
+    ballTarget.z = BABYLON.Scalar.Clamp(ballTarget.z, -560, 560);
     node.position.x += (ballTarget.x - node.position.x) * Math.min(1, dt * 9);
     node.position.z += (ballTarget.z - node.position.z) * Math.min(1, dt * 9);
 
@@ -2659,27 +2572,54 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     }
     node.position.y = player.y + (player.isCharacter ? 0 : 0.58 + Math.sin(performance.now() / 420) * 0.06);
 
-    /* animação de caminhada do personagem */
+    /* ---- animação humana: passada com joelhos, braços, tronco e respiração ---- */
     if (player.isCharacter && node.metadata && node.metadata.humanoid) {
       var tt = performance.now() / 1000;
-      var amp = moving ? (player.run ? 0.95 : 0.55) : 0;
-      var swing = Math.sin(tt * (player.run ? 14 : 9)) * amp;
-      var parts = node.getChildMeshes();
-      for (var pi = 0; pi < parts.length; pi++) {
-        var pn = parts[pi].name;
-        if (pn === 'pernaE') parts[pi].rotation.x = swing;
-        else if (pn === 'pernaD') parts[pi].rotation.x = -swing;
-        else if (pn === 'bracoE') parts[pi].rotation.x = -swing * 0.8;
-        else if (pn === 'bracoD') parts[pi].rotation.x = swing * 0.8;
+      var J = node.metadata.joints || {};
+      var vel = moving ? (player.run ? 1.7 : 1.0) : 0;
+      var step = tt * (player.run ? 11.5 : 7.4);
+      var s = Math.sin(step), c = Math.cos(step);
+      var amp = vel * (player.run ? 0.85 : 0.55);
+      var idle = Math.sin(tt * 1.9);
+
+      if (J.hipE) J.hipE.rotation.x = s * amp;
+      if (J.hipD) J.hipD.rotation.x = -s * amp;
+      if (J.kneeE) J.kneeE.rotation.x = Math.max(0, -c) * amp * 1.2;
+      if (J.kneeD) J.kneeD.rotation.x = Math.max(0, c) * amp * 1.2;
+      if (J.ankleE) J.ankleE.rotation.x = -s * amp * 0.35;
+      if (J.ankleD) J.ankleD.rotation.x = s * amp * 0.35;
+
+      if (J.shE) { J.shE.rotation.x = -s * amp * 0.85; J.shE.rotation.z = 0.06 + idle * 0.012; }
+      if (J.shD) { J.shD.rotation.x = s * amp * 0.85; J.shD.rotation.z = -0.06 - idle * 0.012; }
+      if (J.elbE) J.elbE.rotation.x = -0.18 - Math.max(0, -s) * amp * 0.75;
+      if (J.elbD) J.elbD.rotation.x = -0.18 - Math.max(0, s) * amp * 0.75;
+      if (J.handE) J.handE.rotation.x = -0.08;
+      if (J.handD) J.handD.rotation.x = -0.08;
+
+      /* tronco e cabeça (cache dos meshes para não varrer a árvore todo frame) */
+      if (!node.metadata._torso) {
+        var kids = node.getChildMeshes();
+        for (var ki = 0; ki < kids.length; ki++) {
+          if (kids[ki].name === 'torso') node.metadata._torso = kids[ki];
+          if (kids[ki].name === 'cabeca') node.metadata._cabeca = kids[ki];
+        }
       }
+      if (node.metadata._torso) node.metadata._torso.rotation.y = s * amp * 0.10;
+      if (node.metadata._cabeca) node.metadata._cabeca.rotation.y = -s * amp * 0.06;
+      node.position.y += Math.abs(c) * amp * 0.055 + (moving ? 0 : idle * 0.008);
     }
 
-    /* câmera segue o jogador */
-    var camLerp = player.mode === 'shooter' ? 14 : 2.6;
-    var camY = node.position.y + (player.mode === 'shooter' ? 1.65 : 1.2);
+    /* câmera: segue com amortecimento e se alinha atrás do personagem ao andar */
+    var camLerp = player.mode === 'shooter' ? 14 : 4.2;
+    var camY = node.position.y + (player.mode === 'shooter' ? 1.65 : 1.35);
     camera.target.x += (node.position.x - camera.target.x) * Math.min(1, dt * camLerp);
     camera.target.z += (node.position.z - camera.target.z) * Math.min(1, dt * camLerp);
     camera.target.y += (camY - camera.target.y) * Math.min(1, dt * camLerp);
+    if (moving && player.mode === 'third' && performance.now() > (window.__camManual || 0)) {
+      var want = node.rotation.y - Math.PI / 2;
+      var dif = Math.atan2(Math.sin(want - camera.alpha), Math.cos(want - camera.alpha));
+      camera.alpha += dif * Math.min(1, dt * 1.5);
+    }
 
     /* NPC seguidor */
     tickNPC(dt);
@@ -2749,6 +2689,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   window.addEventListener('orientationchange', function () { setTimeout(function () { engine.resize(); }, 250); });
 
   /* ---------------- NPC AMHEEX (segue o jogador, anda e pula) ---------------- */
+/* ===== src/game/06-actors.js ===== */
+/* AMHEEX GAME — atores: NPC seguidor, skins e início de jogo. */
   function spawnNPC(nome) {
     if (npc && npc.node && !npc.node.isDisposed) { try { npc.node.dispose(); } catch (e) {} }
     var pele = ['#f1c27d', '#c68642', '#8d5524', '#e0ac69'][Math.floor(Math.random() * 4)];
@@ -2862,8 +2804,17 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     var n = (nome || '').trim() || MP.nome();
     try { localStorage.setItem('amx_nome', n); } catch (e) {}
     MP.name = n;
+    /* personagem padrão da conta: pele, camisa, calça e cabelo salvos no perfil */
+    var sk = (window.AMX_UI && window.AMX_UI.skin) || player.skin || {};
+    player.skin = {
+      pele: sk.pele || '#c68642', cor: sk.cor || '#4f7cff',
+      calca: sk.calca || '#1f2a44', cabelo: sk.cabelo || '', seed: Number(sk.seed || 12345)
+    };
     if (!player.isCharacter) {
-      createAvatar({ t: 'character', nome: n, pele: player.skin.pele, cor: player.skin.cor, seed: player.skin.seed, x: 0, z: 0 });
+      createAvatar({
+        t: 'character', nome: n, pele: player.skin.pele, cor: player.skin.cor,
+        calca: player.skin.calca, cabelo: player.skin.cabelo, seed: player.skin.seed, x: 0, z: 0
+      });
     }
     setControlMode('third');
     if (!npc) spawnNPC('AMHEEX BOT');
@@ -2876,7 +2827,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     return { ok: true, nome: n };
   }
   window.AMX_START = startGame;
-
+/* ===== src/game/07-loop.js ===== */
+/* AMHEEX GAME — laço: animação, câmera, multiplayer e inicialização. */
   function setNames(on) {
     settings.names = !!on;
     for (var id in MP.remotes) { var r = MP.remotes[id]; if (r.label) r.label.setEnabled(settings.names); }
@@ -3077,19 +3029,20 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     }
   };
 
+  /* o chat agora é um só: conversa com a AMHEEX AI. Mensagens de jogadores
+     próximos entram no mesmo fluxo sem nunca apagar o histórico. */
   MP.renderChat = function () {
-    var box = $('rbChatLog');
-    if (!box) return;
-    var html = '';
     var arr = MP.chat || [];
-    for (var i = Math.max(0, arr.length - 40); i < arr.length; i++) {
+    if (MP._chatSeen == null) MP._chatSeen = arr.length; /* não repete histórico ao entrar */
+    if (arr.length < MP._chatSeen) MP._chatSeen = 0;
+    for (var i = MP._chatSeen; i < arr.length; i++) {
       var c = arr[i];
       var me = c.id && c.id === MP.id;
-      html += '<div class="m' + (me ? ' me' : '') + '"><b>' + (c.name || 'Jogador') + ':</b> ' + (c.msg || '') + '</div>';
+      if (window.AMX_CHAT && window.AMX_CHAT.append) {
+        window.AMX_CHAT.append(me ? 'me' : 'ia', c.name || 'Jogador', c.msg || '');
+      }
     }
-    box.innerHTML = html || '<div class="sys">Ninguém falou nada ainda. Diga oi!</div>';
-    box.scrollTop = box.scrollHeight;
-    var cc = $('rbChatCount'); if (cc) cc.textContent = arr.length;
+    MP._chatSeen = arr.length;
   };
 
   MP.sendChat = function (msg) {
@@ -3169,1049 +3122,907 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 })();
 </script>
 <script>
-/* ============================================================
-   AMHEEX GAME — UI estilo Roblox
-   boot • login/registro • editor de personagem • HUD • joystick
-   configurações em abas • voz por proximidade (WebRTC)
-   ============================================================ */
 (function () {
   'use strict';
+/* ===== src/ui/01-base.js ===== */
+/* AMHEEX GAME — interface: base compartilhada, estado local e carregamento (boot). */
+function $(id) { return document.getElementById(id); }
+function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
+function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
+function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+function esc(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
 
-  function $(id) { return document.getElementById(id); }
-  function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
-  function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
-  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
-  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
+/* helpers e estado compartilhados com o IIFE da IA e do motor 3D */
+window.$ = $; window.on = on; window.esc = esc;
+window.lsGet = lsGet; window.lsSet = lsSet; window.lsDel = lsDel;
 
-  var CFG = {
-    volume: Number(lsGet('amx_volume', 80)),
-    voiceRange: Number(lsGet('amx_voice_range', 16)),
-    sens: Number(lsGet('amx_sens', 100)),
-    names: lsGet('amx_names', 'on') === 'on',
-    mic: lsGet('amx_mic', 'off') === 'on',
-    quality: lsGet('amx_quality', 'mid')
-  };
+/* ---------------- estado ---------------- */
+var USER = null;
+var SKIN = { pele: '#c68642', cor: '#4f7cff', calca: '#1f2a44', cabelo: '#1b1b1b', seed: 12345 };
+var CFG = {
+  volume: parseInt(lsGet('amx_vol', '80'), 10),
+  quality: lsGet('amx_quality', 'mid'),
+  sens: parseInt(lsGet('amx_sens', '100'), 10),
+  voiceRange: parseInt(lsGet('amx_vrange', '16'), 10),
+  names: lsGet('amx_names', 'on') === 'on',
+  mic: lsGet('amx_mic', 'off') === 'on'
+};
+window.AMX_UI = { cfg: CFG, skin: SKIN, user: function () { return USER; } };
+/* acesso ao vivo (o IIFE da IA lê USER/SKIN como globais) */
+Object.defineProperty(window, 'USER', { configurable: true, get: function () { return USER; }, set: function (v) { USER = v; } });
+Object.defineProperty(window, 'SKIN', { configurable: true, get: function () { return SKIN; }, set: function (v) { SKIN = v; } });
+Object.defineProperty(window, 'CFG', { configurable: true, get: function () { return CFG; }, set: function (v) { CFG = v; } });
 
-  var SKIN = { pele: '#c68642', cor: '#4f7cff', calca: '#1f2a44', cabelo: '#1b1b1b', seed: 12345 };
-  var USER = null;
-  window.AMX_UI = { cfg: CFG, skin: SKIN, user: function () { return USER; } };
-  window.AMX_USER = null;
+/* ---------------- boot ---------------- */
+var boot = $('boot'), bootFill = $('bootFill'), bootPct = $('bootPct'), bootDone = false;
+var pct = 0;
+var TIPS = [
+  'Carregando o mundo global…',
+  'Preparando a AMHEEX AI…',
+  'Ajustando a câmera e os controles…',
+  'Quase lá — abrindo o login…'
+];
+function paintBoot(p) {
+  pct = Math.max(pct, Math.min(100, p));
+  if (bootFill) bootFill.style.width = pct + '%';
+  if (bootPct) bootPct.textContent = Math.round(pct) + '%';
+  var tip = boot && boot.querySelector('.bootTip, #bootTip');
+  if (tip && TIPS.length) tip.textContent = TIPS[Math.min(TIPS.length - 1, Math.floor(pct / 26))];
+}
+var bootTimer = setInterval(function () { paintBoot(pct + 2 + Math.random() * 7); }, 160);
 
-  /* ---------------- 1) BOOT ---------------- */
-  var boot = $('boot'), bootFill = $('bootFill'), bootPct = $('bootPct'), bootTip = $('bootTip');
-  var pct = 0, bootDone = false;
-  var tips = [
-    'Preparando o mundo, carregando a AMHEEX AI…',
-    'Gerando o chão verde e o céu azul…',
-    'Conectando o mundo global…',
-    'Acordando o NPC AMHEEX BOT…',
-    'Quase lá — abrindo o login…'
-  ];
-  function paintBoot(p) {
-    pct = Math.max(0, Math.min(100, p));
-    if (bootFill) bootFill.style.width = pct + '%';
-    if (bootPct) bootPct.textContent = Math.round(pct) + '%';
-    if (bootTip) bootTip.textContent = tips[Math.min(tips.length - 1, Math.floor(pct / 22))];
+function finishBoot() {
+  if (bootDone) return;
+  bootDone = true;
+  clearInterval(bootTimer);
+  paintBoot(100);
+  setTimeout(function () { if (boot) boot.classList.add('off'); openLogin(); }, 420);
+}
+/* ===== src/ui/02-auth.js ===== */
+/* AMHEEX GAME — contas: tela de entrar, tela de criar conta e sessão. */
+var loginEl = $('login'), regEl = $('register');
+var loginMsg = $('loginMsg'), regMsg = $('registerMsg');
+
+function showLogin() {
+  if (regEl) regEl.classList.remove('on');
+  if (loginEl) loginEl.classList.add('on');
+  setTimeout(function () { var u = $('loginUser'); if (u) u.focus(); }, 120);
+}
+function showRegister() {
+  if (loginEl) loginEl.classList.remove('on');
+  if (regEl) regEl.classList.add('on');
+  setTimeout(function () { var u = $('regUser'); if (u) u.focus(); }, 120);
+}
+function openLogin() {
+  if (USER && USER.token) { enterWorld(USER); return; }
+  var tok = lsGet('amx_token', '');
+  if (!tok) { showLogin(); return; }
+  fetch('?api=perfil&token=' + encodeURIComponent(tok)).then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (j && j.ok && j.user) { USER = j.user; window.AMX_USER = USER; enterWorld(USER); }
+      else { lsDel('amx_token'); showLogin(); }
+    })
+    .catch(function () { showLogin(); });
+}
+
+function loginMsgSet(txt, ok) { if (loginMsg) { loginMsg.textContent = txt; loginMsg.className = ok ? 'ok' : ''; } }
+function regMsgSet(txt, ok) { if (regMsg) { regMsg.textContent = txt; regMsg.className = ok ? 'ok' : ''; } }
+
+function applyUserSkin(u) {
+  if (u && u.skin) {
+    SKIN.pele = u.skin.pele || SKIN.pele;
+    SKIN.cor = u.skin.cor || SKIN.cor;
+    SKIN.calca = u.skin.calca || SKIN.calca;
+    SKIN.cabelo = u.skin.cabelo || SKIN.cabelo;
+    SKIN.seed = u.skin.seed || SKIN.seed;
   }
-  var bootTimer = setInterval(function () {
-    if (bootDone) return;
-    var step = pct < 55 ? 2.6 : pct < 85 ? 1.4 : 0.6;
-    paintBoot(pct + step);
-    if (pct >= 100) finishBoot();
-  }, 55);
-  function finishBoot() {
-    if (bootDone) return;
-    bootDone = true; clearInterval(bootTimer); paintBoot(100);
-    setTimeout(function () { if (boot) boot.classList.add('off'); openLogin(); }, 420);
-  }
+}
 
-  /* ---------------- 2) LOGIN ---------------- */
-  var loginEl = $('login'), loginMsg = $('loginMsg'), modoLogin = 'entrar';
+/* entra no mundo: personagem padrão já pronto, sem editor na tela inicial */
+function enterWorld(u) {
+  USER = u; window.AMX_USER = USER;
+  applyUserSkin(u);
+  if (loginEl) loginEl.classList.remove('on');
+  if (regEl) regEl.classList.remove('on');
+  var hud = $('rblx'); if (hud) hud.classList.add('on');
+  var who = $('rbUser'); if (who) who.textContent = (u && (u.nome || u.usuario)) || 'Jogador';
+  var dot = $('rbAvatarDot');
+  if (dot) dot.style.background = 'linear-gradient(135deg,' + SKIN.pele + ',' + SKIN.cor + ')';
+  if (window.AMX_START) window.AMX_START((u && (u.nome || u.usuario)) || 'Jogador');
+  setTimeout(function () { if (CFG.mic) startVoice(); }, 900);
+}
 
-  function openLogin() {
-    if (loginEl) loginEl.classList.add('on');
-    var u = lsGet('amx_usuario', '');
-    if (u && $('loginUser')) $('loginUser').value = u;
-    setTimeout(function () { var el = $('loginUser'); if (el) el.focus(); }, 120);
-    var tok = lsGet('amx_token', '');
-    if (tok) {
-      fetch('?api=perfil&token=' + encodeURIComponent(tok)).then(function (r) { return r.json(); })
-        .then(function (j) { if (j && j.ok && j.user) { USER = j.user; window.AMX_USER = USER; if (loginEl) loginEl.classList.remove('on'); enterAvatar(); } })
-        .catch(function () {});
-    }
-  }
-  function setLoginTab(t) {
-    modoLogin = t;
-    var tabs = document.querySelectorAll('#loginTabs button');
-    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('on', tabs[i].getAttribute('data-tab') === t);
-    var wrap = $('loginNomeWrap'); if (wrap) wrap.hidden = (t !== 'criar');
-    var go = $('loginGo'); if (go) go.textContent = t === 'criar' ? 'CRIAR CONTA E JOGAR' : 'ENTRAR NO MUNDO';
-    if (loginMsg) { loginMsg.textContent = ''; loginMsg.className = ''; }
-  }
-  var tabBtns = document.querySelectorAll('#loginTabs button');
-  for (var tb = 0; tb < tabBtns.length; tb++) {
-    (function (b) { b.addEventListener('click', function () { setLoginTab(b.getAttribute('data-tab')); }); })(tabBtns[tb]);
-  }
-  function msg(txt, ok) { if (!loginMsg) return; loginMsg.textContent = txt; loginMsg.className = ok ? 'ok' : ''; }
+function doLogin() {
+  var u = $('loginUser'), p = $('loginPass');
+  var usuario = u ? u.value.trim() : '', senha = p ? p.value : '';
+  if (!usuario || !senha) { loginMsgSet('Preencha usuário e senha.', false); return; }
+  loginMsgSet('Entrando…', true);
+  fetch('?api=login', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario: usuario, senha: senha })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j || !j.ok) { loginMsgSet((j && j.erro) || 'Não foi possível entrar.', false); return; }
+    lsSet('amx_token', j.user.token);
+    loginMsgSet('Bem-vindo de volta!', true);
+    setTimeout(function () { enterWorld(j.user); }, 300);
+  }).catch(function () { loginMsgSet('Servidor não respondeu. Tente de novo.', false); });
+}
 
-  function doAuth() {
-    var usuario = (($('loginUser') && $('loginUser').value) || '').trim().toLowerCase();
-    var senha = (($('loginPass') && $('loginPass').value) || '');
-    var nome = (($('loginNome') && $('loginNome').value) || '').trim();
-    if (usuario.length < 3) { msg('Usuário precisa de 3 caracteres ou mais.'); return; }
-    if (senha.length < 4) { msg('Senha precisa de 4 caracteres ou mais.'); return; }
-    var go = $('loginGo'); if (go) { go.disabled = true; go.textContent = 'CONECTANDO…'; }
-    var acao = modoLogin === 'criar' ? 'registrar' : 'login';
-    fetch('?api=' + acao, {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usuario: usuario, senha: senha, nome: nome || usuario })
-    }).then(function (r) { return r.json(); }).then(function (j) {
-      if (!j || !j.ok) {
-        msg((j && j.erro) || 'Não foi possível entrar.');
-        if (go) { go.disabled = false; go.textContent = modoLogin === 'criar' ? 'CRIAR CONTA E JOGAR' : 'ENTRAR NO MUNDO'; }
-        return;
-      }
-      USER = j.user; window.AMX_USER = USER;
-      lsSet('amx_token', USER.token);
-      lsSet('amx_usuario', USER.usuario);
-      lsSet('amx_nome', USER.nome || USER.usuario);
-      msg(j.novo ? 'Conta criada! Montando seu personagem…' : 'Bem-vindo de volta!', true);
-      if (j.user.skin && j.user.skin.pele) {
-        SKIN = {
-          pele: j.user.skin.pele, cor: j.user.skin.cor || '#4f7cff',
-          calca: j.user.skin.calca || '#1f2a44', cabelo: j.user.skin.cabelo || '#1b1b1b',
-          seed: Number(j.user.skin.seed || 12345)
-        };
-        window.AMX_UI.skin = SKIN;
-      }
-      setTimeout(function () { if (loginEl) loginEl.classList.remove('on'); enterAvatar(); }, 420);
-    }).catch(function () {
-      msg('Servidor indisponível. Tente novamente.');
-      if (go) { go.disabled = false; go.textContent = 'ENTRAR NO MUNDO'; }
+function doRegister() {
+  var u = $('regUser'), p = $('regPass'), n = $('regNome');
+  var usuario = u ? u.value.trim() : '', senha = p ? p.value : '', nome = n ? n.value.trim() : '';
+  if (usuario.length < 3) { regMsgSet('Usuário precisa de 3 caracteres ou mais.', false); return; }
+  if (senha.length < 4) { regMsgSet('Senha precisa de 4 caracteres ou mais.', false); return; }
+  regMsgSet('Criando sua conta…', true);
+  fetch('?api=registrar', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ usuario: usuario, senha: senha, nome: nome || usuario })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j || !j.ok) { regMsgSet((j && j.erro) || 'Não foi possível criar a conta.', false); return; }
+    lsSet('amx_token', j.user.token);
+    regMsgSet('Conta criada! Entrando no mundo…', true);
+    setTimeout(function () { enterWorld(j.user); }, 350);
+  }).catch(function () { regMsgSet('Servidor não respondeu. Tente de novo.', false); });
+}
+
+function sair() {
+  if (USER && USER.token) {
+    fetch('?api=sair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: USER.token }) }).catch(function () {});
+  }
+  lsDel('amx_token');
+  USER = null; window.AMX_USER = null;
+  openSettings(false);
+  var hud = $('rblx'); if (hud) hud.classList.remove('on');
+  if (window.MP && window.MP.enable) window.MP.enable(false);
+  if (window.AMX_UI && window.AMX_UI.stopVoice) window.AMX_UI.stopVoice();
+  showLogin();
+}
+
+on($('loginGo'), 'click', doLogin);
+on($('registerGo'), 'click', doRegister);
+on($('goRegister'), 'click', showRegister);
+on($('goLogin'), 'click', showLogin);
+on($('loginPass'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doLogin(); } });
+on($('loginUser'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); var p = $('loginPass'); if (p) p.focus(); } });
+on($('regPass'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doRegister(); } });
+/* ===== src/ui/03-hud.js ===== */
+/* AMHEEX GAME — HUD: joystick à esquerda, pulo à direita, câmera, correr e ação. */
+var joy = $('rbJoy'), knob = $('rbJoyKnob');
+var joyActive = false, joyId = null;
+
+function setMove(f, b, l, r) {
+  var mi = window.WORLD && window.WORLD.player && window.WORLD.player.moveInput;
+  if (!mi) return;
+  mi.f = f; mi.b = b; mi.l = l; mi.r = r;
+}
+function joyStart(e) {
+  joyActive = true; joyId = e.pointerId;
+  if (joy && joy.setPointerCapture) { try { joy.setPointerCapture(e.pointerId); } catch (err) {} }
+  joyMove(e);
+}
+function joyMove(e) {
+  if (!joyActive || (joyId != null && e.pointerId !== joyId)) return;
+  var rect = joy.getBoundingClientRect();
+  var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+  var dx = e.clientX - cx, dy = e.clientY - cy;
+  var max = rect.width / 2 - 10;
+  var d = Math.sqrt(dx * dx + dy * dy);
+  if (d > max) { dx = dx / d * max; dy = dy / d * max; }
+  if (knob) knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  var nx = dx / max, ny = dy / max;
+  setMove(ny < -0.22, ny > 0.22, nx < -0.22, nx > 0.22);
+  e.preventDefault();
+}
+function joyEnd(e) {
+  if (joyId != null && e.pointerId !== joyId) return;
+  joyActive = false; joyId = null;
+  if (knob) knob.style.transform = 'translate(0,0)';
+  setMove(false, false, false, false);
+}
+if (joy) {
+  joy.addEventListener('pointerdown', joyStart);
+  joy.addEventListener('pointermove', joyMove);
+  joy.addEventListener('pointerup', joyEnd);
+  joy.addEventListener('pointercancel', joyEnd);
+}
+
+on($('rbJump'), 'pointerdown', function (e) {
+  e.preventDefault();
+  if (window.WORLD && window.WORLD.player) window.WORLD.player.jump = true;
+});
+
+var correndo = false;
+on($('rbRun'), 'click', function () {
+  correndo = !correndo;
+  this.classList.toggle('on', correndo);
+  if (window.WORLD && window.WORLD.player) window.WORLD.player.run = correndo;
+});
+
+on($('rbCam'), 'click', function () {
+  if (!window.WORLD || !window.WORLD.control) return;
+  var m = (window.WORLD.player && window.WORLD.player.mode) || 'third';
+  window.WORLD.control(m === 'third' ? 'first' : m === 'first' ? 'shooter' : 'third');
+});
+
+on($('rbAction'), 'click', function () {
+  if (window.WORLD && window.WORLD.player && window.WORLD.player.mode === 'shooter') {
+    if (window.WORLD.player.fire) window.WORLD.player.fire();
+  } else {
+    toggleChat(true);
+    var inp = $('rbChatInput'); if (inp) inp.focus();
+  }
+});
+
+on($('rbMenu'), 'click', function () { openSettings(true, 'config'); });
+on($('rbChatBtn'), 'click', function () { toggleChat(); });
+
+/* teclado */
+document.addEventListener('keydown', function (e) {
+  var tag = (e.target && e.target.tagName) || '';
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+  if (e.key === 'v' || e.key === 'V') { e.preventDefault(); if (voice.on) toggleMute(); else startVoice(); }
+  if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleChat(true); }
+  if (e.key === 'Escape') { toggleChat(false); openSettings(false); }
+});
+/* ===== src/ui/04-chat.js ===== */
+/* AMHEEX GAME — chat embutido: conversa direta com a AMHEEX AI (sem abas). */
+var rbChat = $('rbChat'), chatLog = $('rbChatLog'), chatInput = $('rbChatInput');
+
+function toggleChat(force) {
+  if (!rbChat) return;
+  var open = force == null ? !rbChat.classList.contains('on') : !!force;
+  rbChat.classList.toggle('on', open);
+  if (open) {
+    if (chatLog) chatLog.scrollTop = chatLog.scrollHeight;
+    if (chatInput) setTimeout(function () { chatInput.focus(); }, 60);
+  }
+}
+
+function chatAppend(kind, who, text, acts) {
+  if (!chatLog) return null;
+  var row = document.createElement('div');
+  row.className = 'm ' + (kind || 'ia');
+  var b = document.createElement('b');
+  b.textContent = (who || 'AMHEEX AI') + ':';
+  row.appendChild(b);
+  var span = document.createElement('span');
+  span.innerHTML = String(text || '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+  row.appendChild(span);
+  if (acts && acts.length) {
+    var box = document.createElement('div');
+    box.className = 'acts';
+    acts.forEach(function (a) {
+      var s = document.createElement('span');
+      if (a.ok === false) s.className = 'er';
+      s.textContent = a.label || a;
+      box.appendChild(s);
     });
+    row.appendChild(box);
   }
-  on($('loginGo'), 'click', doAuth);
-  on($('loginPass'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doAuth(); } });
-  on($('loginUser'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); var p = $('loginPass'); if (p) p.focus(); } });
+  chatLog.appendChild(row);
+  chatLog.scrollTop = chatLog.scrollHeight;
+  var cc = $('rbChatCount');
+  if (cc) cc.textContent = chatLog.children.length;
+  return row;
+}
 
-  /* ---------------- 3) EDITOR DE PERSONAGEM ---------------- */
-  var avatarEl = $('avatar');
-  var PALETAS = {
-    pele: ['#f6d5b8', '#e8b98f', '#c68642', '#a5673f', '#8d5524', '#5c3a21', '#f1c9a5', '#3f2a1c'],
-    cor: ['#4f7cff', '#ff3d81', '#22c55e', '#f59e0b', '#a855f7', '#ef4444', '#0ea5e9', '#e2e8f0', '#111827'],
-    calca: ['#1f2a44', '#111827', '#3b4a6b', '#6b7280', '#7c2d12', '#14532d', '#4c1d95', '#e5e7eb'],
-    cabelo: ['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c', '#8b2f2f', '#e5e7eb', '#7c3aed', '#0ea5e9']
-  };
-  function swId(k) { return 'av' + k.charAt(0).toUpperCase() + k.slice(1); }
-  function buildSwatches() {
-    ['pele', 'cor', 'calca', 'cabelo'].forEach(function (k) {
-      var box = $(swId(k)); if (!box) return;
-      box.innerHTML = '';
-      PALETAS[k].forEach(function (hex) {
-        var i = document.createElement('i');
-        i.style.background = hex; i.setAttribute('data-hex', hex);
-        i.addEventListener('click', function () {
-          SKIN[k] = hex; paintSwatches();
-          if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN);
-        });
-        box.appendChild(i);
-      });
+function chatClear() {
+  if (chatLog) chatLog.innerHTML = '';
+  var cc = $('rbChatCount'); if (cc) cc.textContent = '0';
+}
+
+function chatSend(text) {
+  var t = (text || '').trim();
+  if (!t) return;
+  if (chatInput) chatInput.value = '';
+  if (window.AMHEEX_IA3D && window.AMHEEX_IA3D.chat) window.AMHEEX_IA3D.chat(t);
+}
+
+on($('rbChatForm'), 'submit', function (e) {
+  e.preventDefault();
+  chatSend(chatInput ? chatInput.value : '');
+});
+on(chatInput, 'keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); chatSend(chatInput.value); }
+});
+on($('rbMic'), 'click', function () {
+  if (window.AMHEEX_IA3D && window.AMHEEX_IA3D.listen) window.AMHEEX_IA3D.listen();
+});
+on($('rbLive'), 'click', function () {
+  if (window.AMHEEX_IA3D && window.AMHEEX_IA3D.live) window.AMHEEX_IA3D.live();
+});
+
+var sugBtns = document.querySelectorAll('#rbChatFoot button');
+for (var sb = 0; sb < sugBtns.length; sb++) {
+  (function (b) {
+    b.addEventListener('click', function () {
+      var s = b.getAttribute('data-sug');
+      if (s) chatSend(s);
     });
-    paintSwatches();
-  }
-  function paintSwatches() {
-    ['pele', 'cor', 'calca', 'cabelo'].forEach(function (k) {
-      var box = $(swId(k)); if (!box) return;
-      var kids = box.querySelectorAll('i');
-      for (var i = 0; i < kids.length; i++) kids[i].classList.toggle('on', kids[i].getAttribute('data-hex') === SKIN[k]);
-    });
-  }
-  function enterAvatar() {
-    var hud0 = $('rblx'); if (hud0) hud0.classList.remove('on');
-    if (avatarEl) avatarEl.classList.add('on');
-    if (avatarEl && !avatarEl._built) { buildSwatches(); avatarEl._built = true; }
-    paintSwatches();
-    var nome = (USER && (USER.nome || USER.usuario)) || 'Jogador';
-    if (window.AMX_SET) window.AMX_SET.nome = nome;
-    setTimeout(function () { if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN); }, 220);
-  }
-  on($('avRandom'), 'click', function () {
-    function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
-    SKIN.pele = pick(PALETAS.pele); SKIN.cor = pick(PALETAS.cor);
-    SKIN.calca = pick(PALETAS.calca); SKIN.cabelo = pick(PALETAS.cabelo);
-    SKIN.seed = Math.floor(1 + Math.random() * 999999);
-    paintSwatches();
-    if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN);
-  });
-  on($('avPlay'), 'click', function () {
-    var nome = (USER && (USER.nome || USER.usuario)) || 'Jogador';
-    if (avatarEl) avatarEl.classList.remove('on');
-    if (USER && USER.token) {
-      fetch('?api=salvar_perfil', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: USER.token, skin: SKIN, nome: nome })
-      }).then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok && j.user) { USER = j.user; window.AMX_USER = USER; } }).catch(function () {});
-    }
-    if (window.AMX_SKIN) window.AMX_SKIN(SKIN);
-    if (window.AMX_START) window.AMX_START(nome);
-    setTimeout(function () { if (CFG.mic) startVoice(); }, 900);
-  });
+  })(sugBtns[sb]);
+}
 
-  /* ---------------- 4) HUD ---------------- */
-  var rbChat = $('rbChat');
-  function toggleChat(force) {
-    if (!rbChat) return;
-    var open = force == null ? !rbChat.classList.contains('on') : !!force;
-    rbChat.classList.toggle('on', open);
-    if (open) { var ci = $('rbChatInput'); if (ci) setTimeout(function () { ci.focus(); }, 60); }
-  }
-  on($('rbChatBtn'), 'click', function () { toggleChat(); });
-  on($('rbMenu'), 'click', function () { openSettings(true, 'config'); });
+/* mensagens de jogadores próximos aparecem no mesmo fluxo, marcadas */
+window.AMX_CHAT = {
+  append: chatAppend,
+  clear: chatClear,
+  send: chatSend,
+  player: function (name, msg) { chatAppend('me', name || 'Jogador', esc(msg || '')); },
+  status: function (txt) { var s = $('rbChatStatus'); if (s) s.textContent = txt; }
+};
+/* ===== src/ui/05-settings.js ===== */
+/* AMHEEX GAME — configurações no estilo Roblox (5 abas + rodapé). */
+var setEl = $('rbSettings');
 
-  var chatTab = 'global';
-  var chatTabs = document.querySelectorAll('#rbChatTabs button');
-  for (var ct = 0; ct < chatTabs.length; ct++) {
-    (function (b) {
-      b.addEventListener('click', function () {
-        chatTab = b.getAttribute('data-tab');
-        for (var i = 0; i < chatTabs.length; i++) chatTabs[i].classList.toggle('on', chatTabs[i] === b);
-        if (window.MP && window.MP.renderChat) window.MP.renderChat();
-      });
-    })(chatTabs[ct]);
+function openSettings(force, tab) {
+  if (!setEl) return;
+  var open = force == null ? !setEl.classList.contains('on') : !!force;
+  setEl.classList.toggle('on', open);
+  if (open) {
+    if (tab) selectSetTab(tab);
+    syncSettingsUI();
+    if (window.MP && window.MP.renderPlayers) window.MP.renderPlayers();
+    renderGallery();
   }
-  on($('rbChatForm'), 'submit', function (e) {
-    e.preventDefault();
-    var inp = $('rbChatInput');
-    var t = inp && inp.value ? inp.value.trim() : '';
-    if (!t) return;
-    if (window.MP && window.MP.sendChat) window.MP.sendChat(t);
-    if (inp) inp.value = '';
-  });
+}
 
-  var sides = document.querySelectorAll('#rbLeft .rbSide');
-  for (var sd = 0; sd < sides.length; sd++) {
-    (function (b) {
-      b.addEventListener('click', function () {
-        var o = b.getAttribute('data-open');
-        if (o === 'sair') { sair(); return; }
-        if (o === 'skin') { enterAvatar(); return; }
-        openSettings(true, (o === 'loja' || o === 'inv') ? 'galeria' : 'config');
-      });
-    })(sides[sd]);
-  }
+function selectSetTab(t) {
+  var tabs = document.querySelectorAll('#rbSetTabs button');
+  for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('on', tabs[i].getAttribute('data-t') === t);
+  var bodies = document.querySelectorAll('#rbSetCard .rbSetBody');
+  for (var b = 0; b < bodies.length; b++) bodies[b].classList.toggle('on', bodies[b].getAttribute('data-body') === t);
+}
+var setTabs = document.querySelectorAll('#rbSetTabs button');
+for (var st = 0; st < setTabs.length; st++) {
+  (function (b) { b.addEventListener('click', function () { selectSetTab(b.getAttribute('data-t')); }); })(setTabs[st]);
+}
+on($('rbCont'), 'click', function () { openSettings(false); });
+on(setEl, 'click', function (e) { if (e.target === setEl) openSettings(false); });
 
-  /* ---------------- 5) JOYSTICK ---------------- */
-  var joy = $('rbJoy'), knob = $('rbJoyKnob');
-  var joyActive = false, joyId = null;
-  function setMove(f, b, l, r) {
-    var mi = window.WORLD && window.WORLD.player && window.WORLD.player.moveInput;
-    if (!mi) return;
-    mi.f = f; mi.b = b; mi.l = l; mi.r = r;
-  }
-  function joyStart(e) {
-    joyActive = true; joyId = e.pointerId;
-    if (joy && joy.setPointerCapture) { try { joy.setPointerCapture(e.pointerId); } catch (err) {} }
-    joyMove(e);
-  }
-  function joyMove(e) {
-    if (!joyActive || (joyId != null && e.pointerId !== joyId)) return;
-    var rect = joy.getBoundingClientRect();
-    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
-    var dx = e.clientX - cx, dy = e.clientY - cy;
-    var max = rect.width / 2 - 8;
-    var d = Math.sqrt(dx * dx + dy * dy);
-    if (d > max) { dx = dx / d * max; dy = dy / d * max; }
-    if (knob) knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-    var nx = dx / max, ny = dy / max;
-    setMove(ny < -0.25, ny > 0.25, nx < -0.25, nx > 0.25);
-    e.preventDefault();
-  }
-  function joyEnd(e) {
-    if (joyId != null && e.pointerId !== joyId) return;
-    joyActive = false; joyId = null;
-    if (knob) knob.style.transform = 'translate(0,0)';
-    setMove(false, false, false, false);
-  }
-  if (joy) {
-    joy.addEventListener('pointerdown', joyStart);
-    joy.addEventListener('pointermove', joyMove);
-    joy.addEventListener('pointerup', joyEnd);
-    joy.addEventListener('pointercancel', joyEnd);
-  }
-  on($('rbJump'), 'pointerdown', function (e) { e.preventDefault(); if (window.WORLD && window.WORLD.player) window.WORLD.player.jump = true; });
-  var correndo = false;
-  on($('rbRun'), 'click', function () {
-    correndo = !correndo;
-    this.classList.toggle('on', correndo);
-    if (window.WORLD && window.WORLD.player) window.WORLD.player.run = correndo;
-  });
-  on($('rbCam'), 'click', function () {
-    if (!window.WORLD || !window.WORLD.control) return;
-    var m = (window.WORLD.player && window.WORLD.player.mode) || 'third';
-    window.WORLD.control(m === 'third' ? 'first' : m === 'first' ? 'shooter' : 'third');
-  });
-  on($('rbAction'), 'click', function () {
-    if (window.WORLD && window.WORLD.player && window.WORLD.player.mode === 'shooter') {
-      if (window.WORLD.player.fire) window.WORLD.player.fire();
-    } else if (window.AMX_UI && window.AMX_UI.openAI) window.AMX_UI.openAI();
-  });
-
-  /* ---------------- 6) CONFIGURAÇÕES ---------------- */
-  var setEl = $('rbSettings');
-  function openSettings(force, tab) {
-    if (!setEl) return;
-    var open = force == null ? !setEl.classList.contains('on') : !!force;
-    setEl.classList.toggle('on', open);
-    if (open) {
-      if (tab) selectSetTab(tab);
-      syncSettingsUI();
-      if (window.MP && window.MP.renderPlayers) window.MP.renderPlayers();
-      renderGallery();
-    }
-  }
-  function selectSetTab(t) {
-    var bs = document.querySelectorAll('#rbSetTabs button');
-    for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', bs[i].getAttribute('data-t') === t);
-    var bodies = document.querySelectorAll('.rbSetBody');
-    for (var k = 0; k < bodies.length; k++) bodies[k].classList.toggle('on', bodies[k].getAttribute('data-body') === t);
-  }
-  var setTabs = document.querySelectorAll('#rbSetTabs button');
-  for (var st = 0; st < setTabs.length; st++) {
-    (function (b) { b.addEventListener('click', function () { selectSetTab(b.getAttribute('data-t')); }); })(setTabs[st]);
-  }
-  on($('rbCont'), 'click', function () { openSettings(false); });
-  on(setEl, 'click', function (e) { if (e.target === setEl) openSettings(false); });
-
-  var segs = $('rbVolSegs');
-  if (segs) {
-    segs.innerHTML = '';
-    for (var si = 0; si < 10; si++) {
+/* volume em 10 segmentos */
+var volBox = $('rbVolSegs');
+function buildSegs() {
+  if (!volBox || volBox._built) return;
+  volBox._built = true;
+  for (var i = 1; i <= 10; i++) {
+    (function (n) {
       var seg = document.createElement('i');
-      seg.setAttribute('data-v', String((si + 1) * 10));
       seg.addEventListener('click', function () {
-        CFG.volume = Number(this.getAttribute('data-v'));
-        lsSet('amx_volume', CFG.volume);
-        if (window.AMX_SET) window.AMX_SET.volume = CFG.volume / 100;
-        paintSegs();
+        CFG.volume = n * 10; lsSet('amx_vol', CFG.volume); paintSegs(); applyVolume();
       });
-      segs.appendChild(seg);
-    }
+      volBox.appendChild(seg);
+    })(i);
   }
-  function paintSegs() {
-    if (!segs) return;
-    var kids = segs.querySelectorAll('i');
-    for (var i = 0; i < kids.length; i++) kids[i].classList.toggle('on', (i + 1) * 10 <= CFG.volume);
-  }
-  function syncSettingsUI() {
-    var q = $('rbQuality'); if (q) q.value = CFG.quality;
-    var vr = $('rbVoiceRange'); if (vr) vr.value = CFG.voiceRange;
-    var vrv = $('rbVoiceRangeV'); if (vrv) vrv.textContent = CFG.voiceRange + 'm';
-    var s = $('rbSens'); if (s) s.value = CFG.sens;
-    var sv = $('rbSensV'); if (sv) sv.textContent = CFG.sens;
-    var nm = $('rbNames'); if (nm) nm.value = CFG.names ? 'on' : 'off';
-    var mic = $('rbMic'); if (mic) mic.textContent = voice.on ? (voice.muted ? 'MUDO (V)' : 'LIGADO (V)') : 'LIGAR (V)';
-    paintSegs();
-  }
-  on($('rbQuality'), 'change', function () {
-    CFG.quality = this.value; lsSet('amx_quality', CFG.quality);
-    if (window.WORLD && window.WORLD.setQuality) window.WORLD.setQuality(CFG.quality);
-  });
-  on($('rbVoiceRange'), 'input', function () {
-    CFG.voiceRange = Number(this.value); lsSet('amx_voice_range', CFG.voiceRange);
-    var v = $('rbVoiceRangeV'); if (v) v.textContent = CFG.voiceRange + 'm';
-    if (window.AMX_SET) window.AMX_SET.voiceRange = CFG.voiceRange;
-  });
-  on($('rbSens'), 'input', function () {
-    CFG.sens = Number(this.value); lsSet('amx_sens', CFG.sens);
-    var v = $('rbSensV'); if (v) v.textContent = CFG.sens;
-    if (window.AMX_SET) window.AMX_SET.sens = CFG.sens / 100;
-  });
-  on($('rbNames'), 'change', function () {
-    CFG.names = this.value === 'on'; lsSet('amx_names', CFG.names ? 'on' : 'off');
-    if (window.AMX_NAMES) window.AMX_NAMES(CFG.names);
-  });
-  on($('rbMic'), 'click', function () { if (voice.on) toggleMute(); else startVoice(); syncSettingsUI(); });
+  paintSegs();
+}
+function paintSegs() {
+  if (!volBox) return;
+  var segs = volBox.querySelectorAll('i');
+  var lit = Math.round(CFG.volume / 10);
+  for (var i = 0; i < segs.length; i++) segs[i].classList.toggle('on', i < lit);
+}
+function applyVolume() {
+  if (window.AMX_SET) window.AMX_SET.volume = CFG.volume / 100;
+  var auds = document.querySelectorAll('audio');
+  for (var i = 0; i < auds.length; i++) auds[i].volume = Math.max(0, Math.min(1, CFG.volume / 100));
+}
+buildSegs();
 
-  function renderGallery() {
-    var box = $('rbGallery'); if (!box) return;
-    var objs = (window.WORLD && window.WORLD.state && window.WORLD.state.objects) || [];
-    var html = '';
-    for (var i = 0; i < objs.length; i++) {
-      var o = objs[i];
-      if (o.isAvatar) continue;
-      html += '<div class="rbCard"><b>' + (o.nome || o.ent) + '</b>' + (o.forma || o.ent) + '</div>';
-    }
-    box.innerHTML = html || '<div class="rbCard"><b>Mapa vazio</b>peça algo para a IA</div>';
+function syncSettingsUI() {
+  paintSegs();
+  var q = $('rbQuality'); if (q) q.value = CFG.quality;
+  var s = $('rbSens'); if (s) s.value = CFG.sens;
+  var sv = $('rbSensV'); if (sv) sv.textContent = CFG.sens;
+  var vr = $('rbVoiceRange'); if (vr) vr.value = CFG.voiceRange;
+  var vrv = $('rbVoiceRangeV'); if (vrv) vrv.textContent = CFG.voiceRange + 'm';
+  var nm = $('rbNames'); if (nm) nm.value = CFG.names ? 'on' : 'off';
+  var mic = $('rbMicSet');
+  if (mic) {
+    var onv = window.AMX_VOICE && window.AMX_VOICE.on;
+    mic.textContent = onv ? (window.AMX_VOICE.muted ? 'MUDO (V)' : 'LIGADO (V)') : 'LIGAR (V)';
   }
-  on($('rbReportGo'), 'click', function () {
-    var who = $('rbReportWho'), why = $('rbReportWhy');
-    if (!who || !who.value) { if (window.MP) window.MP.toast('Nenhum jogador para denunciar.'); return; }
-    fetch('?api=mp_chat', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: 'denuncia', name: 'DENÚNCIA', msg: 'Denúncia contra ' + who.options[who.selectedIndex].text + ': ' + (why ? why.value : '') })
-    }).catch(function () {});
-    if (window.MP) window.MP.toast('Denúncia registrada.');
-  });
-  on($('rbRegen'), 'click', function () {
-    openSettings(false);
-    if (avatarEl) avatarEl.classList.add('on');
-    buildSwatches();
-    if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN);
-  });
+}
 
-  function sair() {
-    if (USER && USER.token) {
-      fetch('?api=sair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: USER.token }) }).catch(function () {});
-    }
-    lsDel('amx_token');
-    USER = null; window.AMX_USER = null;
-    openSettings(false);
-    if (avatarEl) avatarEl.classList.remove('on');
-    var hud = $('rblx'); if (hud) hud.classList.remove('on');
-    if (window.MP && window.MP.enable) window.MP.enable(false);
-    if (loginEl) loginEl.classList.add('on');
-  }
-  on($('rbSair'), 'click', sair);
+on($('rbQuality'), 'change', function () {
+  CFG.quality = this.value; lsSet('amx_quality', CFG.quality);
+  if (window.WORLD && window.WORLD.setQuality) window.WORLD.setQuality(CFG.quality);
+});
+on($('rbVoiceRange'), 'input', function () {
+  CFG.voiceRange = parseInt(this.value, 10) || 16; lsSet('amx_vrange', CFG.voiceRange);
+  var v = $('rbVoiceRangeV'); if (v) v.textContent = CFG.voiceRange + 'm';
+  if (window.AMX_SET) window.AMX_SET.voiceRange = CFG.voiceRange;
+});
+on($('rbSens'), 'input', function () {
+  CFG.sens = parseInt(this.value, 10) || 100; lsSet('amx_sens', CFG.sens);
+  var v = $('rbSensV'); if (v) v.textContent = CFG.sens;
+  if (window.AMX_SET) window.AMX_SET.sens = CFG.sens / 100;
+});
+on($('rbNames'), 'change', function () {
+  CFG.names = this.value === 'on'; lsSet('amx_names', CFG.names ? 'on' : 'off');
+  if (window.AMX_NAMES) window.AMX_NAMES(CFG.names);
+});
+on($('rbMicSet'), 'click', function () { if (voice.on) toggleMute(); else startVoice(); syncSettingsUI(); });
 
-  /* ---------------- 7) VOZ POR PROXIMIDADE ---------------- */
-  var voice = { on: false, muted: false, stream: null, peers: {}, pollTimer: null, starting: false };
-  window.AMX_VOICE = voice;
-  var ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+function renderGallery() {
+  var box = $('rbGallery'); if (!box) return;
+  var objs = (window.WORLD && window.WORLD.state && window.WORLD.state.objects) || [];
+  var html = '';
+  for (var i = 0; i < objs.length; i++) {
+    var o = objs[i];
+    if (o.isAvatar) continue;
+    html += '<div class="rbCard"><b>' + esc(o.nome || o.ent) + '</b>' + esc(o.forma || o.ent) + '</div>';
+  }
+  box.innerHTML = html || '<div class="rbCard"><b>Mapa vazio</b>peça algo para a IA</div>';
+}
 
-  function startVoice() {
-    if (voice.on || voice.starting) return;
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      if (window.MP) window.MP.toast('Este navegador não suporta microfone.'); return;
-    }
-    voice.starting = true;
-    navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function (st) {
-      voice.stream = st; voice.on = true; voice.starting = false; voice.muted = false;
-      startPolling(); syncSettingsUI();
-      if (window.MP) window.MP.toast('Voz ligada — só quem está perto escuta.');
-    }).catch(function () { voice.starting = false; if (window.MP) window.MP.toast('Microfone bloqueado pelo navegador.'); });
+on($('rbReportGo'), 'click', function () {
+  var who = $('rbReportWho'), why = $('rbReportWhy');
+  if (!who || !who.value) { if (window.MP) window.MP.toast('Nenhum jogador para denunciar.'); return; }
+  fetch('?api=mp_chat', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: 'denuncia', name: 'DENÚNCIA', msg: 'Denúncia contra ' + who.options[who.selectedIndex].text + ': ' + (why ? why.value : '') })
+  }).catch(function () {});
+  if (window.MP) window.MP.toast('Denúncia registrada.');
+});
+
+/* "Novo visual": o personagem é editado pela IA, nunca por botões soltos */
+on($('rbRegen'), 'click', function () {
+  openSettings(false);
+  toggleChat(true);
+  chatSend('crie um personagem realista novo para mim');
+});
+
+on($('rbSair'), 'click', sair);
+/* ===== src/ui/06-voice.js ===== */
+/* AMHEEX GAME — voz por proximidade (WebRTC) e mudo. */
+var voice = { on: false, muted: false, stream: null, peers: {}, pollTimer: null, starting: false };
+window.AMX_VOICE = voice;
+var ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
+
+function startVoice() {
+  if (voice.on || voice.starting) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    if (window.MP) window.MP.toast('Este navegador não suporta microfone.'); return;
   }
-  function stopVoice() {
-    voice.on = false; stopPolling();
-    for (var id in voice.peers) closePeer(id);
-    voice.peers = {};
-    if (voice.stream) { try { voice.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} voice.stream = null; }
-    syncSettingsUI();
-  }
-  function toggleMute() {
-    voice.muted = !voice.muted;
-    if (voice.stream) { try { voice.stream.getAudioTracks().forEach(function (t) { t.enabled = !voice.muted; }); } catch (e) {} }
-    syncSettingsUI();
-    if (window.MP) window.MP.toast(voice.muted ? 'Microfone mutado.' : 'Microfone ativo.');
-  }
-  function rtcSend(to, kind, data) {
-    if (!window.MP || !window.MP.id || !to) return;
-    fetch('?api=rtc_send', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: window.MP.id, to: to, kind: kind, data: data })
-    }).catch(function () {});
-  }
-  function startPolling() { if (voice.pollTimer) return; voice.pollTimer = setInterval(pollSignals, 1200); pollSignals(); }
-  function stopPolling() { if (voice.pollTimer) { clearInterval(voice.pollTimer); voice.pollTimer = null; } }
-  function pollSignals() {
-    if (!voice.on || !window.MP || !window.MP.id) return;
-    fetch('?api=rtc_poll&id=' + encodeURIComponent(window.MP.id)).then(function (r) { return r.json(); })
-      .then(function (j) { if (!j || !j.ok || !j.msgs) return; for (var i = 0; i < j.msgs.length; i++) handleSignal(j.msgs[i]); })
-      .catch(function () {});
-  }
-  function handleSignal(m) {
-    if (!m || !m.from) return;
-    var id = m.from;
-    if (m.kind === 'offer') {
-      var pc = ensurePeer(id);
-      pc.setRemoteDescription(new RTCSessionDescription(m.data)).then(function () { return pc.createAnswer(); })
-        .then(function (ans) { return pc.setLocalDescription(ans); })
-        .then(function () { rtcSend(id, 'answer', pc.localDescription); }).catch(function () {});
-    } else if (m.kind === 'answer') {
-      var p2 = voice.peers[id];
-      if (p2 && !p2._answered) { p2._answered = true; p2.setRemoteDescription(new RTCSessionDescription(m.data)).catch(function () {}); }
-    } else if (m.kind === 'ice') {
-      var p3 = voice.peers[id];
-      if (p3 && m.data) { try { p3.addIceCandidate(new RTCIceCandidate(m.data)).catch(function () {}); } catch (e) {} }
-    } else if (m.kind === 'bye') { closePeer(id); }
-  }
-  function ensurePeer(id) {
-    if (voice.peers[id]) return voice.peers[id];
-    var pc = new RTCPeerConnection(ICE);
-    pc._offered = false; pc._answered = false; pc._audio = null;
-    voice.peers[id] = pc;
-    if (voice.stream) { try { voice.stream.getTracks().forEach(function (t) { pc.addTrack(t, voice.stream); }); } catch (e) {} }
-    pc.onicecandidate = function (e) { if (e.candidate) rtcSend(id, 'ice', e.candidate); };
-    pc.ontrack = function (e) {
-      var audio = document.createElement('audio');
-      audio.autoplay = true; audio.srcObject = e.streams[0]; audio.style.display = 'none';
-      audio.volume = Math.max(0, Math.min(1, CFG.volume / 100));
-      document.body.appendChild(audio); pc._audio = audio;
-      try { audio.play().catch(function () {}); } catch (err) {}
-    };
-    pc.onconnectionstatechange = function () { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') closePeer(id); };
-    return pc;
-  }
-  function offerTo(id) {
+  voice.starting = true;
+  navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function (st) {
+    voice.stream = st; voice.on = true; voice.starting = false; voice.muted = false;
+    CFG.mic = true; lsSet('amx_mic', 'on');
+    startPolling(); syncSettingsUI();
+    if (window.MP) window.MP.toast('Voz ligada — só quem está perto escuta.');
+  }).catch(function () { voice.starting = false; if (window.MP) window.MP.toast('Microfone bloqueado pelo navegador.'); });
+}
+function stopVoice() {
+  voice.on = false; stopPolling();
+  for (var id in voice.peers) closePeer(id);
+  voice.peers = {};
+  if (voice.stream) { try { voice.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} voice.stream = null; }
+  CFG.mic = false; lsSet('amx_mic', 'off');
+  syncSettingsUI();
+}
+function toggleMute() {
+  voice.muted = !voice.muted;
+  if (voice.stream) { try { voice.stream.getAudioTracks().forEach(function (t) { t.enabled = !voice.muted; }); } catch (e) {} }
+  syncSettingsUI();
+  if (window.MP) window.MP.toast(voice.muted ? 'Microfone mutado.' : 'Microfone ativo.');
+}
+function rtcSend(to, kind, data) {
+  if (!window.MP || !window.MP.id || !to) return;
+  fetch('?api=rtc_send', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ from: window.MP.id, to: to, kind: kind, data: data })
+  }).catch(function () {});
+}
+function startPolling() { if (voice.pollTimer) return; voice.pollTimer = setInterval(pollSignals, 1200); pollSignals(); }
+function stopPolling() { if (voice.pollTimer) { clearInterval(voice.pollTimer); voice.pollTimer = null; } }
+function pollSignals() {
+  if (!voice.on || !window.MP || !window.MP.id) return;
+  fetch('?api=rtc_poll&id=' + encodeURIComponent(window.MP.id)).then(function (r) { return r.json(); })
+    .then(function (j) { if (!j || !j.ok || !j.msgs) return; for (var i = 0; i < j.msgs.length; i++) handleSignal(j.msgs[i]); })
+    .catch(function () {});
+}
+function handleSignal(m) {
+  if (!m || !m.from) return;
+  var id = m.from;
+  if (m.kind === 'offer') {
     var pc = ensurePeer(id);
-    if (pc._offered) return;
-    pc._offered = true;
-    pc.createOffer({ offerToReceiveAudio: true }).then(function (off) { return pc.setLocalDescription(off); })
-      .then(function () { rtcSend(id, 'offer', pc.localDescription); })
-      .catch(function () { pc._offered = false; });
-  }
-  function closePeer(id) {
+    pc.setRemoteDescription(new RTCSessionDescription(m.data)).then(function () { return pc.createAnswer(); })
+      .then(function (ans) { return pc.setLocalDescription(ans); })
+      .then(function () { rtcSend(id, 'answer', pc.localDescription); }).catch(function () {});
+  } else if (m.kind === 'answer') {
+    var p2 = voice.peers[id];
+    if (p2 && !p2._answered) { p2._answered = true; p2.setRemoteDescription(new RTCSessionDescription(m.data)).catch(function () {}); }
+  } else if (m.kind === 'ice') {
+    var p3 = voice.peers[id];
+    if (p3 && m.data) { try { p3.addIceCandidate(new RTCIceCandidate(m.data)).catch(function () {}); } catch (e) {} }
+  } else if (m.kind === 'bye') { closePeer(id); }
+}
+function ensurePeer(id) {
+  if (voice.peers[id]) return voice.peers[id];
+  var pc = new RTCPeerConnection(ICE);
+  pc._offered = false; pc._answered = false; pc._audio = null;
+  voice.peers[id] = pc;
+  if (voice.stream) { try { voice.stream.getTracks().forEach(function (t) { pc.addTrack(t, voice.stream); }); } catch (e) {} }
+  pc.onicecandidate = function (e) { if (e.candidate) rtcSend(id, 'ice', e.candidate); };
+  pc.ontrack = function (e) {
+    var audio = document.createElement('audio');
+    audio.autoplay = true; audio.srcObject = e.streams[0]; audio.style.display = 'none';
+    audio.volume = Math.max(0, Math.min(1, CFG.volume / 100));
+    document.body.appendChild(audio); pc._audio = audio;
+    try { audio.play().catch(function () {}); } catch (err) {}
+  };
+  pc.onconnectionstatechange = function () { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') closePeer(id); };
+  return pc;
+}
+function offerTo(id) {
+  var pc = ensurePeer(id);
+  if (pc._offered) return;
+  pc._offered = true;
+  pc.createOffer({ offerToReceiveAudio: true }).then(function (off) { return pc.setLocalDescription(off); })
+    .then(function () { rtcSend(id, 'offer', pc.localDescription); })
+    .catch(function () { pc._offered = false; });
+}
+function closePeer(id) {
+  var pc = voice.peers[id];
+  if (!pc) return;
+  try { rtcSend(id, 'bye', null); } catch (e) {}
+  try { if (pc._audio) { pc._audio.srcObject = null; pc._audio.parentNode.removeChild(pc._audio); } } catch (e) {}
+  try { pc.close(); } catch (e) {}
+  delete voice.peers[id];
+}
+function proximityTick() {
+  if (!voice.on || !window.MP || !window.MP.remotes) return;
+  var me = window.WORLD && window.WORLD.player && window.WORLD.player.node;
+  if (!me) return;
+  var range = CFG.voiceRange, vistos = {};
+  for (var id in window.MP.remotes) {
+    var r = window.MP.remotes[id];
+    if (!r || !r.node) continue;
+    vistos[id] = true;
+    var dx = r.node.position.x - me.position.x, dz = r.node.position.z - me.position.z;
+    var dist = Math.sqrt(dx * dx + dz * dz);
+    var perto = dist <= range;
     var pc = voice.peers[id];
-    if (!pc) return;
-    try { rtcSend(id, 'bye', null); } catch (e) {}
-    try { if (pc._audio) { pc._audio.srcObject = null; pc._audio.parentNode.removeChild(pc._audio); } } catch (e) {}
-    try { pc.close(); } catch (e) {}
-    delete voice.peers[id];
-  }
-  function proximityTick() {
-    if (!voice.on || !window.MP || !window.MP.remotes) return;
-    var me = window.WORLD && window.WORLD.player && window.WORLD.player.node;
-    if (!me) return;
-    var range = CFG.voiceRange, vistos = {};
-    for (var id in window.MP.remotes) {
-      var r = window.MP.remotes[id];
-      if (!r || !r.node) continue;
-      vistos[id] = true;
-      var dx = r.node.position.x - me.position.x, dz = r.node.position.z - me.position.z;
-      var dist = Math.sqrt(dx * dx + dz * dz);
-      var perto = dist <= range;
-      var pc = voice.peers[id];
-      if (perto) {
-        if (!pc) pc = ensurePeer(id);
-        if (String(window.MP.id) < String(id) && !pc._offered) offerTo(id);
-      }
-      if (pc && pc._audio) {
-        pc._audio.muted = !perto || voice.muted;
-        pc._audio.volume = Math.max(0.05, Math.min(1, (CFG.volume / 100) * (1 - dist / (range * 1.6))));
-      }
+    if (perto) {
+      if (!pc) pc = ensurePeer(id);
+      if (String(window.MP.id) < String(id) && !pc._offered) offerTo(id);
     }
-    for (var pid in voice.peers) { if (!vistos[pid]) closePeer(pid); }
-  }
-  setInterval(proximityTick, 900);
-
-  document.addEventListener('keydown', function (e) {
-    var tag = (e.target && e.target.tagName) || '';
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
-    if (e.key === 'v' || e.key === 'V') { e.preventDefault(); if (voice.on) toggleMute(); else startVoice(); }
-    if (e.key === 't' || e.key === 'T') { e.preventDefault(); toggleChat(true); }
-    if (e.key === 'Escape') { toggleChat(false); openSettings(false); }
-  });
-
-  /* ---------------- 8) BOOTSTRAP ---------------- */
-  function applySaved() {
-    if (window.WORLD && window.WORLD.setQuality) window.WORLD.setQuality(CFG.quality);
-    if (window.AMX_SET) {
-      window.AMX_SET.volume = CFG.volume / 100;
-      window.AMX_SET.voiceRange = CFG.voiceRange;
-      window.AMX_SET.sens = CFG.sens / 100;
+    if (pc && pc._audio) {
+      pc._audio.muted = !perto || voice.muted;
+      pc._audio.volume = Math.max(0.05, Math.min(1, (CFG.volume / 100) * (1 - dist / (range * 1.6))));
     }
-    if (window.AMX_NAMES) window.AMX_NAMES(CFG.names);
-    syncSettingsUI();
   }
-  var tries = 0;
-  var readyTimer = setInterval(function () {
-    tries++;
-    if (window.WORLD && window.AMX_START) { clearInterval(readyTimer); applySaved(); if (pct > 92) finishBoot(); }
-    else if (tries > 120) { clearInterval(readyTimer); }
-  }, 100);
-  window.addEventListener('load', function () { setTimeout(function () { if (!bootDone) finishBoot(); }, 2800); });
+  for (var pid in voice.peers) { if (!vistos[pid]) closePeer(pid); }
+}
+setInterval(proximityTick, 900);
+/* ===== src/ui/07-main.js ===== */
+/* AMHEEX GAME — inicialização da interface: espera o motor, aplica ajustes e abre o login. */
+function applySaved() {
+  if (window.WORLD && window.WORLD.setQuality) window.WORLD.setQuality(CFG.quality);
+  if (window.AMX_SET) {
+    window.AMX_SET.volume = CFG.volume / 100;
+    window.AMX_SET.voiceRange = CFG.voiceRange;
+    window.AMX_SET.sens = CFG.sens / 100;
+  }
+  if (window.AMX_NAMES) window.AMX_NAMES(CFG.names);
+  syncSettingsUI();
+}
 
-  window.AMX_UI.openSettings = openSettings;
-  window.AMX_UI.toggleChat = toggleChat;
-  window.AMX_UI.startVoice = startVoice;
-  window.AMX_UI.stopVoice = stopVoice;
-  window.AMX_UI.toggleMute = toggleMute;
-  window.AMX_UI.sair = sair;
+var tries = 0;
+var readyTimer = setInterval(function () {
+  tries++;
+  if (window.WORLD && window.AMX_START) {
+    clearInterval(readyTimer);
+    applySaved();
+    if (pct > 92) finishBoot();
+  } else if (tries > 120) {
+    clearInterval(readyTimer);
+  }
+}, 100);
+
+window.addEventListener('load', function () { setTimeout(function () { if (!bootDone) finishBoot(); }, 2800); });
+
+window.AMX_UI.openSettings = openSettings;
+window.AMX_UI.toggleChat = toggleChat;
+window.AMX_UI.startVoice = startVoice;
+window.AMX_UI.stopVoice = stopVoice;
+window.AMX_UI.toggleMute = toggleMute;
+window.AMX_UI.sair = sair;
+window.AMX_UI.enterWorld = enterWorld;
 })();
 </script>
 <script>
-/* =====================================================================
-   AMHEEX AI — ícone flutuante + chat + voz (Fish Audio / TTS local / STT navegador)
-   Layout e lógica do FAB extraídos do AMHEEX DRIVE e adaptados ao mundo 3D.
-   ===================================================================== */
 (function () {
   'use strict';
-  if (window.__amxaiInit) return;
-  window.__amxaiInit = true;
+/* ===== src/ai/01-speech.js ===== */
+/* AMHEEX AI — voz: Fish Audio (servidor) com fallback do navegador e escuta contínua. */
+var voiceOn = lsGet('amx3d_voz', 'on') !== 'off';
+var audioEl = null;
+var ttsCache = {};
+var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+var rec = null, listening = false, live = false, liveWanted = false;
 
-  var root = document.getElementById('amxai-root');
-  if (!root) return;
-  var fab = document.getElementById('amxai-fab');
-  var panel = document.getElementById('amxai-panel');
-  var head = document.getElementById('amxai-head');
-  var msgs = document.getElementById('amxai-msgs');
-  var form = document.getElementById('amxai-form');
-  var input = document.getElementById('amxai-input');
-  var send = document.getElementById('amxai-send');
-  var mic = document.getElementById('amxai-mic');
-  var statusEl = document.getElementById('amxai-status');
-  var countEl = document.getElementById('amxai-count');
-  var pin = document.getElementById('amxai-pin');
-  var clearBtn = document.getElementById('amxai-clear');
-  var chips = document.getElementById('amxai-chips');
-  var voiceBtn = document.getElementById('amxai-voice');
-  var liveBtn = document.getElementById('amxai-live');
+function aiStatus(txt) { if (window.AMX_CHAT) window.AMX_CHAT.status(txt); }
+function aiSay(role, text, acts) { return window.AMX_CHAT ? window.AMX_CHAT.append(role, role === 'me' ? (USER && USER.nome) || 'Você' : 'AMHEEX AI', text, acts) : null; }
 
-  var busy = false;
-  var history = [];
-  var drag = null;
-  var lastEnt = null;
+function stopSpeak() {
+  if (audioEl) { try { audioEl.pause(); } catch (e) {} audioEl = null; }
+  try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
+}
 
-  function esc(s) {
-    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-  function store(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
-  function load(k, d) { try { var v = JSON.parse(localStorage.getItem(k)); return v == null ? d : v; } catch (e) { return d; } }
-  function toast(msg) { if (statusEl) statusEl.textContent = msg; }
+function browserSpeak(text) {
+  if (!text || !window.speechSynthesis) return;
+  try {
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'pt-BR'; u.rate = 1.02; u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  } catch (e) {}
+}
 
-  /* ---------------- modo flutuante / fixo ---------------- */
-  var mode = load('amx3d_mode', 'float');
-  if (mode !== 'fixed') mode = 'float';
-  root.dataset.mode = mode;
-  pin.classList.toggle('on', mode === 'fixed');
+function playAudio(url) {
+  stopSpeak();
+  audioEl = new Audio(url);
+  audioEl.volume = Math.max(0, Math.min(1, (window.AMX_SET ? window.AMX_SET.volume : 0.8)));
+  audioEl.play().catch(function () {});
+}
 
-  function setMode(m) {
-    mode = m === 'fixed' ? 'fixed' : 'float';
-    root.dataset.mode = mode;
-    pin.classList.toggle('on', mode === 'fixed');
-    store('amx3d_mode', mode);
-    if (mode === 'fixed') {
-      panel.style.left = panel.style.top = panel.style.right = panel.style.bottom = '';
-      panel.style.width = panel.style.height = '';
-      fab.style.left = fab.style.top = fab.style.right = fab.style.bottom = '';
-    } else {
-      applySavedPos(); applyFabPos();
+function speak(text) {
+  if (!voiceOn) return;
+  var clean = String(text || '').replace(/\*\*/g, '').replace(/[#`>]/g, '').slice(0, 300).trim();
+  if (!clean) return;
+  if (ttsCache[clean]) { playAudio(ttsCache[clean]); return; }
+  fetch('?api=tts&text=' + encodeURIComponent(clean))
+    .then(function (r) {
+      var ct = r.headers.get('Content-Type') || '';
+      if (ct.indexOf('audio') === 0) return r.blob();
+      return r.json().then(function (j) { throw new Error((j && j.aviso) || 'sem audio'); });
+    })
+    .then(function (blob) {
+      var url = URL.createObjectURL(blob);
+      ttsCache[clean] = url;
+      playAudio(url);
+    })
+    .catch(function () { browserSpeak(clean); });
+}
+
+/* ---------------- escuta (voz → texto) ---------------- */
+function buildRec() {
+  if (!SR) return null;
+  var r = new SR();
+  r.lang = 'pt-BR';
+  r.continuous = false;
+  r.interimResults = true;
+  r.onstart = function () { listening = true; var b = $('rbMic'); if (b) b.classList.add('on'); aiStatus('ouvindo…'); };
+  r.onend = function () {
+    listening = false;
+    var b = $('rbMic'); if (b) b.classList.remove('on');
+    aiStatus('online');
+    if (liveWanted) setTimeout(function () { try { r.start(); } catch (e) {} }, 350);
+  };
+  r.onerror = function (ev) {
+    listening = false;
+    var b = $('rbMic'); if (b) b.classList.remove('on');
+    if (ev && ev.error === 'not-allowed') aiStatus('microfone bloqueado');
+    else aiStatus('online');
+  };
+  r.onresult = function (ev) {
+    var finalTxt = '', interim = '';
+    for (var i = ev.resultIndex; i < ev.results.length; i++) {
+      var t = ev.results[i][0].transcript;
+      if (ev.results[i].isFinal) finalTxt += t; else interim += t;
     }
-  }
-
-  function openPanel() {
-    panel.hidden = false;
-    root.dataset.open = '1';
-    fab.setAttribute('aria-expanded', 'true');
-    if (mode === 'float') applySavedPos();
-    setTimeout(function () { try { input.focus(); } catch (e) {} }, 120);
-    scrollBottom();
-  }
-  function closePanel() {
-    panel.hidden = true;
-    root.dataset.open = '0';
-    fab.setAttribute('aria-expanded', 'false');
-  }
-
-  /* ---------------- arrastar FAB e painel ---------------- */
-  function applyFabPos() {
-    var p = load('amx3d_fabpos', null);
-    if (!p) return;
-    fab.style.left = p.x + 'px'; fab.style.top = p.y + 'px';
-    fab.style.right = 'auto'; fab.style.bottom = 'auto';
-  }
-  function applySavedPos() {
-    var p = load('amx3d_pos', null);
-    if (!p) return;
-    panel.style.left = p.x + 'px'; panel.style.top = p.y + 'px';
-    panel.style.right = 'auto'; panel.style.bottom = 'auto';
-    if (p.w) panel.style.width = p.w + 'px';
-    if (p.h) panel.style.height = p.h + 'px';
-  }
-
-  function makeDraggable(el, kind) {
-    el.addEventListener('pointerdown', function (e) {
-      if (e.target.closest('button') && kind === 'fab') { /* deixa o clique */ }
-      if (kind === 'panel' && e.target.closest('button,textarea,input,a')) return;
-      if (mode === 'fixed') return;
-      var r = el.getBoundingClientRect();
-      drag = { kind: kind, id: e.pointerId, ox: e.clientX - r.left, oy: e.clientY - r.top, moved: false, w: r.width, h: r.height };
-      try { el.setPointerCapture(e.pointerId); } catch (err) {}
-    });
-    el.addEventListener('pointermove', function (e) {
-      if (!drag || drag.id !== e.pointerId) return;
-      var dx = e.clientX - drag.ox, dy = e.clientY - drag.oy;
-      if (Math.abs(e.clientX - (drag.ox + el.getBoundingClientRect().left)) > 3) drag.moved = true;
-      var x = Math.max(4, Math.min(window.innerWidth - (drag.kind === 'fab' ? 64 : 120), dx));
-      var y = Math.max(4, Math.min(window.innerHeight - (drag.kind === 'fab' ? 64 : 90), dy));
-      el.style.left = x + 'px'; el.style.top = y + 'px';
-      el.style.right = 'auto'; el.style.bottom = 'auto';
-      if (drag.kind === 'panel') { el.style.width = drag.w + 'px'; el.style.height = drag.h + 'px'; }
-    });
-    el.addEventListener('pointerup', function (e) {
-      if (!drag || drag.id !== e.pointerId) return;
-      var r = el.getBoundingClientRect();
-      if (drag.kind === 'fab') store('amx3d_fabpos', { x: r.left, y: r.top });
-      else store('amx3d_pos', { x: r.left, y: r.top, w: Math.round(r.width), h: Math.round(r.height) });
-      if (drag.kind === 'fab' && drag.moved) window.__amxDragMoved = Date.now();
-      drag = null;
-    });
-  }
-  makeDraggable(fab, 'fab');
-  makeDraggable(head, 'panel');
-
-  /* ---------------- eventos ---------------- */
-  document.addEventListener('click', function (e) {
-    var t = e.target;
-    if (!t || !t.closest) return;
-    if (t.closest('#amxai-close')) { e.preventDefault(); closePanel(); return; }
-    if (t.closest('#amxai-fab')) {
-      e.preventDefault();
-      if (Date.now() - (window.__amxDragMoved || 0) < 400) return;
-      openPanel(); return;
+    var inp = $('rbChatInput');
+    if (interim && inp) inp.value = interim;
+    if (finalTxt) {
+      if (inp) inp.value = '';
+      aiSend(finalTxt.trim());
     }
-    if (t.closest('#amxai-pin')) { e.preventDefault(); setMode(mode === 'fixed' ? 'float' : 'fixed'); return; }
-    if (t.closest('#amxai-clear')) { e.preventDefault(); limpar(); return; }
-    if (t.closest('#amxai-voice')) { e.preventDefault(); toggleVoice(); return; }
-    if (t.closest('#amxai-live')) { e.preventDefault(); toggleLive(); return; }
-    var chip = t.closest('[data-chip]');
-    if (chip) { e.preventDefault(); input.value = chip.getAttribute('data-chip'); sendMsg(); }
-  }, true);
+  };
+  return r;
+}
 
-  document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && !panel.hidden) closePanel();
-  });
+function startListen() {
+  if (!SR) { aiSay('ia', 'Este navegador não tem reconhecimento de voz. Escreva no chat que eu respondo igual.'); return; }
+  if (listening) { liveWanted = false; live = false; try { rec.stop(); } catch (e) {} return; }
+  if (!rec) rec = buildRec();
+  if (!rec) return;
+  liveWanted = false;
+  try { rec.start(); } catch (e) {}
+}
 
-  /* ---------------- render ---------------- */
-  function scrollBottom() { msgs.scrollTop = msgs.scrollHeight; }
+/* conversa em tempo real: escuta contínua + resposta falada */
+function toggleLive() {
+  var b = $('rbLive');
+  if (live) {
+    live = false; liveWanted = false;
+    if (b) b.classList.remove('on');
+    try { if (rec) rec.stop(); } catch (e) {}
+    stopSpeak();
+    aiStatus('online');
+    aiSay('ia', 'Modo conversa encerrado. Pode escrever quando quiser.');
+    return;
+  }
+  if (!SR) { aiSay('ia', 'Conversa por voz precisa do Chrome/Edge com microfone. Aqui você pode escrever — eu respondo e falo.'); return; }
+  live = true; liveWanted = true;
+  if (b) b.classList.add('on');
+  if (!rec) rec = buildRec();
+  aiSay('ia', '**Modo conversa ao vivo.** Fale normalmente: eu escuto, respondo e falo em tempo real. Toque no botão de onda para encerrar.');
+  try { rec.start(); } catch (e) {}
+}
+/* ===== src/ai/02-engine.js ===== */
+/* AMHEEX AI — motor de conversa: envia para o PHP, aplica ações com limites e fala. */
+var aiBusy = false;
+var aiHistory = [];
+var aiLastEnt = null;
+var aiSentAt = 0;
+var aiSentCount = 0;
+var aiWindowAt = Date.now();
+var AI_MAX_ACTS = 8;
+var AI_MIN_GAP = 700;
 
-  function addMsg(role, text, acts) {
-    var wrap = document.createElement('div');
-    wrap.className = 'amxai-msg ' + role;
-    var b = document.createElement('div');
-    b.className = 'amxai-bubble';
-    b.innerHTML = '<span class="amxai-txt">' + fmt(text) + '</span>';
-    if (acts && acts.length) {
+function aiStore() { try { localStorage.setItem('amx3d_hist', JSON.stringify(aiHistory.slice(-40))); } catch (e) {} }
+
+function aiActionLabel(a, res) {
+  var t = a && a.t;
+  var nomes = {
+    spawn: 'criou ' + (a.nome || a.ent), avatar: 'ajustou seu personagem',
+    character: 'ajustou seu personagem', modify: 'alterou ' + (a.ent || 'objeto'),
+    remove: 'removeu ' + (a.ent || 'objeto'), recolor: 'pintou ' + (a.ent || 'objeto'),
+    scale: 'redimensionou', move: 'moveu', rotate: 'girou', terrain: 'mudou o terreno',
+    weather: 'mudou o clima', camera: 'mudou a câmera', control: 'mudou o controle',
+    world: 'montou o mundo ' + (a.preset || ''), clear: 'limpou o mapa',
+    layout: 'adicionou ' + (a.item || 'elemento'), physics: 'ligou a física',
+    multiplayer: 'ligou o multiplayer'
+  };
+  return nomes[t] || ('ação ' + t);
+}
+
+/* o personagem só pode ser editado pelo próprio dono — nunca por outro jogador */
+function aiApplyAction(a) {
+  if (!a || !a.t) return { ok: false };
+  var isAvatarAction = (a.t === 'avatar' || a.t === 'character');
+  if (isAvatarAction) {
+    var sk = {
+      pele: a.pele || SKIN.pele, cor: a.cor || SKIN.cor,
+      calca: a.calca || SKIN.calca, cabelo: a.cabelo || SKIN.cabelo,
+      seed: Number(a.seed || SKIN.seed || 12345)
+    };
+    if (window.WORLD && window.WORLD.applySkin) window.WORLD.applySkin(sk);
+    SKIN.pele = sk.pele; SKIN.cor = sk.cor; SKIN.calca = sk.calca; SKIN.cabelo = sk.cabelo; SKIN.seed = sk.seed;
+    var dot = $('rbAvatarDot');
+    if (dot) dot.style.background = 'linear-gradient(135deg,' + SKIN.pele + ',' + SKIN.cor + ')';
+    if (USER && USER.token) {
+      fetch('?api=salvar_perfil', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: USER.token, skin: SKIN })
+      }).catch(function () {});
+    }
+    return { ok: true };
+  }
+  /* proteção: nunca mexer em avatar de outro jogador nem em objeto de outro dono */
+  if (a.ent && /^avatar[:|]/i.test(String(a.ent))) return { ok: false, erro: 'personagem de outro jogador' };
+  if ((a.t === 'modify' || a.t === 'remove' || a.t === 'recolor') && a.ent === 'avatar') return { ok: false, erro: 'protegido' };
+  try { return window.WORLD ? window.WORLD.apply(a) : { ok: false }; } catch (e) { return { ok: false }; }
+}
+
+function aiSend(text) {
+  var t = String(text || '').trim();
+  if (!t || aiBusy) return;
+  var now = Date.now();
+  if (now - aiSentAt < AI_MIN_GAP) return;
+  if (now - aiWindowAt > 60000) { aiWindowAt = now; aiSentCount = 0; }
+  if (aiSentCount >= 30) { aiSay('ia', 'Calma aí! Muitos pedidos em pouco tempo. Espera alguns segundos.'); return; }
+  aiSentAt = now; aiSentCount++;
+
+  aiSay('me', t);
+  aiHistory.push({ r: 'user', t: t }); aiStore();
+  aiBusy = true;
+  var pending = aiSay('ia', '');
+  if (pending) {
+    var sp = pending.querySelector('span');
+    if (sp) sp.innerHTML = '<i class="dots">…</i>';
+  }
+  aiStatus('pensando…');
+
+  var ctx = {
+    eu: (USER && (USER.usuario || USER.nome)) || 'jogador',
+    ultimo: aiLastEnt,
+    objetos: (window.WORLD ? window.WORLD.state.objects.map(function (o) { return o.nome || o.ent; }) : [])
+  };
+
+  fetch('?api=chat', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ msg: t, ctx: ctx })
+  }).then(function (r) { return r.json(); }).then(function (j) {
+    if (!j || !j.ok) throw new Error((j && j.erro) || 'falha');
+    var results = [];
+    var acts = (j.actions || []).slice(0, AI_MAX_ACTS);
+    acts.forEach(function (a) {
+      if (a && a.t === 'spawn' && !a.preset && window.WORLD && WORLD.player && WORLD.player.node) {
+        var pp = WORLD.player.node.position;
+        var pry = WORLD.player.node.rotation.y || 0;
+        var dd = 6.5 + Math.random() * 3.5;
+        a.x = Math.round((pp.x + Math.sin(pry) * dd) * 100) / 100;
+        a.z = Math.round((pp.z + Math.cos(pry) * dd) * 100) / 100;
+      }
+      var res = aiApplyAction(a);
+      results.push({ label: aiActionLabel(a, res), ok: !res || res.ok !== false });
+      if (a.t === 'spawn') aiLastEnt = a.nome || a.ent;
+      if (a.t === 'modify') aiLastEnt = a.ent;
+    });
+
+    var sp2 = pending && pending.querySelector('span');
+    if (sp2) sp2.innerHTML = String(j.reply || '').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>').replace(/\n/g, '<br>');
+    if (pending && results.length) {
       var box = document.createElement('div');
-      box.className = 'amxai-acts';
-      acts.forEach(function (a) {
+      box.className = 'acts';
+      results.forEach(function (r) {
         var s = document.createElement('span');
-        s.className = 'amxai-act ' + (a.ok ? 'ok' : 'er');
-        s.textContent = a.label;
+        if (!r.ok) s.className = 'er';
+        s.textContent = r.label;
         box.appendChild(s);
       });
-      b.appendChild(box);
+      pending.appendChild(box);
     }
-    wrap.appendChild(b);
-    msgs.appendChild(wrap);
-    scrollBottom();
-    return wrap;
-  }
+    if (window.AMX_CHAT) window.AMX_CHAT.append; /* mantém o contador */
+    var cc = $('rbChatCount');
+    var log = $('rbChatLog');
+    if (cc && log) cc.textContent = log.children.length;
 
-  function fmt(t) {
-    var s = esc(t);
-    s = s.replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
-    s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
-    s = s.replace(/\n/g, '<br>');
-    return s;
-  }
-
-  function updateCount() {
-    if (countEl) countEl.textContent = history.length + ' msg';
-  }
-
-  function actionLabel(a, res) {
-    var ok = res && res.ok !== false;
-    var icon = ok ? '✓' : '✕';
-    switch (a.t) {
-      case 'spawn': return icon + ' ' + (a.n || 1) + '× ' + (a.nome || a.ent);
-      case 'layout': return icon + ' tela: ' + a.item;
-      case 'avatar': return icon + ' avatar ' + (a.nome || '');
-      case 'modify': return icon + ' modificar ' + a.ent;
-      case 'remove': return icon + ' remover ' + a.ent;
-      case 'clear': return icon + ' cena limpa';
-      case 'recolor': return icon + ' ' + a.ent + ' → ' + a.cor;
-      case 'scale': return icon + ' escala ' + a.ent;
-      case 'move': return icon + ' mover ' + a.ent;
-      case 'rotate': return icon + ' girar ' + a.ent;
-      case 'terrain': return icon + ' chão: ' + a.tipo;
-      case 'weather': return icon + ' clima: ' + String(a.tipo).replace('_', ' ');
-      case 'camera': return icon + ' câmera: ' + a.cmd;
-      case 'physics': return icon + ' gravidade ' + (a.on ? 'on' : 'off');
-      case 'skin': return icon + ' skin ' + a.ent;
-      case 'world': return icon + ' mundo: ' + a.preset;
-      case 'character': return icon + ' personagem ' + (a.nome || 'realista');
-      case 'control': return icon + ' controle: ' + (a.mode || 'pad');
-      case 'multiplayer': return icon + ' multiplayer ' + (a.on === false ? 'off' : 'on');
-      default: return icon + ' ' + a.t;
-    }
-  }
-
-  /* ---------------- voz: TTS ---------------- */
-  var voiceOn = load('amx3d_voz', true);
-  if (voiceBtn) voiceBtn.classList.toggle('on', voiceOn);
-  var audioEl = null;
-  var ttsCache = {};
-
-  function toggleVoice() {
-    voiceOn = !voiceOn;
-    if (voiceBtn) voiceBtn.classList.toggle('on', voiceOn);
-    store('amx3d_voz', voiceOn);
-    if (!voiceOn) stopSpeak();
-  }
-
-  function stopSpeak() {
-    try { if (audioEl) { audioEl.pause(); audioEl.currentTime = 0; } } catch (e) {}
-    try { if (window.speechSynthesis) window.speechSynthesis.cancel(); } catch (e) {}
-  }
-
-  function speak(text) {
-    if (!voiceOn || !text) return;
-    stopSpeak();
-    var clean = String(text).replace(/[*_`#>]/g, '').slice(0, 420);
-    if (ttsCache[clean]) { playAudio(ttsCache[clean]); return; }
-    fetch('?api=tts&text=' + encodeURIComponent(clean))
-      .then(function (r) {
-        var ct = r.headers.get('content-type') || '';
-        if (ct.indexOf('audio') === 0) return r.blob();
-        throw new Error('sem audio');
-      })
-      .then(function (blob) {
-        var url = URL.createObjectURL(blob);
-        ttsCache[clean] = url;
-        playAudio(url);
-      })
-      .catch(function () { browserSpeak(clean); });
-  }
-
-  function playAudio(url) {
-    try {
-      if (!audioEl) audioEl = new Audio();
-      audioEl.src = url;
-      audioEl.play().catch(function () { browserSpeak(''); });
-    } catch (e) { browserSpeak(''); }
-  }
-
-  function browserSpeak(text) {
-    if (!voiceOn || !text || !window.speechSynthesis) return;
-    try {
-      var u = new SpeechSynthesisUtterance(text);
-      u.lang = 'pt-BR'; u.rate = 1.02; u.pitch = 1;
-      var vs = window.speechSynthesis.getVoices();
-      for (var i = 0; i < vs.length; i++) {
-        if ((vs[i].lang || '').toLowerCase().indexOf('pt') === 0) { u.voice = vs[i]; break; }
-      }
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(u);
-    } catch (e) {}
-  }
-
-  /* ---------------- voz: STT ---------------- */
-  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  var rec = null, listening = false, live = false, liveWanted = false;
-
-  function buildRec() {
-    if (!SR) return null;
-    var r = new SR();
-    r.lang = 'pt-BR';
-    r.interimResults = true;
-    r.continuous = true;
-    r.maxAlternatives = 1;
-    r.onstart = function () { listening = true; mic.classList.add('listening'); mic.setAttribute('aria-pressed', 'true'); toast('Ouvindo…'); };
-    r.onend = function () {
-      listening = false; mic.classList.remove('listening'); mic.setAttribute('aria-pressed', 'false');
-      if (liveWanted) { setTimeout(function () { try { r.start(); } catch (e) {} }, 350); }
-      else toast('Online · motor local');
-    };
-    r.onerror = function (ev) {
-      listening = false; mic.classList.remove('listening');
-      if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
-        toast('Microfone bloqueado');
-        liveWanted = false; live = false;
-        if (liveBtn) liveBtn.classList.remove('on');
-      } else if (ev.error === 'no-speech') {
-        /* silêncio: continua no modo tempo real */
-      } else {
-        toast('Voz: ' + ev.error);
-      }
-    };
-    r.onresult = function (ev) {
-      var interim = '', final = '';
-      for (var i = ev.resultIndex; i < ev.results.length; i++) {
-        var res = ev.results[i];
-        if (res.isFinal) final += res[0].transcript;
-        else interim += res[0].transcript;
-      }
-      if (interim) input.value = interim;
-      if (final) {
-        input.value = final.trim();
-        if (live || final.trim().length > 2) sendMsg();
-      }
-    };
-    return r;
-  }
-
-  function startListen() {
-    if (!SR) { toast('Este navegador não tem reconhecimento de voz. Use o Chrome/Edge.'); return; }
-    if (!rec) rec = buildRec();
-    stopSpeak();
-    try { rec.start(); } catch (e) { /* já ativo */ }
-  }
-  function stopListen() {
-    liveWanted = false;
-    if (rec) { try { rec.stop(); } catch (e) {} }
-    listening = false; mic.classList.remove('listening');
-  }
-
-  mic.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (listening) { stopListen(); toast('Microfone pausado'); }
-    else { liveWanted = false; startListen(); }
-  });
-
-  function toggleLive() {
-    live = !live;
-    liveWanted = live;
-    if (liveBtn) liveBtn.classList.toggle('on', live);
-    if (live) { startListen(); toast('Conversa em tempo real'); }
-    else { stopListen(); toast('Online · motor local'); }
-  }
-
-  /* ---------------- envio ---------------- */
-  function sendMsg() {
-    var text = (input.value || '').trim();
-    if (!text || busy) return;
-    input.value = '';
-    autoGrow();
-    addMsg('user', text);
-    history.push({ r: 'user', t: text });
-    store('amx3d_hist', history.slice(-60));
-    updateCount();
-
-    busy = true; send.disabled = true;
-    var pending = addMsg('bot', '');
-    pending.querySelector('.amxai-bubble').innerHTML = '<span class="amxai-typing"><i></i><i></i><i></i></span>';
-    scrollBottom();
-
-    var ctx = { ultimo: lastEnt, objetos: (window.WORLD ? window.WORLD.state.objects.map(function (o) { return o.nome || o.ent; }) : []) };
-
-    fetch('?api=chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ msg: text, ctx: ctx })
-    }).then(function (r) { return r.json(); }).then(function (j) {
-      if (!j || !j.ok) throw new Error((j && j.erro) || 'falha');
-      var results = [];
-      var acts = j.actions || [];
-      acts.forEach(function (a) {
-        /* posiciona construções à frente do jogador, sem sobrepor */
-        if (a && a.t === 'spawn' && !a.preset && window.WORLD && WORLD.player && WORLD.player.node) {
-          var pp = WORLD.player.node.position;
-          var pry = WORLD.player.node.rotation.y || 0;
-          var dd = 6.5 + Math.random() * 3.5;
-          a.x = Math.round((pp.x + Math.sin(pry) * dd) * 100) / 100;
-          a.z = Math.round((pp.z + Math.cos(pry) * dd) * 100) / 100;
-        }
-        var res = null;
-        try { res = window.WORLD ? window.WORLD.apply(a) : null; } catch (e) { res = { ok: false }; }
-        results.push({ label: actionLabel(a, res), ok: !res || res.ok !== false });
-        if (a.t === 'spawn') lastEnt = a.nome || a.ent;
-        if (a.t === 'avatar') lastEnt = 'avatar';
-        if (a.t === 'modify') lastEnt = a.ent;
-      });
-      var bubble = pending.querySelector('.amxai-bubble');
-      bubble.innerHTML = '<span class="amxai-txt">' + fmt(j.reply) + '</span>';
-      if (results.length) {
-        var box = document.createElement('div');
-        box.className = 'amxai-acts';
-        results.forEach(function (r) {
-          var s = document.createElement('span');
-          s.className = 'amxai-act ' + (r.ok ? 'ok' : 'er');
-          s.textContent = r.label;
-          box.appendChild(s);
+    aiHistory.push({ r: 'bot', t: j.reply }); aiStore();
+    if (j.sugestoes && j.sugestoes.length) {
+      var foot = $('rbChatFoot');
+      if (foot) {
+        foot.innerHTML = '';
+        j.sugestoes.slice(0, 4).forEach(function (s) {
+          var b = document.createElement('button');
+          b.type = 'button'; b.textContent = s;
+          b.addEventListener('click', function () { aiSend(s); });
+          foot.appendChild(b);
         });
-        bubble.appendChild(box);
       }
-      history.push({ r: 'bot', t: j.reply });
-      store('amx3d_hist', history.slice(-60));
-      updateCount();
-      scrollBottom();
-      if (j.sugestoes && j.sugestoes.length) renderChips(j.sugestoes);
-      speak(j.fala || j.reply);
-      if (window.WORLD) window.WORLD.save();
-      toast('Online · ' + (j.ms || 0) + ' ms');
-    }).catch(function (err) {
-      pending.querySelector('.amxai-bubble').innerHTML = '<span class="amxai-txt">Não consegui falar com o motor local. Verifique se o PHP está rodando (php -S) e recarregue. <code>' + esc(err.message) + '</code></span>';
-      toast('Motor offline');
-    }).then(function () {
-      busy = false; send.disabled = false;
-    });
-  }
-
-  form.addEventListener('submit', function (e) { e.preventDefault(); sendMsg(); });
-  input.addEventListener('keydown', function (e) {
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-  });
-  function autoGrow() {
-    input.style.height = 'auto';
-    input.style.height = Math.min(110, input.scrollHeight) + 'px';
-  }
-  input.addEventListener('input', autoGrow);
-
-  /* ---------------- chips ---------------- */
-  var SUG = [
-    'Crie um prédio à direita',
-    'Crie um guarda-roupa',
-    'Crie um avatar chamado Leo',
-    'Adicione um título na tela',
-    'Adicione um contador de pontos',
-    'Modifique a casa para azul e brilhante',
-    'Crie 5 dinossauros no centro',
-    'Crie game'
-  ];
-  function renderChips(list) {
-    chips.innerHTML = '';
-    list.slice(0, 8).forEach(function (t) {
-      var b = document.createElement('button');
-      b.type = 'button'; b.setAttribute('data-chip', t); b.textContent = t;
-      chips.appendChild(b);
-    });
-  }
-  renderChips(SUG);
-
-  /* ---------------- limpar ---------------- */
-  function limpar() {
-    history = []; store('amx3d_hist', []); msgs.innerHTML = ''; updateCount();
-    addMsg('bot', 'Conversa limpa. O mundo 3D continua como está. Peça algo novo — ou diga “limpe a cena”.');
-  }
-
-  /* ---------------- boot ---------------- */
-  /* uma vez, ao atualizar para o AMHEEX GAME 3.0, limpa o histórico antigo */
-  try {
-    if (load('amx3d_ver', '') !== '3.0') {
-      store('amx3d_hist', []); store('amx3d_ver', '3.0');
     }
-  } catch (e) {}
-  var saved = load('amx3d_hist', []);
+    speak(j.fala || j.reply);
+    if (window.WORLD && window.WORLD.save) window.WORLD.save();
+    aiStatus('online');
+  }).catch(function (err) {
+    var sp3 = pending && pending.querySelector('span');
+    if (sp3) sp3.textContent = 'Não consegui falar com o motor local. Verifique se o PHP está rodando. (' + err.message + ')';
+    aiStatus('offline');
+  }).then(function () { aiBusy = false; });
+}
+
+/* ---------------- inicialização ---------------- */
+(function aiInit() {
+  var saved = null;
+  try { saved = JSON.parse(localStorage.getItem('amx3d_hist') || 'null'); } catch (e) {}
   if (saved && saved.length) {
-    history = saved.slice(-40);
-    history.forEach(function (m) { addMsg(m.r === 'user' ? 'user' : 'bot', m.t); });
+    aiHistory = saved.slice(-40);
+    aiHistory.forEach(function (m) { aiSay(m.r === 'user' ? 'me' : 'ia', m.t); });
   } else {
-    addMsg('bot', 'Oi! Eu sou a **AMHEEX AI**, a inteligência do **AMHEEX GAME**. O mundo começa vazio de propósito: só **chão verde** e a **bola vermelha**. Todo o resto eu crio quando você pedir.\n\nPosso criar **qualquer coisa 3D** (prédio, casa, dinossauro, o que você inventar), **personagens realistas com skin procedural**, **controles** (andar, correr, pular, câmera em 1ª/3ª pessoa, modo tiro), **multiplayer por IP com mapa compartilhado e chat**, **elementos na tela** e **modificar** objetos que já existem. Diga **“crie game”** para montar um jogo inteiro, ou **“ative o multiplayer”**. Fale pelo microfone ou escreva.');
+    aiSay('ia', 'Oi! Eu sou a **AMHEEX AI**. O mundo é um só: **chão verde** e **céu azul**, e a comunidade constrói junto.\n\nEu edito o **mapa global** e o **seu personagem** — nunca o personagem de outro jogador. Peça coisas como “crie uma torre”, “faça uma casa”, “deixe minha camisa vermelha”. Fale pelo microfone ou escreva; no botão de onda eu converso com você em tempo real.');
   }
-  updateCount();
-  applyFabPos();
-
   fetch('?api=ping').then(function (r) { return r.json(); }).then(function (j) {
-    if (j && j.ok) {
-      var vm = j.voz === 'fish-clone' ? 'voz AMHEEX (Fish)' : (j.voz === 'espeak-ng' ? 'voz local' : 'voz navegador');
-      toast('Online · ' + vm + ' · PHP ' + j.php + (j.multiplayer ? ' · multiplayer' : ''));
-    }
-  }).catch(function () { toast('Motor offline (PHP não respondeu)'); });
+    if (j && j.ok) aiStatus(j.voz === 'fish-clone' ? 'voz AMHEEX' : 'online');
+  }).catch(function () { aiStatus('offline'); });
+})();
 
-  /* API pública para integrar em qualquer página */
-  window.AMHEEX_IA3D = {
-    version: '3.0.0',
-    chat: function (text) { input.value = text; sendMsg(); },
-    speak: speak,
-    listen: startListen,
-    stopListen: stopListen,
-    open: openPanel,
-    close: closePanel,
-    setVoice: function (on) { voiceOn = !!on; if (voiceBtn) voiceBtn.classList.toggle('on', voiceOn); store('amx3d_voz', voiceOn); },
-    history: function () { return history.slice(); }
-  };
+window.AMHEEX_IA3D = {
+  version: '3.1.0',
+  chat: function (text) { aiSend(text); },
+  speak: speak,
+  listen: startListen,
+  live: toggleLive,
+  open: function () { toggleChat(true); },
+  close: function () { toggleChat(false); },
+  setVoice: function (v) { voiceOn = !!v; lsSet('amx3d_voz', voiceOn ? 'on' : 'off'); },
+  history: function () { return aiHistory.slice(); }
+};
 })();
 </script>
 </body>
