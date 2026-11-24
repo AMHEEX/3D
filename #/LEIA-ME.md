@@ -152,51 +152,120 @@ O `Dockerfile` na raiz instala PHP 8.2 + Apache, Node 20, **ffmpeg** e
 
 ---
 
-## 8. Interface nova (estilo Roblox) e voz por proximidade
+## 8. Conta, interface estilo Roblox e mundo global
 
-A interface foi refeita para ficar parecida com a de jogos modernos:
+### Login e registro (não é mais por IP)
 
-- **Tela de carregamento** com a logo oficial
-  (`https://storage.amheex.workers.dev/AMHEEX/icon.png`), nome AMHEEX GAME e
-  **barra RGB animada com porcentagem** (0–100%).
-- **Menu inicial** com logo centralizada, campo de nome, botão
-  **ENTRAR NO MUNDO**, **CONFIGURAÇÕES**, **COMO JOGAR** e contador de
-  jogadores online.
-- **Barra superior** com marca, chat, contador de jogadores, configurações e
-  menu.
-- **Chat do mundo** flutuante (tecla `T`), com histórico compartilhado.
-- **Configurações** (qualidade gráfica, volume, alcance da voz, sensibilidade
-  da câmera, microfone e mostrar nomes) — não alteram o mapa nem o personagem
-  de outros jogadores.
-- **Ícone flutuante da AMHEEX AI** independente do menu: ele não interfere no
-  layout fixo (botões de andar, correr, pular, câmera e mira continuam fixos).
+O acesso agora é por **conta**: usuário e senha. Não existe mais identificação
+por IP nem sistema de "upar" nível — é um mundo social estilo Roblox, onde cada
+pessoa entra com seu próprio personagem.
+
+- `?api=registrar` — cria a conta (`usuario`, `senha`, `nome` opcional).
+  A senha é gravada com `password_hash()` (bcrypt) e **nunca** em texto puro.
+- `?api=login` — valida com `password_verify()` e devolve um **token** novo.
+- `?api=perfil&token=...` — restaura a sessão (personagem, skin, posição).
+- `?api=salvar_perfil` — salva nome e skin do personagem.
+- `?api=sair` — invalida o token.
+
+As contas ficam em `#/ia/usuarios.json` (sem banco de dados). O token é
+guardado no `localStorage` do navegador, então ao voltar você cai direto no seu
+personagem.
+
+Quando há token válido, a identidade no multiplayer passa a ser a **conta**
+(`u` + hash do usuário), e não o IP. Assim, o mesmo jogador mantém o personagem,
+a skin e a posição mesmo trocando de rede.
+
+### Tela de carregamento
+
+Logo oficial (`https://storage.amheex.workers.dev/AMHEEX/icon.png`), nome
+**AMHEEX GAME**, **barra RGB animada com porcentagem** (0–100%) e dicas
+rotativas ("Gerando o chão verde e o céu azul…").
+
+### Editor de personagem (antes de entrar)
+
+Depois do login o jogador monta o avatar uma única vez: **tom de pele, camisa,
+calça e cabelo** (paletas com várias cores), botão **ALEATÓRIO** e **JOGAR**.
+O personagem é procedural, realista, com mais de **37 mil triângulos** (rosto,
+olhos, nariz, boca, dedos, cabelo, tênis e roupas com textura). A escolha é
+salva na conta.
+
+### HUD estilo Roblox
+
+- **Canto superior esquerdo**: menu, chat e cartão da conta com avatar e nome.
+- **Centro superior**: contador de pessoas online e de mensagens.
+- **Lateral esquerda**: botões inclinados coloridos **LOJA**, **SKINS**,
+  **INVENTÁRIO**, **CONFIG.** e **SAIR**.
+- **Canto inferior direito**: **joystick circular flutuante** (arraste para
+  andar em qualquer direção), botão redondo de **pulo**, botão de **câmera**
+  (1ª pessoa / 3ª pessoa / modo tiro) e botões **CORRER** e **AÇÃO**.
+  Teclado: WASD/setas, Espaço para pular, Shift para correr.
+- **Chat** com abas **Aqui** (perto de você) e **Global** (todo o mundo).
+
+### Configurações (5 abas, igual ao Roblox)
+
+1. **Pessoas** — lista de quem está no servidor, com ações de perfil e denúncia.
+2. **Config.** — Áudio (volume em **segmentos**, dispositivo de saída), Chat e
+   idioma (mensagens reformuladas), Alcance da voz, Gráficos (qualidade
+   Baixa/Média/Alta e sensibilidade) e Microfone.
+3. **Galeria** — tudo o que a AMHEEX AI criou no mundo.
+4. **Denunciar** — escolhe a pessoa e envia a denúncia pelo chat global.
+5. **Ajuda** — comandos e dicas.
+
+Rodapé fixo com **Sair**, **Regenerar** (volta ao editor de personagem) e
+**Continuar**.
+
+### Mapa global único
+
+O servidor sobe com **um único mapa**: **chão verde e céu azul**. Não existe
+tela de escolha de mapa nem de personagem no início do jogo. A comunidade
+constrói o mundo junto: tudo o que a IA cria é salvo em `#/ia/cenas/mundo.json`
+e sincronizado para todos (`world_revision`).
 
 ### Voz por proximidade (como Roblox)
 
 A voz usa **WebRTC** com sinalização feita pelo próprio servidor PHP:
 
-- `?api=rtc_send` — envia `offer`, `answer`, `ice` ou `bye` (com `from`, `to`,
-  `kind`, `data`).
+- `?api=rtc_send` — envia `offer`, `answer`, `ice` ou `bye`.
 - `?api=rtc_poll&id=SEU_ID` — recebe e remove as mensagens destinadas a você.
 
-O cliente (`src/ui.js`) abre o microfone com `getUserMedia`, negocia peer a peer
-e **só libera o áudio de quem está dentro do alcance configurado**
-(`Alcance da voz`, padrão 16 m). Longe = silêncio; perto = escuta. A tecla `V`
-liga/desliga a voz e muta/desmuta. O botão **Som** também muta/desmuta.
+O cliente abre o microfone com `getUserMedia`, negocia peer a peer e **só libera
+o áudio de quem está dentro do alcance** (`Alcance da voz`, padrão 16 m). A
+tecla `V` liga/desliga a voz e muta/desmuta.
 
 ### NPC AMHEEX BOT
 
-Ao entrar no mundo nasce um **NPC fixo** (`AMHEEX BOT`) modelado com o mesmo
-sistema procedural do jogador (mais de 20 mil polígonos somando os segmentos),
-com tons realistas. Ele **segue o jogador andando**, pula para acompanhar e
-anima braços e pernas em tempo real.
+Ao entrar no mundo nasce um **NPC fixo** (`AMHEEX BOT`) com o mesmo sistema
+procedural do jogador (mais de 20 mil polígonos somando os segmentos). Ele
+**segue o jogador andando**, pula para acompanhar e anima braços e pernas em
+tempo real.
+
+### O que pedir para a AMHEEX AI
+
+A IA **só edita o personagem do próprio jogador e o mapa global**. Ela não mexe
+no layout fixo do jogo (botões, HUD, configurações) nem no personagem de outras
+pessoas.
+
+Exemplos de pedidos:
+
+- `crie uma torre de pedra alta` / `crie uma casa de madeira` / `crie um castelo`
+- `crie 5 dinossauros no centro` / `crie um lago` / `mude para floresta`
+- `deixe o chão de areia` / `coloque um pôr do sol` / `volte para o dia`
+- `adicione uma skin azul no meu personagem` / `mude minha camisa para vermelho`
+- `crie um personagem chamado Leo` / `me dê cabelo loiro`
+- `adicione um contador de pontos` / `adicione um título na tela`
+
+As construções aparecem **à frente do jogador** (cerca de 7–10 m), sem sobrepor
+quem pediu, e ficam salvas no mapa global para todos.
 
 ### Regras de edição
 
 - A IA pode **criar e modificar formas geométricas 3D** no mapa compartilhado.
-- A IA **não edita o personagem de outros jogadores**: os avatares remotos não
+- A IA **não edita o personagem de outros jogadores**: avatares remotos não
   entram em `WORLD.objects` e `findByEnt()` filtra `o.remoto`.
-- O **layout fixo do jogo** (botões, HUD, mira, configurações) não é alterado
-  pela IA.
-- Cada novo IP entra no **mapa fixo de chão verde** e passa a aparecer no mapa
+- O **layout fixo do jogo** não é alterado pela IA.
+- Cada conta entra no **mapa único de chão verde** e passa a aparecer no mapa
   global para todos os jogadores.
+
+---
+
+© 2026 **AMHEEX** — Soluções em Tecnologia e Programação.

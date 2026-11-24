@@ -82,6 +82,7 @@ EOF
 # 7️⃣ Copia os arquivos do projeto e garante permissões totais na pasta X
 COPY . /var/www/html
 RUN mkdir -p "/var/www/html/#" "/var/www/html/#/dados/voz" "/var/www/html/#/ia/cenas" "/var/www/html/#/uploads" \
+    && [ -f "/var/www/html/#/ia/usuarios.json" ] || echo '{"users":{}}' > "/var/www/html/#/ia/usuarios.json" \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 777 /var/www/html
 

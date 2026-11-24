@@ -64,6 +64,7 @@ function amx_mp_public(array $players): array {
             'id' => (string)($p['id'] ?? ''),
             'name' => (string)($p['name'] ?? 'Jogador'),
             'ip' => (string)($p['ip'] ?? ''),
+            'usuario' => (string)($p['usuario'] ?? ''),
             'x' => (float)($p['x'] ?? 0),
             'z' => (float)($p['z'] ?? 0),
             'ry' => (float)($p['ry'] ?? 0),
@@ -73,6 +74,45 @@ function amx_mp_public(array $players): array {
         ];
     }
     return $out;
+}
+
+
+/* ---------------- CONTAS: registro e login (usuário + senha) ---------------- */
+function amx_users_file(): string { return amx_path('usuarios.json'); }
+
+function amx_users(): array {
+    $db = amx_read_json(amx_users_file(), []);
+    if (!is_array($db) || !isset($db['users']) || !is_array($db['users'])) $db = ['users' => []];
+    return $db;
+}
+
+function amx_user_public(array $u): array {
+    return [
+        'usuario' => (string)($u['usuario'] ?? ''),
+        'nome' => (string)($u['nome'] ?? ($u['usuario'] ?? 'Jogador')),
+        'token' => (string)($u['token'] ?? ''),
+        'skin' => is_array($u['skin'] ?? null) ? $u['skin'] : [],
+        'criado' => (string)($u['criado'] ?? ''),
+    ];
+}
+
+function amx_user_por_token(string $token): ?array {
+    if ($token === '') return null;
+    $db = amx_users();
+    foreach ($db['users'] as $u) {
+        if (!is_array($u)) continue;
+        if (hash_equals((string)($u['token'] ?? ''), $token)) return $u;
+    }
+    return null;
+}
+
+function amx_mp_token(): string {
+    $t = (string)($_GET['token'] ?? '');
+    if ($t === '') {
+        $in = amx_body();
+        $t = (string)($in['token'] ?? '');
+    }
+    return preg_replace('/[^a-f0-9]/', '', $t) ?? '';
 }
 
 /* ------------------------------------------------------------------ */
@@ -160,6 +200,93 @@ if ($API !== '') {
             amx_out(['ok' => $out !== null, 'motor' => $eng, 'texto' => $out ?? '']);
         }
 
+        /* ---------------- CONTAS ---------------- */
+        case 'registrar': {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') amx_out(['ok' => false, 'erro' => 'use POST'], 405);
+            $in = amx_body();
+            $usuario = strtolower(amx_limpa((string)($in['usuario'] ?? ''), 18));
+            $usuario = preg_replace('/[^a-z0-9_.-]/', '', $usuario) ?? '';
+            $senha = (string)($in['senha'] ?? '');
+            $nome = amx_limpa((string)($in['nome'] ?? $usuario), 18);
+            if (strlen($usuario) < 3) amx_out(['ok' => false, 'erro' => 'Usuário precisa de 3 caracteres ou mais.'], 400);
+            if (strlen($senha) < 4) amx_out(['ok' => false, 'erro' => 'Senha precisa de 4 caracteres ou mais.'], 400);
+            $db = amx_users();
+            if (isset($db['users'][$usuario])) amx_out(['ok' => false, 'erro' => 'Esse usuário já existe. Faça login.'], 409);
+            $token = bin2hex(random_bytes(16));
+            $db['users'][$usuario] = [
+                'usuario' => $usuario,
+                'nome' => $nome !== '' ? $nome : $usuario,
+                'hash' => password_hash($senha, PASSWORD_DEFAULT),
+                'token' => $token,
+                'skin' => [
+                    'pele' => '#c68642', 'cor' => '#4f7cff', 'calca' => '#1f2a44',
+                    'cabelo' => '#1b1b1b', 'seed' => random_int(1, 999999),
+                ],
+                'criado' => date('c'),
+            ];
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true, 'user' => amx_user_public($db['users'][$usuario]), 'novo' => true]);
+        }
+
+        case 'login': {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') amx_out(['ok' => false, 'erro' => 'use POST'], 405);
+            $in = amx_body();
+            $usuario = strtolower(amx_limpa((string)($in['usuario'] ?? ''), 18));
+            $senha = (string)($in['senha'] ?? '');
+            $db = amx_users();
+            $u = $db['users'][$usuario] ?? null;
+            if (!is_array($u) || !password_verify($senha, (string)($u['hash'] ?? ''))) {
+                amx_out(['ok' => false, 'erro' => 'Usuário ou senha incorretos.'], 401);
+            }
+            $u['token'] = bin2hex(random_bytes(16));
+            $u['ultimo_login'] = date('c');
+            $db['users'][$usuario] = $u;
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true, 'user' => amx_user_public($u)]);
+        }
+
+        case 'perfil': {
+            $u = amx_user_por_token(amx_mp_token());
+            if (!$u) amx_out(['ok' => false, 'erro' => 'sessão expirada'], 401);
+            amx_out(['ok' => true, 'user' => amx_user_public($u)]);
+        }
+
+        case 'salvar_perfil': {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') amx_out(['ok' => false, 'erro' => 'use POST'], 405);
+            $in = amx_body();
+            $token = preg_replace('/[^a-f0-9]/', '', (string)($in['token'] ?? '')) ?? '';
+            $db = amx_users();
+            $achou = null;
+            foreach ($db['users'] as $k => $u) {
+                if (is_array($u) && $token !== '' && hash_equals((string)($u['token'] ?? ''), $token)) { $achou = $k; break; }
+            }
+            if ($achou === null) amx_out(['ok' => false, 'erro' => 'sessão expirada'], 401);
+            $skin = is_array($in['skin'] ?? null) ? $in['skin'] : [];
+            $db['users'][$achou]['skin'] = [
+                'pele' => amx_limpa((string)($skin['pele'] ?? '#c68642'), 16),
+                'cor' => amx_limpa((string)($skin['cor'] ?? '#4f7cff'), 16),
+                'calca' => amx_limpa((string)($skin['calca'] ?? '#1f2a44'), 16),
+                'cabelo' => amx_limpa((string)($skin['cabelo'] ?? '#1b1b1b'), 16),
+                'seed' => (int)($skin['seed'] ?? random_int(1, 999999)),
+            ];
+            if (!empty($in['nome'])) $db['users'][$achou]['nome'] = amx_limpa((string)$in['nome'], 18);
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true, 'user' => amx_user_public($db['users'][$achou])]);
+        }
+
+        case 'sair': {
+            $in = amx_body();
+            $token = preg_replace('/[^a-f0-9]/', '', (string)($in['token'] ?? '')) ?? '';
+            $db = amx_users();
+            foreach ($db['users'] as $k => $u) {
+                if (is_array($u) && $token !== '' && hash_equals((string)($u['token'] ?? ''), $token)) {
+                    $db['users'][$k]['token'] = '';
+                }
+            }
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true]);
+        }
+
         /* ---------------- MULTIPLAYER POR IP + MAPA COMPARTILHADO ---------------- */
         case 'mp_join':
         case 'mp_move':
@@ -175,7 +302,13 @@ if ($API !== '') {
             if (!is_array($mp['chat'])) $mp['chat'] = [];
 
             $ip = amx_mp_ip();
-            $id = amx_mp_id($ip);
+            $tokenMp = amx_mp_token();
+            $conta = $tokenMp !== '' ? amx_user_por_token($tokenMp) : null;
+            if ($conta) {
+                $id = 'u' . substr(hash('sha256', 'conta|' . (string)$conta['usuario']), 0, 15);
+            } else {
+                $id = amx_mp_id($ip);
+            }
             $now = time();
 
             /* remove jogadores inativos há mais de 25s */
@@ -186,8 +319,10 @@ if ($API !== '') {
             if ($API === 'mp_join') {
                 $in = amx_body();
                 $nome = amx_limpa((string)($in['name'] ?? 'Jogador'), 24);
+                if ($conta) $nome = amx_limpa((string)($conta['nome'] ?? $conta['usuario']), 24);
                 if ($nome === '') $nome = 'Jogador';
                 $skin = is_array($in['skin'] ?? null) ? $in['skin'] : [];
+                if ($conta && is_array($conta['skin'] ?? null) && !$skin) $skin = $conta['skin'];
                 $mp['players'][$id] = [
                     'id' => $id,
                     'name' => $nome,
@@ -195,9 +330,12 @@ if ($API !== '') {
                     'x' => (float)($in['x'] ?? 0),
                     'z' => (float)($in['z'] ?? 0),
                     'ry' => (float)($in['ry'] ?? 0),
+                    'usuario' => $conta ? (string)$conta['usuario'] : '',
                     'skin' => [
                         'pele' => amx_limpa((string)($skin['pele'] ?? '#c68642'), 16),
                         'cor' => amx_limpa((string)($skin['cor'] ?? '#4f7cff'), 16),
+                        'calca' => amx_limpa((string)($skin['calca'] ?? '#1f2a44'), 16),
+                        'cabelo' => amx_limpa((string)($skin['cabelo'] ?? '#1b1b1b'), 16),
                         'seed' => (int)($skin['seed'] ?? random_int(1, 999999)),
                     ],
                     'last' => $now,
@@ -223,6 +361,16 @@ if ($API !== '') {
                 $mp['players'][$id]['anim'] = amx_limpa((string)($in['anim'] ?? 'idle'), 16);
                 $mp['players'][$id]['last'] = $now;
                 if (isset($in['name'])) $mp['players'][$id]['name'] = amx_limpa((string)$in['name'], 24);
+                if (is_array($in['skin'] ?? null)) {
+                    $sk = $in['skin'];
+                    $mp['players'][$id]['skin'] = [
+                        'pele' => amx_limpa((string)($sk['pele'] ?? '#c68642'), 16),
+                        'cor' => amx_limpa((string)($sk['cor'] ?? '#4f7cff'), 16),
+                        'calca' => amx_limpa((string)($sk['calca'] ?? '#1f2a44'), 16),
+                        'cabelo' => amx_limpa((string)($sk['cabelo'] ?? '#1b1b1b'), 16),
+                        'seed' => (int)($sk['seed'] ?? 12345),
+                    ];
+                }
                 $mp['updated'] = date('c');
                 amx_write_json($mpFile, $mp);
                 amx_out(['ok' => true, 'players' => amx_mp_public($mp['players']), 'world_revision' => (int)$mp['world_revision']]);
@@ -709,6 +857,159 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   #voiceBar{bottom:80px}
   #topbar .tb span.lbl{display:none}
 }
+
+/* ================= AMHEEX — UI ESTILO ROBLOX ================= */
+#login{position:fixed;inset:0;z-index:99990;display:none;align-items:center;justify-content:center;padding:18px;
+  background:radial-gradient(120% 100% at 50% 0%,#123b6b 0%,#0a1a33 45%,#05070d 100%);font-family:var(--font)}
+#login.on{display:flex}
+#loginCard{width:min(392px,100%);background:linear-gradient(170deg,rgba(18,25,42,.97),rgba(8,12,22,.98));
+  border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px 22px 20px;text-align:center;
+  box-shadow:0 40px 90px -30px #000,0 0 0 1px rgba(255,255,255,.04) inset}
+#loginLogo{width:78px;height:78px;border-radius:20px;object-fit:cover;box-shadow:0 14px 40px -12px rgba(0,200,255,.55)}
+#loginCard h1{margin:12px 0 2px;font-size:25px;letter-spacing:.06em;font-weight:900;
+  background:linear-gradient(90deg,#00e0ff,#7a5cff,#ff3d81);-webkit-background-clip:text;background-clip:text;color:transparent}
+#loginCard .sub{margin:0 0 16px;font-size:12px;color:#93a1c2}
+#loginTabs{display:flex;gap:6px;background:rgba(255,255,255,.05);border-radius:12px;padding:4px;margin-bottom:14px}
+#loginTabs button{flex:1;padding:9px;border:0;border-radius:9px;background:transparent;color:#9aa8c7;font:800 11.5px var(--font);letter-spacing:.06em;cursor:pointer}
+#loginTabs button.on{background:linear-gradient(180deg,#2b6cff,#1b4fd8);color:#fff;box-shadow:0 8px 20px -8px #2b6cff}
+#loginCard label{display:block;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#7f8db0;margin:10px 0 5px}
+#loginCard input{width:100%;padding:12px 13px;border-radius:11px;border:1px solid rgba(255,255,255,.13);
+  background:#0a0f1c;color:#eaf0ff;font:600 14px var(--font);outline:none}
+#loginCard input:focus{border-color:#2b6cff;box-shadow:0 0 0 3px rgba(43,108,255,.18)}
+#loginMsg{min-height:18px;margin:10px 0 4px;font-size:12px;font-weight:700;color:#ff7a8a}
+#loginMsg.ok{color:#3ee08a}
+#loginGo{width:100%;padding:13px;border:0;border-radius:12px;cursor:pointer;color:#fff;font:900 14px var(--font);letter-spacing:.08em;
+  background:linear-gradient(90deg,#00c2ff,#2b6cff 55%,#7a5cff);box-shadow:0 16px 34px -14px #2b6cff}
+#loginGo:active{transform:scale(.985)}
+#loginCard .tiny{margin-top:10px;font-size:10.5px;color:#6f7d9e;line-height:1.5}
+
+/* editor de personagem */
+#avatar{position:fixed;inset:0;z-index:99980;display:none;font-family:var(--font);pointer-events:none}
+#avatar.on{display:block}
+#avHead{position:absolute;left:50%;top:16px;transform:translateX(-50%);text-align:center;pointer-events:none}
+#avHead b{display:block;font-size:13px;letter-spacing:.16em;color:#fff;text-shadow:0 3px 14px #000}
+#avHead small{font-size:10.5px;color:#b9c6e2}
+#avPanel{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:min(280px,calc(100vw - 28px));
+  pointer-events:auto;background:rgba(8,12,22,.82);border:1px solid rgba(255,255,255,.12);border-radius:16px;
+  padding:14px;backdrop-filter:blur(14px);box-shadow:0 24px 60px -24px #000}
+.avRow{margin-bottom:10px}
+.avRow>span{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;color:#8391b3;margin-bottom:6px}
+.avRow .sw{display:flex;gap:6px;flex-wrap:wrap}
+.avRow .sw i{width:26px;height:26px;border-radius:8px;cursor:pointer;border:2px solid transparent;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+.avRow .sw i.on{border-color:#fff;transform:scale(1.08)}
+.avBtns{display:flex;gap:8px;margin-top:14px}
+.avBtns button{flex:1;padding:11px 6px;border-radius:11px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.07);color:#e8eefc;font:800 11px var(--font);letter-spacing:.05em;cursor:pointer}
+.avBtns #avPlay{background:linear-gradient(90deg,#00c2ff,#2b6cff);border:0;color:#fff;font-size:12px}
+#avHint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:11px;color:#c3cfe8;
+  background:rgba(8,12,22,.7);padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1)}
+
+/* HUD */
+#rblx{position:fixed;inset:0;z-index:8;display:none;pointer-events:none;font-family:var(--font)}
+#rblx.on{display:block}
+#rbTopLeft{position:absolute;left:12px;top:12px;display:flex;align-items:center;gap:8px;pointer-events:auto}
+.rbCircle{width:40px;height:40px;border-radius:50%;border:0;background:rgba(10,14,24,.55);color:#fff;font-size:17px;
+  display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px);box-shadow:0 6px 18px -8px #000}
+.rbCircle:active{transform:scale(.94)}
+#rbAccount{display:flex;align-items:center;gap:6px;padding:6px 11px 6px 7px;border-radius:999px;
+  background:rgba(10,14,24,.55);backdrop-filter:blur(8px);font-size:11px;color:#dfe7ff;max-width:150px}
+#rbAccount b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rbAvatarDot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#00e0ff,#7a5cff);flex:0 0 auto}
+
+#rbStats{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;gap:8px;pointer-events:none}
+.rbStat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:rgba(10,14,24,.55);
+  backdrop-filter:blur(8px);font-size:12px;color:#cfe0ff;font-weight:800}
+.rbStat b{color:#fff;font-size:13px}
+
+#rbChat{position:absolute;left:12px;top:62px;width:min(330px,calc(100vw - 100px));pointer-events:auto;display:none;
+  background:rgba(8,12,22,.78);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;backdrop-filter:blur(12px)}
+#rbChat.on{display:block}
+#rbChatTabs{display:flex;background:rgba(255,255,255,.05)}
+#rbChatTabs button{flex:1;padding:8px;border:0;background:transparent;color:#93a1c2;font:800 11px var(--font);cursor:pointer}
+#rbChatTabs button.on{background:rgba(255,255,255,.1);color:#fff}
+#rbChatLog{height:150px;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:5px;font-size:11.5px;line-height:1.4;color:#dbe4f7}
+#rbChatLog .m b{color:#22d3ee}
+#rbChatLog .m.me b{color:#3ee08a}
+#rbChatLog .sys{color:#7f8db3;font-style:italic}
+#rbChatForm{display:flex;gap:6px;padding:7px;border-top:1px solid rgba(255,255,255,.08)}
+#rbChatForm input{flex:1;min-width:0;padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:#0a0f1c;color:#eaf0ff;font:500 12px var(--font);outline:none}
+#rbChatForm button{width:36px;border:0;border-radius:9px;background:#2b6cff;color:#fff;font-size:14px;cursor:pointer}
+
+#rbLeft{position:absolute;left:12px;bottom:96px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
+.rbSide{width:118px;padding:9px 8px;border:0;border-radius:9px;cursor:pointer;color:#fff;font:900 11.5px var(--font);
+  letter-spacing:.05em;text-align:center;box-shadow:0 6px 16px -8px #000,0 0 0 2px rgba(0,0,0,.28) inset;transform:skewX(-4deg)}
+.rbSide:active{transform:skewX(-4deg) scale(.96)}
+.rbSide.loja{background:linear-gradient(180deg,#39d353,#1f9d3a)}
+.rbSide.skin{background:linear-gradient(180deg,#b06bff,#7a3fd6)}
+.rbSide.inv{background:linear-gradient(180deg,#c9d1de,#8d97a8);color:#20283a}
+.rbSide.cfg{background:linear-gradient(180deg,#4f8cff,#2b5fd6)}
+.rbSide.sair{background:linear-gradient(180deg,#ff5a6e,#c92b40)}
+
+#rbJoy{position:absolute;right:22px;bottom:74px;width:96px;height:96px;border-radius:50%;pointer-events:auto;
+  background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.28);backdrop-filter:blur(6px);touch-action:none}
+#rbJoyKnob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
+  background:rgba(255,255,255,.85);box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .06s linear}
+#rbJump{position:absolute;right:34px;bottom:186px;width:62px;height:62px;border-radius:50%;pointer-events:auto;
+  border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer;backdrop-filter:blur(6px)}
+#rbJump:active{background:rgba(255,255,255,.32);transform:scale(.94)}
+#rbCam{position:absolute;right:150px;bottom:86px;width:44px;height:44px;border-radius:50%;pointer-events:auto;
+  border:2px solid rgba(255,255,255,.28);background:rgba(10,14,24,.5);color:#fff;font-size:17px;cursor:pointer;backdrop-filter:blur(6px)}
+#rbBottom{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:8px;pointer-events:auto}
+#rbBottom button{padding:10px 18px;border-radius:10px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,24,.6);color:#e8eefc;font:800 11px var(--font);letter-spacing:.06em;cursor:pointer;backdrop-filter:blur(8px)}
+#rbBottom #rbRun.on{background:rgba(34,197,94,.35);border-color:rgba(34,197,94,.6)}
+
+/* modal de configurações */
+#rbSettings{position:fixed;inset:0;z-index:99985;display:none;align-items:center;justify-content:center;padding:14px;
+  background:rgba(4,7,14,.55);backdrop-filter:blur(6px);font-family:var(--font)}
+#rbSettings.on{display:flex}
+#rbSetCard{width:min(660px,100%);max-height:calc(100dvh - 28px);display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(26,28,36,.97),rgba(16,18,26,.98));border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;overflow:hidden;box-shadow:0 40px 100px -30px #000}
+#rbSetTabs{display:flex;gap:2px;padding:8px 8px 0;border-bottom:1px solid rgba(255,255,255,.08);overflow:auto}
+#rbSetTabs button{flex:1;min-width:86px;padding:10px 8px;border:0;background:transparent;color:#9aa6bd;
+  font:700 11.5px var(--font);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+#rbSetTabs button.on{color:#fff;border-bottom-color:#fff}
+.rbSetBody{display:none;padding:14px 18px;overflow:auto;color:#e6ecfa}
+.rbSetBody.on{display:block}
+.rbSetBody h4{margin:6px 0 8px;font-size:15px;font-weight:900;color:#fff}
+.rbRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);font-size:12.5px;color:#c6d0e6}
+.rbRow b{font-weight:700;color:#fff;font-size:12px}
+.rbRow select,.rbSetBody select{padding:7px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.16);
+  background:#12161f;color:#e8eefc;font:600 12px var(--font);outline:none}
+.rbRow input[type=range]{width:120px;accent-color:#2b6cff}
+#rbVolSegs{display:flex;gap:3px}
+#rbVolSegs i{width:13px;height:18px;border-radius:3px;background:rgba(255,255,255,.18);cursor:pointer}
+#rbVolSegs i.on{background:#fff}
+.rbHint{font-size:12px;line-height:1.6;color:#a8b4cc;margin:6px 0}
+#rbPeople{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.rbPerson{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);font-size:12px;color:#dfe7ff}
+.rbPerson i{width:10px;height:10px;border-radius:50%;background:#3ee08a}
+.rbPerson small{margin-left:auto;color:#7f8db3;font-size:10px}
+#rbGallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+.rbCard{padding:10px;border-radius:10px;background:rgba(255,255,255,.05);font-size:11px;color:#cfd9ef;text-align:center}
+.rbCard b{display:block;color:#fff;font-size:11.5px;margin-bottom:2px}
+#rbSetFooter{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25)}
+#rbSetFooter button{flex:1;padding:11px;border-radius:9px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.06);color:#dfe7ff;font:800 12px var(--font);cursor:pointer}
+#rbSetFooter #rbCont{background:linear-gradient(180deg,#2b6cff,#1b4fd8);border:0;color:#fff}
+#rbReportGo{margin-top:10px;width:100%;padding:11px;border:0;border-radius:9px;background:#c92b40;color:#fff;font:800 12px var(--font);cursor:pointer}
+
+@media (max-width:560px){
+  #rbLeft{bottom:92px;gap:5px}
+  .rbSide{width:104px;font-size:10.5px;padding:8px 6px}
+  #rbJoy{width:88px;height:88px;right:16px;bottom:70px}
+  #rbJump{right:28px;bottom:172px;width:56px;height:56px}
+  #rbCam{right:132px;bottom:78px}
+  #avPanel{left:10px;right:10px;top:auto;bottom:56px;transform:none;width:auto}
+  #avHint{bottom:12px}
+}
+
+
+/* ---- legado escondido: HUD Roblox substitui ---- */
+#controls,#health,#mpBtn,#mpPanel,#hint,#crosshair{display:none!important}
 </style>
 </head>
 <body>
@@ -728,60 +1029,151 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   <div id="bootTip">Preparando o mundo, carregando a AMHEEX AI…</div>
 </div>
 
-<!-- ===== MENU INICIAL ===== -->
-<div id="menu">
-  <img id="menuLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
-  <h1 id="menuTitle">AMHEEX GAME</h1>
-  <div id="menuSub">Mundo 3D online • AMHEEX AI</div>
-  <div id="menuCard">
-    <label for="menuName">Seu nome no jogo</label>
-    <input id="menuName" maxlength="18" placeholder="Digite seu nome…" autocomplete="off">
-    <button id="menuPlay" type="button">▶ ENTRAR NO MUNDO</button>
-    <div id="menuRow">
-      <button id="menuCfg" type="button">⚙ CONFIGURAÇÕES</button>
-      <button id="menuHow" type="button">❔ COMO JOGAR</button>
+<!-- ================= LOGIN / REGISTRO ================= -->
+<div id="login">
+  <div id="loginCard">
+    <img id="loginLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
+    <h1>AMHEEX GAME</h1>
+    <p class="sub">Entre na sua conta para jogar no mundo global</p>
+    <div id="loginTabs">
+      <button type="button" data-tab="entrar" class="on">ENTRAR</button>
+      <button type="button" data-tab="criar">CRIAR CONTA</button>
     </div>
-    <div id="menuStats">Jogadores online: <b id="menuPlayers">0</b> • seu IP identifica seu personagem</div>
+    <label for="loginUser">Usuário</label>
+    <input id="loginUser" maxlength="18" autocomplete="username" placeholder="seu usuário">
+    <label for="loginPass">Senha</label>
+    <input id="loginPass" type="password" maxlength="40" autocomplete="current-password" placeholder="sua senha">
+    <div id="loginNomeWrap" hidden>
+      <label for="loginNome">Nome no jogo</label>
+      <input id="loginNome" maxlength="18" placeholder="como quer aparecer">
+    </div>
+    <div id="loginMsg"></div>
+    <button id="loginGo" type="button">ENTRAR NO MUNDO</button>
+    <div class="tiny">Sua conta guarda personagem, skin e posição no mapa global.</div>
   </div>
 </div>
 
-<!-- ===== BARRA SUPERIOR ===== -->
-<div id="topbar">
-  <div id="tbBrand"><img src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt=""><div><b>AMHEEX GAME</b><small>AMHEEX AI</small></div></div>
-  <button class="tb icon" id="tbMenu" type="button" title="Menu">☰</button>
-  <button class="tb" id="tbChat" type="button" title="Chat">💬 <span class="lbl">Chat</span></button>
-  <button class="tb" id="tbPlayers" type="button" title="Jogadores">🌐 <b id="tbCount">0</b></button>
-  <button class="tb icon" id="tbSettings" type="button" title="Configurações">⚙</button>
+<!-- ================= EDITOR DE PERSONAGEM ================= -->
+<div id="avatar">
+  <div id="avHead">
+    <b>EDITOR DE PERSONAGEM</b>
+    <small>Monte seu avatar antes de entrar no mundo</small>
+  </div>
+  <div id="avPanel">
+    <div class="avRow"><span>Tom de pele</span><div class="sw" id="avPele"></div></div>
+    <div class="avRow"><span>Camisa</span><div class="sw" id="avCamisa"></div></div>
+    <div class="avRow"><span>Calça</span><div class="sw" id="avCalca"></div></div>
+    <div class="avRow"><span>Cabelo</span><div class="sw" id="avCabelo"></div></div>
+    <div class="avBtns">
+      <button id="avRandom" type="button">🎲 ALEATÓRIO</button>
+      <button id="avPlay" type="button">▶ JOGAR</button>
+    </div>
+  </div>
+  <div id="avHint">Arraste para girar o personagem</div>
 </div>
 
-<!-- ===== CHAT ===== -->
-<div id="chatPanel">
-  <div id="chatHead"><span>CHAT DO MUNDO</span><button id="chatClose" type="button">×</button></div>
-  <div id="chatLog"></div>
-  <form id="chatForm" autocomplete="off"><input id="chatInput" maxlength="180" placeholder="Digite e pressione Enter…"><button type="submit">Enviar</button></form>
-</div>
+<!-- ================= HUD ESTILO ROBLOX ================= -->
+<div id="rblx">
+  <div id="rbTopLeft">
+    <button id="rbMenu" class="rbCircle" type="button" title="Menu">☰</button>
+    <button id="rbChatBtn" class="rbCircle" type="button" title="Chat">💬</button>
+    <div id="rbAccount"><i id="rbAvatarDot"></i><b id="rbUser">Jogador</b></div>
+  </div>
 
-<!-- ===== VOZ ===== -->
-<div id="voiceBar">
-  <button id="voiceMic" type="button"><i id="voiceDot"></i> <span id="voiceLbl">VOZ OFF</span></button>
-  <button id="voiceMute" type="button">🔊 <span>Som</span></button>
-</div>
+  <div id="rbStats">
+    <div class="rbStat"><span>👥</span><b id="rbOnline">0</b></div>
+    <div class="rbStat"><span>💬</span><b id="rbChatCount">0</b></div>
+  </div>
 
-<!-- ===== CONFIGURAÇÕES ===== -->
-<div id="settings">
-  <div id="settingsCard">
-    <h3>Configurações</h3>
-    <p class="hint">Ajustes do jogo. Não alteram o mapa nem o personagem dos outros jogadores.</p>
-    <div class="setRow"><span>Qualidade gráfica</span><select id="setQuality"><option value="low">Baixa</option><option value="mid" selected>Média</option><option value="high">Alta</option></select></div>
-    <div class="setRow"><span>Volume geral</span><input id="setVolume" type="range" min="0" max="100" value="80"><span class="val" id="setVolumeV">80</span></div>
-    <div class="setRow"><span>Alcance da voz</span><input id="setVoiceRange" type="range" min="5" max="40" value="16"><span class="val" id="setVoiceRangeV">16m</span></div>
-    <div class="setRow"><span>Sensibilidade da câmera</span><input id="setSens" type="range" min="20" max="200" value="100"><span class="val" id="setSensV">100</span></div>
-    <div class="setRow"><span>Microfone</span><select id="setMic"><option value="off">Desligado</option><option value="on">Ligado (tecla V)</option></select></div>
-    <div class="setRow"><span>Mostrar nomes</span><select id="setNames"><option value="on" selected>Sim</option><option value="off">Não</option></select></div>
-    <button id="settingsClose" type="button">FECHAR</button>
+  <div id="rbChat">
+    <div id="rbChatTabs">
+      <button type="button" data-tab="aqui" class="on">Aqui</button>
+      <button type="button" data-tab="global">Global</button>
+    </div>
+    <div id="rbChatLog"></div>
+    <form id="rbChatForm" autocomplete="off">
+      <input id="rbChatInput" maxlength="180" placeholder="Toque aqui para escrever">
+      <button type="submit">➤</button>
+    </form>
+  </div>
+
+  <div id="rbLeft">
+    <button class="rbSide loja" type="button" data-open="loja">LOJA</button>
+    <button class="rbSide skin" type="button" data-open="skin">SKINS</button>
+    <button class="rbSide inv" type="button" data-open="inv">INVENTÁRIO</button>
+    <button class="rbSide cfg" type="button" data-open="config">CONFIG.</button>
+    <button class="rbSide sair" type="button" data-open="sair">SAIR</button>
+  </div>
+
+  <div id="rbJoy"><div id="rbJoyKnob"></div></div>
+  <button id="rbJump" type="button" title="Pular">⬆</button>
+  <button id="rbCam" type="button" title="Câmera">🎥</button>
+  <div id="rbBottom">
+    <button id="rbRun" type="button">CORRER</button>
+    <button id="rbAction" type="button">AÇÃO</button>
   </div>
 </div>
 
+<!-- ================= CONFIGURAÇÕES ESTILO ROBLOX ================= -->
+<div id="rbSettings">
+  <div id="rbSetCard">
+    <div id="rbSetTabs">
+      <button type="button" data-t="pessoas">👥 Pessoas</button>
+      <button type="button" data-t="config" class="on">⚙ Config.</button>
+      <button type="button" data-t="galeria">🖼 Galeria</button>
+      <button type="button" data-t="denunciar">🚩 Denunciar</button>
+      <button type="button" data-t="ajuda">❓ Ajuda</button>
+    </div>
+
+    <div class="rbSetBody on" data-body="config">
+      <h4>Áudio</h4>
+      <div class="rbRow"><span>Volume</span><div id="rbVolSegs"></div></div>
+      <div class="rbRow"><span>Dispositivo de saída</span><b>Padrão (alto-falante)</b></div>
+      <h4>Chat e idioma</h4>
+      <div class="rbRow"><span>Mensagens reformuladas</span><b>Ligado</b></div>
+      <div class="rbRow"><span>Alcance da voz</span><input id="rbVoiceRange" type="range" min="5" max="40" value="16"><b id="rbVoiceRangeV">16m</b></div>
+      <h4>Gráficos</h4>
+      <div class="rbRow"><span>Qualidade</span><select id="rbQuality"><option value="low">Baixa</option><option value="mid" selected>Média</option><option value="high">Alta</option></select></div>
+      <div class="rbRow"><span>Sensibilidade</span><input id="rbSens" type="range" min="20" max="200" value="100"><b id="rbSensV">100</b></div>
+      <div class="rbRow"><span>Mostrar nomes</span><select id="rbNames"><option value="on" selected>Sim</option><option value="off">Não</option></select></div>
+      <h4>Microfone</h4>
+      <div class="rbRow"><span>Voz por proximidade</span><button id="rbMic" type="button">LIGAR (V)</button></div>
+    </div>
+
+    <div class="rbSetBody" data-body="pessoas">
+      <h4>Neste servidor</h4>
+      <div id="rbPeople"></div>
+      <div class="rbRow"><span>Convidar amigos</span><b>Compartilhe o link do jogo</b></div>
+    </div>
+
+    <div class="rbSetBody" data-body="galeria">
+      <h4>Galeria do mundo</h4>
+      <p class="rbHint">Tudo que a AMHEEX AI cria no mapa aparece aqui. Peça no chat da IA: “crie uma torre”, “coloque uma casa”, “mude para floresta”.</p>
+      <div id="rbGallery"></div>
+    </div>
+
+    <div class="rbSetBody" data-body="denunciar">
+      <h4>Denunciar jogador</h4>
+      <p class="rbHint">Escolha um jogador e o motivo. A denúncia fica registrada no servidor.</p>
+      <select id="rbReportWho"></select>
+      <select id="rbReportWhy"><option>Linguagem ofensiva</option><option>Assédio</option><option>Spam</option><option>Outro</option></select>
+      <button id="rbReportGo" type="button">ENVIAR DENÚNCIA</button>
+    </div>
+
+    <div class="rbSetBody" data-body="ajuda">
+      <h4>Como jogar</h4>
+      <p class="rbHint"><b>Mover:</b> WASD/setas ou o joystick flutuante. <b>Pular:</b> Espaço ou botão ⬆. <b>Correr:</b> Shift ou CORRER. <b>Câmera:</b> arraste na tela ou botão 🎥.</p>
+      <p class="rbHint"><b>IA:</b> toque no ícone da AMHEEX AI e peça em português. Ela cria formas 3D no mapa, mas nunca edita o personagem de outro jogador.</p>
+      <p class="rbHint"><b>Voz:</b> tecla V liga/desliga. Só quem está perto escuta, como no Roblox.</p>
+    </div>
+
+    <div id="rbSetFooter">
+      <button id="rbSair" type="button">Sair</button>
+      <button id="rbRegen" type="button">Regenerar</button>
+      <button id="rbCont" type="button">Continuar</button>
+    </div>
+  </div>
+</div>
 
 <div id="crosshair"></div>
 <div id="health"><span>HP</span><div class="bar"><i id="healthBar"></i></div><b id="healthN">100</b></div>
@@ -1084,13 +1476,18 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     var seed = Number(o.seed || 1);
     var peleHex = o.pele || '#c68642';
     var roupaHex = o.cor || '#4f7cff';
+    var calcaHex = o.calca || '#1f2a44';
+    var cabeloHex = o.cabelo || '';
     var peleTex = skinTexture(peleHex, seed);
     var roupaTex = clothTexture(roupaHex, seed + 11);
+    var calcaTex = clothTexture(calcaHex, seed + 23);
     var pele = new BABYLON.StandardMaterial('pele' + seed, scene);
     pele.diffuseTexture = peleTex; pele.specularColor = new BABYLON.Color3(.10, .10, .10); pele.specularPower = 48;
     var roupa = new BABYLON.StandardMaterial('roupa' + seed, scene);
     roupa.diffuseTexture = roupaTex; roupa.specularColor = new BABYLON.Color3(.06, .06, .06);
-    var cabeloCor = ['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c', '#8b2f2f'][seed % 5];
+    var calca = new BABYLON.StandardMaterial('calca' + seed, scene);
+    calca.diffuseTexture = calcaTex; calca.specularColor = new BABYLON.Color3(.06, .06, .06);
+    var cabeloCor = cabeloHex || ['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c', '#8b2f2f'][seed % 5];
     var cabelo = mat(cabeloCor);
     var olho = mat('#f8fafc', { emissive: .05 });
     var iris = mat(['#3b82f6', '#22c55e', '#a16207', '#0f172a'][seed % 4], { emissive: .12 });
@@ -1102,16 +1499,16 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     var S = 24, SP = 28;
 
     /* pernas articuladas: coxa, joelho, canela, pé */
-    cyl('coxaE', .26, .23, .62, r, -.20, .92, 0, roupa, S);
-    cyl('coxaD', .26, .23, .62, r, .20, .92, 0, roupa, S);
-    sph('joelhoE', .21, r, -.20, .60, 0, roupa, 16);
-    sph('joelhoD', .21, r, .20, .60, 0, roupa, 16);
+    cyl('coxaE', .26, .23, .62, r, -.20, .92, 0, calca, S);
+    cyl('coxaD', .26, .23, .62, r, .20, .92, 0, calca, S);
+    sph('joelhoE', .21, r, -.20, .60, 0, calca, 16);
+    sph('joelhoD', .21, r, .20, .60, 0, calca, 16);
     cyl('pernaE', .20, .17, .52, r, -.20, .30, 0, pele, S);
     cyl('pernaD', .20, .17, .52, r, .20, .30, 0, pele, S);
     box('peE', .28, .15, .46, r, -.20, .08, .09, sapato);
     box('peD', .28, .15, .46, r, .20, .08, .09, sapato);
     /* quadril e cintura */
-    cyl('quadril', .58, .52, .34, r, 0, 1.20, 0, roupa, S);
+    cyl('quadril', .58, .52, .34, r, 0, 1.20, 0, calca, S);
     cyl('cintura', .55, .57, .16, r, 0, 1.39, 0, detalhe, S);
     /* torso com peito e costas */
     cyl('torso', .63, .55, .78, r, 0, 1.80, 0, roupa, S);
@@ -1165,7 +1562,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     box('labioInf', .17, .045, .05, r, 0, 2.455, .312, boca);
     sph('orelhaE', .13, r, -.33, 2.70, 0, pele, 14).scaling.z = .55;
     sph('orelhaD', .13, r, .33, 2.70, 0, pele, 14).scaling.z = .55;
-    r.metadata = { humanoid: true, seed: seed, pele: peleHex, cor: roupaHex };
+    r.metadata = { humanoid: true, seed: seed, pele: peleHex, cor: roupaHex, calca: calcaHex, cabelo: cabeloCor };
     return r;
   };
 
@@ -1721,7 +2118,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     WORLD.weather = kind;
     stopWeather();
     if (kind === 'dia') {
-      paintSky('#2f6bd8', '#d7ebff'); scene.clearColor = new BABYLON.Color4(0.03, 0.05, 0.09, 1);
+      paintSky('#2f6bd8', '#d7ebff'); scene.clearColor = new BABYLON.Color4(0.72, 0.84, 0.98, 1);
       hemi.intensity = 0.95; sun.intensity = 1.05; scene.fogDensity = 0.005;
       scene.fogColor = new BABYLON.Color3(0.62, 0.75, 0.92);
     } else if (kind === 'noite') {
@@ -1789,7 +2186,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   var player = {
     node: ball, y: 0, vy: 0, grounded: true, mode: 'third', run: false,
     health: 100, speed: 7.2, skin: { pele: '#c68642', cor: '#4f7cff', seed: 12345 },
-    isCharacter: false
+    isCharacter: false, moveInput: moveInput
   };
   var controlOn = false;
   var npc = null;
@@ -1836,7 +2233,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       var ctl = $('controls'); if (ctl) ctl.classList.add('shooter');
     } else if (mode === 'third') {
       player.mode = 'third'; controlOn = true;
-      camera.radius = 13; camera.beta = 1.02; camera.lowerRadiusLimit = 4;
+      camera.radius = 9; camera.beta = 1.22; camera.lowerRadiusLimit = 4;
       if (player.isCharacter && player.node) player.node.setEnabled(true);
       var ch2 = $('crosshair'); if (ch2) ch2.classList.remove('on');
       var ctl2 = $('controls'); if (ctl2) ctl2.classList.remove('shooter');
@@ -1847,7 +2244,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     } else {
       /* pad: controles na tela em terceira pessoa */
       player.mode = 'third'; controlOn = true;
-      camera.radius = 13; camera.beta = 1.02; camera.lowerRadiusLimit = 4;
+      camera.radius = 9; camera.beta = 1.22; camera.lowerRadiusLimit = 4;
       if (player.isCharacter && player.node) player.node.setEnabled(true);
       var chp = $('crosshair'); if (chp) chp.classList.remove('on');
       var ctlp = $('controls'); if (ctlp) ctlp.classList.remove('shooter');
@@ -1992,7 +2389,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     var r = spawn(ent, {
       cor: a.cor || '#4f7cff', x: Number(a.x || 0), z: Number(a.z || 0),
       escala: Number(a.escala || 1), y: Number(a.y || 0),
-      pele: a.pele || '#c68642', seed: Number(a.seed || 12345)
+      pele: a.pele || '#c68642', seed: Number(a.seed || 12345),
+      calca: a.calca || '#1f2a44', cabelo: a.cabelo || ''
     });
     if (r.ok) {
       var rec = WORLD.objects[WORLD.objects.length - 1];
@@ -2001,7 +2399,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       WORLD.avatar = rec;
       WORLD.avatarName = a.nome || 'Jogador';
       if (ent === 'personagem') {
-        player.skin = { pele: a.pele || '#c68642', cor: a.cor || '#4f7cff', seed: Number(a.seed || 12345) };
+        player.skin = {
+          pele: a.pele || '#c68642', cor: a.cor || '#4f7cff', seed: Number(a.seed || 12345),
+          calca: a.calca || '#1f2a44', cabelo: a.cabelo || ''
+        };
         setPlayerNode(rec.node, true);
         ballTarget.x = rec.node.position.x; ballTarget.z = rec.node.position.z;
         setControlMode('third');
@@ -2414,6 +2815,47 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     }
   }
 
+  /* ---------------- skin do jogador ---------------- */
+  function applySkin(skin) {
+    skin = skin || {};
+    var pos = player.node ? { x: player.node.position.x, z: player.node.position.z, ry: player.node.rotation.y } : { x: 0, z: 0, ry: 0 };
+    var atual = player.skin || {};
+    var novo = {
+      pele: skin.pele || atual.pele || '#c68642',
+      cor: skin.cor || atual.cor || '#4f7cff',
+      calca: skin.calca || atual.calca || '#1f2a44',
+      cabelo: skin.cabelo != null ? skin.cabelo : (atual.cabelo || ''),
+      seed: Number(skin.seed || atual.seed || 12345)
+    };
+    if (player.node && player.node.dispose) {
+      try { player.node.dispose(); } catch (e) {}
+    }
+    player.isCharacter = false;
+    var r = createAvatar({
+      t: 'character', nome: (window.AMX_USER && window.AMX_USER.nome) || MP.name || 'Jogador',
+      pele: novo.pele, cor: novo.cor, calca: novo.calca, cabelo: novo.cabelo, seed: novo.seed,
+      x: pos.x, z: pos.z
+    });
+    if (r && r.ok && player.node) {
+      player.node.rotation.y = pos.ry;
+      player.node.unfreezeWorldMatrix();
+    }
+    player.skin = novo;
+    if (window.MP && MP.active && MP.id) {
+      MP.api('mp_move', { id: MP.id, name: MP.name, x: pos.x, z: pos.z, ry: pos.ry, skin: novo });
+    }
+    return { ok: true, skin: novo };
+  }
+  window.AMX_SKIN = applySkin;
+
+  function previewSkin(skin) {
+    var r = applySkin(skin);
+    setControlMode('third');
+    if (camera) { camera.beta = 1.18; camera.radius = 5.4; camera.alpha = Math.PI / 2 + 0.35; }
+    return r;
+  }
+  window.AMX_PREVIEW = previewSkin;
+
   /* ---------------- início do jogo ---------------- */
   function startGame(nome) {
     var n = (nome || '').trim() || MP.nome();
@@ -2427,8 +2869,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     MP._quiet = true;
     setTimeout(function () { MP._quiet = false; }, 2600);
     MP.enable(true);
-    var tb = $('topbar'); if (tb) tb.classList.add('on');
-    var vb = $('voiceBar'); if (vb) vb.classList.add('on');
+    var hud = $('rblx'); if (hud) hud.classList.add('on');
+    var u = $('rbUser'); if (u) u.textContent = n;
     return { ok: true, nome: n };
   }
   window.AMX_START = startGame;
@@ -2462,7 +2904,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     var opt = body ? {
       method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
     } : { method: 'GET' };
-    fetch('?api=' + action, opt).then(function (r) { return r.json(); })
+    var tk = (window.AMX_USER && window.AMX_USER.token) ? '&token=' + encodeURIComponent(window.AMX_USER.token) : '';
+    fetch('?api=' + action + tk, opt).then(function (r) { return r.json(); })
       .then(function (j) { if (cb) cb(j); }).catch(function () {});
   };
 
@@ -2471,30 +2914,30 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     if (on) {
       MP.name = MP.nome();
       MP.join();
-      var btn = $('mpBtn'); if (btn) btn.classList.add('on');
-      MP.toast('Multiplayer ativado — seu IP identifica seu personagem.');
+      MP.toast('Conectado ao mundo global.');
     } else {
       MP.api('mp_leave', { id: MP.id });
       MP.clearRemotes();
-      var b2 = $('mpBtn'); if (b2) b2.classList.remove('on');
     }
     return { ok: true, multiplayer: MP.active };
   };
 
   MP.join = function () {
-    var skin = player.skin || { pele: '#c68642', cor: '#4f7cff', seed: 12345 };
+    var skin = player.skin || { pele: '#c68642', cor: '#4f7cff', calca: '#1f2a44', cabelo: '', seed: 12345 };
     MP.api('mp_join', {
       name: MP.name, x: player.node ? player.node.position.x : 0,
       z: player.node ? player.node.position.z : 0,
       ry: player.node ? player.node.rotation.y : 0,
-      skin: skin
+      skin: skin,
+      user: (window.AMX_USER && window.AMX_USER.usuario) || '',
+      token: (window.AMX_USER && window.AMX_USER.token) || ''
     }, function (j) {
       if (!j || !j.ok) return;
       MP.id = j.id; MP.ip = j.ip || ''; MP.worldRev = j.world_revision || 0;
       MP.applyState(j);
       if (j.chat && j.chat.length) { MP.chat = j.chat; MP.renderChat(); }
       MP.syncWorld();
-      MP.toast('Conectado como ' + MP.name + ' • IP ' + (MP.ip || 'local'));
+      MP.toast('Bem-vindo, ' + MP.name + '!');
     });
   };
 
@@ -2567,8 +3010,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     }
     var cnt = $('mpCount');
     if (cnt) cnt.textContent = Math.max(0, list.length);
-    var tc = $('tbCount'); if (tc) tc.textContent = Math.max(0, list.length);
-    var mc = $('menuPlayers'); if (mc) mc.textContent = Math.max(0, list.length);
+    var tc = $('rbOnline'); if (tc) tc.textContent = Math.max(0, list.length);
     MP.renderPlayers();
   };
 
@@ -2577,6 +3019,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       var skin = p.skin || {};
       var node = B.personagem({
         pele: skin.pele || '#c68642', cor: skin.cor || '#4f7cff',
+        calca: skin.calca || '#1f2a44', cabelo: skin.cabelo || '',
         seed: Number(skin.seed || 12345)
       });
       node.position.set(Number(p.x || 0), 0, Number(p.z || 0));
@@ -2610,32 +3053,41 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   };
 
   MP.renderPlayers = function () {
-    var box = $('mpPlayers');
+    var box = $('rbPeople');
     if (!box) return;
     var html = '';
     for (var i = 0; i < MP.players.length; i++) {
       var p = MP.players[i];
       var me = p.id === MP.id;
-      html += '<div class="mp-player' + (me ? ' me' : '') + '"><span class="dot"></span>' +
-        '<b>' + (p.name || 'Jogador') + '</b>' + (me ? ' (você)' : '') +
-        '<small>' + (p.ip || '') + '</small></div>';
+      html += '<div class="rbPerson"><i></i><b>' + (p.name || 'Jogador') + '</b>' +
+        (me ? ' (você)' : '') + '<small>' + (p.usuario ? '@' + p.usuario : 'visitante') + '</small></div>';
     }
-    box.innerHTML = html || '<div class="mp-player"><small>Ninguém conectado ainda</small></div>';
+    box.innerHTML = html || '<div class="rbPerson"><i></i><b>Ninguém conectado ainda</b></div>';
+    var sel = $('rbReportWho');
+    if (sel) {
+      var opt = '';
+      for (var k = 0; k < MP.players.length; k++) {
+        var q = MP.players[k];
+        if (q.id === MP.id) continue;
+        opt += '<option value="' + q.id + '">' + (q.name || 'Jogador') + '</option>';
+      }
+      sel.innerHTML = opt || '<option value="">Nenhum jogador</option>';
+    }
   };
 
   MP.renderChat = function () {
-    var box = $('mpChat');
+    var box = $('rbChatLog');
     if (!box) return;
     var html = '';
     var arr = MP.chat || [];
     for (var i = Math.max(0, arr.length - 40); i < arr.length; i++) {
       var c = arr[i];
-      html += '<div class="mp-msg"><b>' + (c.name || 'Jogador') + ':</b> ' + (c.msg || '') + '</div>';
+      var me = c.id && c.id === MP.id;
+      html += '<div class="m' + (me ? ' me' : '') + '"><b>' + (c.name || 'Jogador') + ':</b> ' + (c.msg || '') + '</div>';
     }
-    box.innerHTML = html;
+    box.innerHTML = html || '<div class="sys">Ninguém falou nada ainda. Diga oi!</div>';
     box.scrollTop = box.scrollHeight;
-    var log = $('chatLog');
-    if (log) { log.innerHTML = html; log.scrollTop = log.scrollHeight; }
+    var cc = $('rbChatCount'); if (cc) cc.textContent = arr.length;
   };
 
   MP.sendChat = function (msg) {
@@ -2680,23 +3132,6 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 
   /* UI do painel multiplayer */
   (function bindMP() {
-    var btn = $('mpBtn');
-    if (btn) btn.addEventListener('click', function () {
-      var p = $('mpPanel');
-      if (p) { MP.panelOpen = !MP.panelOpen; p.classList.toggle('on', MP.panelOpen); }
-      if (!MP.active) MP.enable(true);
-      MP.renderPlayers(); MP.renderChat();
-    });
-    var close = $('mpClose');
-    if (close) close.addEventListener('click', function () {
-      var p = $('mpPanel'); if (p) p.classList.remove('on'); MP.panelOpen = false;
-    });
-    var form = $('mpForm');
-    if (form) form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      var inp = $('mpMsg');
-      if (inp && inp.value.trim()) { MP.sendChat(inp.value.trim()); inp.value = ''; }
-    });
     window.addEventListener('beforeunload', function () { if (MP.active) MP.api('mp_leave', { id: MP.id }); });
   })();
 
@@ -2707,6 +3142,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     setTerrain: setTerrain, setWeather: setWeather, clear: clearWorld,
     setLayout: setLayout, clearLayout: clearLayout, avatar: createAvatar, modify: modifyEnt,
     multiplayer: MP, control: setControlMode, player: player, start: startGame, npc: spawnNPC, settings: settings,
+    skin: applySkin, preview: previewSkin,
     save: saveScene, restore: restoreScene, setQuality: function (t) {
       if (!TIERS[t]) return;
       tier = t; T = TIERS[t];
@@ -2732,9 +3168,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 </script>
 <script>
 /* ============================================================
-   AMHEEX GAME — interface (boot, menu, chat, configurações, voz)
-   Este módulo NÃO altera o mapa nem o layout fixo do jogo.
-   Ele apenas liga os elementos de interface ao motor (WORLD/MP).
+   AMHEEX GAME — UI estilo Roblox
+   boot • login/registro • editor de personagem • HUD • joystick
+   configurações em abas • voz por proximidade (WebRTC)
    ============================================================ */
 (function () {
   'use strict';
@@ -2743,6 +3179,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   function on(el, ev, fn) { if (el) el.addEventListener(ev, fn); }
   function lsGet(k, d) { try { var v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
   function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) {} }
 
   var CFG = {
     volume: Number(lsGet('amx_volume', 80)),
@@ -2752,262 +3189,417 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     mic: lsGet('amx_mic', 'off') === 'on',
     quality: lsGet('amx_quality', 'mid')
   };
-  window.AMX_UI = { cfg: CFG };
 
-  /* ---------------------------------------------------------
-     1) TELA DE CARREGAMENTO (barra RGB + logo + %)
-     --------------------------------------------------------- */
+  var SKIN = { pele: '#c68642', cor: '#4f7cff', calca: '#1f2a44', cabelo: '#1b1b1b', seed: 12345 };
+  var USER = null;
+  window.AMX_UI = { cfg: CFG, skin: SKIN, user: function () { return USER; } };
+  window.AMX_USER = null;
+
+  /* ---------------- 1) BOOT ---------------- */
   var boot = $('boot'), bootFill = $('bootFill'), bootPct = $('bootPct'), bootTip = $('bootTip');
   var pct = 0, bootDone = false;
   var tips = [
     'Preparando o mundo, carregando a AMHEEX AI…',
-    'Gerando o chão verde e a bola vermelha…',
-    'Conectando o multiplayer por IP…',
+    'Gerando o chão verde e o céu azul…',
+    'Conectando o mundo global…',
     'Acordando o NPC AMHEEX BOT…',
-    'Quase lá — entrando no mundo…'
+    'Quase lá — abrindo o login…'
   ];
-
   function paintBoot(p) {
     pct = Math.max(0, Math.min(100, p));
     if (bootFill) bootFill.style.width = pct + '%';
     if (bootPct) bootPct.textContent = Math.round(pct) + '%';
     if (bootTip) bootTip.textContent = tips[Math.min(tips.length - 1, Math.floor(pct / 22))];
   }
-
   var bootTimer = setInterval(function () {
     if (bootDone) return;
-    var step = pct < 55 ? 2.4 : pct < 85 ? 1.3 : 0.55;
+    var step = pct < 55 ? 2.6 : pct < 85 ? 1.4 : 0.6;
     paintBoot(pct + step);
     if (pct >= 100) finishBoot();
   }, 55);
-
   function finishBoot() {
     if (bootDone) return;
-    bootDone = true;
-    clearInterval(bootTimer);
-    paintBoot(100);
-    setTimeout(function () {
-      if (boot) boot.classList.add('off');
-      showMenu();
-    }, 420);
+    bootDone = true; clearInterval(bootTimer); paintBoot(100);
+    setTimeout(function () { if (boot) boot.classList.add('off'); openLogin(); }, 420);
   }
 
-  /* ---------------------------------------------------------
-     2) MENU INICIAL
-     --------------------------------------------------------- */
-  var menu = $('menu');
+  /* ---------------- 2) LOGIN ---------------- */
+  var loginEl = $('login'), loginMsg = $('loginMsg'), modoLogin = 'entrar';
 
-  function showMenu() {
-    if (menu) menu.classList.add('on');
-    refreshMenuCount();
-  }
-  function hideMenu() { if (menu) menu.classList.remove('on'); }
-
-  function refreshMenuCount() {
-    var el = $('menuPlayers');
-    if (!el) return;
-    fetch('?api=mp_state', { method: 'GET' }).then(function (r) { return r.json(); })
-      .then(function (j) {
-        if (j && j.ok && j.players) el.textContent = j.players.length;
-      }).catch(function () {});
-  }
-  setInterval(function () { if (menu && menu.classList.contains('on')) refreshMenuCount(); }, 5000);
-
-  var nameInput = $('menuName');
-  if (nameInput) nameInput.value = lsGet('amx_nome', '');
-
-  function play() {
-    var nome = nameInput && nameInput.value ? nameInput.value.trim() : '';
-    if (!nome) {
-      nome = 'Jogador-' + Math.floor(1000 + Math.random() * 9000);
-      if (nameInput) nameInput.value = nome;
+  function openLogin() {
+    if (loginEl) loginEl.classList.add('on');
+    var u = lsGet('amx_usuario', '');
+    if (u && $('loginUser')) $('loginUser').value = u;
+    setTimeout(function () { var el = $('loginUser'); if (el) el.focus(); }, 120);
+    var tok = lsGet('amx_token', '');
+    if (tok) {
+      fetch('?api=perfil&token=' + encodeURIComponent(tok)).then(function (r) { return r.json(); })
+        .then(function (j) { if (j && j.ok && j.user) { USER = j.user; window.AMX_USER = USER; if (loginEl) loginEl.classList.remove('on'); enterAvatar(); } })
+        .catch(function () {});
     }
-    lsSet('amx_nome', nome);
-    hideMenu();
-    if (typeof window.AMX_START === 'function') window.AMX_START(nome);
-    setTimeout(function () {
-      if (CFG.mic) startVoice();
-    }, 900);
   }
-  on($('menuPlay'), 'click', play);
-  on(nameInput, 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); play(); } });
+  function setLoginTab(t) {
+    modoLogin = t;
+    var tabs = document.querySelectorAll('#loginTabs button');
+    for (var i = 0; i < tabs.length; i++) tabs[i].classList.toggle('on', tabs[i].getAttribute('data-tab') === t);
+    var wrap = $('loginNomeWrap'); if (wrap) wrap.hidden = (t !== 'criar');
+    var go = $('loginGo'); if (go) go.textContent = t === 'criar' ? 'CRIAR CONTA E JOGAR' : 'ENTRAR NO MUNDO';
+    if (loginMsg) { loginMsg.textContent = ''; loginMsg.className = ''; }
+  }
+  var tabBtns = document.querySelectorAll('#loginTabs button');
+  for (var tb = 0; tb < tabBtns.length; tb++) {
+    (function (b) { b.addEventListener('click', function () { setLoginTab(b.getAttribute('data-tab')); }); })(tabBtns[tb]);
+  }
+  function msg(txt, ok) { if (!loginMsg) return; loginMsg.textContent = txt; loginMsg.className = ok ? 'ok' : ''; }
 
-  on($('menuCfg'), 'click', function () { openSettings(true); });
-  on($('menuHow'), 'click', showHelp);
+  function doAuth() {
+    var usuario = (($('loginUser') && $('loginUser').value) || '').trim().toLowerCase();
+    var senha = (($('loginPass') && $('loginPass').value) || '');
+    var nome = (($('loginNome') && $('loginNome').value) || '').trim();
+    if (usuario.length < 3) { msg('Usuário precisa de 3 caracteres ou mais.'); return; }
+    if (senha.length < 4) { msg('Senha precisa de 4 caracteres ou mais.'); return; }
+    var go = $('loginGo'); if (go) { go.disabled = true; go.textContent = 'CONECTANDO…'; }
+    var acao = modoLogin === 'criar' ? 'registrar' : 'login';
+    fetch('?api=' + acao, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario: usuario, senha: senha, nome: nome || usuario })
+    }).then(function (r) { return r.json(); }).then(function (j) {
+      if (!j || !j.ok) {
+        msg((j && j.erro) || 'Não foi possível entrar.');
+        if (go) { go.disabled = false; go.textContent = modoLogin === 'criar' ? 'CRIAR CONTA E JOGAR' : 'ENTRAR NO MUNDO'; }
+        return;
+      }
+      USER = j.user; window.AMX_USER = USER;
+      lsSet('amx_token', USER.token);
+      lsSet('amx_usuario', USER.usuario);
+      lsSet('amx_nome', USER.nome || USER.usuario);
+      msg(j.novo ? 'Conta criada! Montando seu personagem…' : 'Bem-vindo de volta!', true);
+      if (j.user.skin && j.user.skin.pele) {
+        SKIN = {
+          pele: j.user.skin.pele, cor: j.user.skin.cor || '#4f7cff',
+          calca: j.user.skin.calca || '#1f2a44', cabelo: j.user.skin.cabelo || '#1b1b1b',
+          seed: Number(j.user.skin.seed || 12345)
+        };
+        window.AMX_UI.skin = SKIN;
+      }
+      setTimeout(function () { if (loginEl) loginEl.classList.remove('on'); enterAvatar(); }, 420);
+    }).catch(function () {
+      msg('Servidor indisponível. Tente novamente.');
+      if (go) { go.disabled = false; go.textContent = 'ENTRAR NO MUNDO'; }
+    });
+  }
+  on($('loginGo'), 'click', doAuth);
+  on($('loginPass'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); doAuth(); } });
+  on($('loginUser'), 'keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); var p = $('loginPass'); if (p) p.focus(); } });
 
-  /* ---------------------------------------------------------
-     3) BARRA SUPERIOR / CHAT / JOGADORES
-     --------------------------------------------------------- */
-  var chatPanel = $('chatPanel');
+  /* ---------------- 3) EDITOR DE PERSONAGEM ---------------- */
+  var avatarEl = $('avatar');
+  var PALETAS = {
+    pele: ['#f6d5b8', '#e8b98f', '#c68642', '#a5673f', '#8d5524', '#5c3a21', '#f1c9a5', '#3f2a1c'],
+    cor: ['#4f7cff', '#ff3d81', '#22c55e', '#f59e0b', '#a855f7', '#ef4444', '#0ea5e9', '#e2e8f0', '#111827'],
+    calca: ['#1f2a44', '#111827', '#3b4a6b', '#6b7280', '#7c2d12', '#14532d', '#4c1d95', '#e5e7eb'],
+    cabelo: ['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c', '#8b2f2f', '#e5e7eb', '#7c3aed', '#0ea5e9']
+  };
+  function swId(k) { return 'av' + k.charAt(0).toUpperCase() + k.slice(1); }
+  function buildSwatches() {
+    ['pele', 'cor', 'calca', 'cabelo'].forEach(function (k) {
+      var box = $(swId(k)); if (!box) return;
+      box.innerHTML = '';
+      PALETAS[k].forEach(function (hex) {
+        var i = document.createElement('i');
+        i.style.background = hex; i.setAttribute('data-hex', hex);
+        i.addEventListener('click', function () {
+          SKIN[k] = hex; paintSwatches();
+          if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN);
+        });
+        box.appendChild(i);
+      });
+    });
+    paintSwatches();
+  }
+  function paintSwatches() {
+    ['pele', 'cor', 'calca', 'cabelo'].forEach(function (k) {
+      var box = $(swId(k)); if (!box) return;
+      var kids = box.querySelectorAll('i');
+      for (var i = 0; i < kids.length; i++) kids[i].classList.toggle('on', kids[i].getAttribute('data-hex') === SKIN[k]);
+    });
+  }
+  function enterAvatar() {
+    if (avatarEl) avatarEl.classList.add('on');
+    if (avatarEl && !avatarEl._built) { buildSwatches(); avatarEl._built = true; }
+    paintSwatches();
+    var nome = (USER && (USER.nome || USER.usuario)) || 'Jogador';
+    if (window.AMX_SET) window.AMX_SET.nome = nome;
+    setTimeout(function () { if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN); }, 220);
+  }
+  on($('avRandom'), 'click', function () {
+    function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+    SKIN.pele = pick(PALETAS.pele); SKIN.cor = pick(PALETAS.cor);
+    SKIN.calca = pick(PALETAS.calca); SKIN.cabelo = pick(PALETAS.cabelo);
+    SKIN.seed = Math.floor(1 + Math.random() * 999999);
+    paintSwatches();
+    if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN);
+  });
+  on($('avPlay'), 'click', function () {
+    var nome = (USER && (USER.nome || USER.usuario)) || 'Jogador';
+    if (avatarEl) avatarEl.classList.remove('on');
+    if (USER && USER.token) {
+      fetch('?api=salvar_perfil', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token: USER.token, skin: SKIN, nome: nome })
+      }).then(function (r) { return r.json(); }).then(function (j) { if (j && j.ok && j.user) { USER = j.user; window.AMX_USER = USER; } }).catch(function () {});
+    }
+    if (window.AMX_SKIN) window.AMX_SKIN(SKIN);
+    if (window.AMX_START) window.AMX_START(nome);
+    setTimeout(function () { if (CFG.mic) startVoice(); }, 900);
+  });
+
+  /* ---------------- 4) HUD ---------------- */
+  var rbChat = $('rbChat');
   function toggleChat(force) {
-    if (!chatPanel) return;
-    var open = force == null ? !chatPanel.classList.contains('on') : !!force;
-    chatPanel.classList.toggle('on', open);
-    if (open) { var ci = $('chatInput'); if (ci) setTimeout(function () { ci.focus(); }, 60); }
+    if (!rbChat) return;
+    var open = force == null ? !rbChat.classList.contains('on') : !!force;
+    rbChat.classList.toggle('on', open);
+    if (open) { var ci = $('rbChatInput'); if (ci) setTimeout(function () { ci.focus(); }, 60); }
   }
-  on($('tbChat'), 'click', function () { toggleChat(); });
-  on($('chatClose'), 'click', function () { toggleChat(false); });
-  on($('tbPlayers'), 'click', function () {
-    toggleChat(true);
-    var n = window.MP && window.MP.players ? window.MP.players.length : 0;
-    if (window.MP && window.MP.toast) window.MP.toast(n + ' jogador(es) no mundo agora.');
-  });
-  on($('tbSettings'), 'click', function () { openSettings(true); });
-  on($('tbMenu'), 'click', function () {
-    toggleChat(false);
-    openSettings(false);
-    if (menu) menu.classList.add('on');
-    if (window.MP && window.MP.active) window.MP.enable(false);
-    var tb = $('topbar'); if (tb) tb.classList.remove('on');
-    var vb = $('voiceBar'); if (vb) vb.classList.remove('on');
-  });
+  on($('rbChatBtn'), 'click', function () { toggleChat(); });
+  on($('rbMenu'), 'click', function () { openSettings(true, 'config'); });
 
-  on($('chatForm'), 'submit', function (e) {
+  var chatTab = 'global';
+  var chatTabs = document.querySelectorAll('#rbChatTabs button');
+  for (var ct = 0; ct < chatTabs.length; ct++) {
+    (function (b) {
+      b.addEventListener('click', function () {
+        chatTab = b.getAttribute('data-tab');
+        for (var i = 0; i < chatTabs.length; i++) chatTabs[i].classList.toggle('on', chatTabs[i] === b);
+        if (window.MP && window.MP.renderChat) window.MP.renderChat();
+      });
+    })(chatTabs[ct]);
+  }
+  on($('rbChatForm'), 'submit', function (e) {
     e.preventDefault();
-    var inp = $('chatInput');
-    var msg = inp && inp.value ? inp.value.trim() : '';
-    if (!msg) return;
-    if (window.MP && window.MP.sendChat) window.MP.sendChat(msg);
+    var inp = $('rbChatInput');
+    var t = inp && inp.value ? inp.value.trim() : '';
+    if (!t) return;
+    if (window.MP && window.MP.sendChat) window.MP.sendChat(t);
     if (inp) inp.value = '';
   });
 
-  /* ---------------------------------------------------------
-     4) CONFIGURAÇÕES (estilo Roblox, sem mexer no layout fixo)
-     --------------------------------------------------------- */
-  var settings = $('settings');
-  function openSettings(force) {
-    if (!settings) return;
-    var open = force == null ? !settings.classList.contains('on') : !!force;
-    settings.classList.toggle('on', open);
-    if (open) syncSettingsUI();
+  var sides = document.querySelectorAll('#rbLeft .rbSide');
+  for (var sd = 0; sd < sides.length; sd++) {
+    (function (b) {
+      b.addEventListener('click', function () {
+        var o = b.getAttribute('data-open');
+        if (o === 'sair') { sair(); return; }
+        if (o === 'skin') { if (avatarEl) avatarEl.classList.add('on'); return; }
+        openSettings(true, (o === 'loja' || o === 'inv') ? 'galeria' : 'config');
+      });
+    })(sides[sd]);
   }
-  on($('settingsClose'), 'click', function () { openSettings(false); });
-  on(settings, 'click', function (e) { if (e.target === settings) openSettings(false); });
 
+  /* ---------------- 5) JOYSTICK ---------------- */
+  var joy = $('rbJoy'), knob = $('rbJoyKnob');
+  var joyActive = false, joyId = null;
+  function setMove(f, b, l, r) {
+    var mi = window.WORLD && window.WORLD.player && window.WORLD.player.moveInput;
+    if (!mi) return;
+    mi.f = f; mi.b = b; mi.l = l; mi.r = r;
+  }
+  function joyStart(e) {
+    joyActive = true; joyId = e.pointerId;
+    if (joy && joy.setPointerCapture) { try { joy.setPointerCapture(e.pointerId); } catch (err) {} }
+    joyMove(e);
+  }
+  function joyMove(e) {
+    if (!joyActive || (joyId != null && e.pointerId !== joyId)) return;
+    var rect = joy.getBoundingClientRect();
+    var cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+    var dx = e.clientX - cx, dy = e.clientY - cy;
+    var max = rect.width / 2 - 8;
+    var d = Math.sqrt(dx * dx + dy * dy);
+    if (d > max) { dx = dx / d * max; dy = dy / d * max; }
+    if (knob) knob.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+    var nx = dx / max, ny = dy / max;
+    setMove(ny < -0.25, ny > 0.25, nx < -0.25, nx > 0.25);
+    e.preventDefault();
+  }
+  function joyEnd(e) {
+    if (joyId != null && e.pointerId !== joyId) return;
+    joyActive = false; joyId = null;
+    if (knob) knob.style.transform = 'translate(0,0)';
+    setMove(false, false, false, false);
+  }
+  if (joy) {
+    joy.addEventListener('pointerdown', joyStart);
+    joy.addEventListener('pointermove', joyMove);
+    joy.addEventListener('pointerup', joyEnd);
+    joy.addEventListener('pointercancel', joyEnd);
+  }
+  on($('rbJump'), 'pointerdown', function (e) { e.preventDefault(); if (window.WORLD && window.WORLD.player) window.WORLD.player.jump = true; });
+  var correndo = false;
+  on($('rbRun'), 'click', function () {
+    correndo = !correndo;
+    this.classList.toggle('on', correndo);
+    if (window.WORLD && window.WORLD.player) window.WORLD.player.run = correndo;
+  });
+  on($('rbCam'), 'click', function () {
+    if (!window.WORLD || !window.WORLD.control) return;
+    var m = (window.WORLD.player && window.WORLD.player.mode) || 'third';
+    window.WORLD.control(m === 'third' ? 'first' : m === 'first' ? 'shooter' : 'third');
+  });
+  on($('rbAction'), 'click', function () {
+    if (window.WORLD && window.WORLD.player && window.WORLD.player.mode === 'shooter') {
+      if (window.WORLD.player.fire) window.WORLD.player.fire();
+    } else if (window.AMX_UI && window.AMX_UI.openAI) window.AMX_UI.openAI();
+  });
+
+  /* ---------------- 6) CONFIGURAÇÕES ---------------- */
+  var setEl = $('rbSettings');
+  function openSettings(force, tab) {
+    if (!setEl) return;
+    var open = force == null ? !setEl.classList.contains('on') : !!force;
+    setEl.classList.toggle('on', open);
+    if (open) {
+      if (tab) selectSetTab(tab);
+      syncSettingsUI();
+      if (window.MP && window.MP.renderPlayers) window.MP.renderPlayers();
+      renderGallery();
+    }
+  }
+  function selectSetTab(t) {
+    var bs = document.querySelectorAll('#rbSetTabs button');
+    for (var i = 0; i < bs.length; i++) bs[i].classList.toggle('on', bs[i].getAttribute('data-t') === t);
+    var bodies = document.querySelectorAll('.rbSetBody');
+    for (var k = 0; k < bodies.length; k++) bodies[k].classList.toggle('on', bodies[k].getAttribute('data-body') === t);
+  }
+  var setTabs = document.querySelectorAll('#rbSetTabs button');
+  for (var st = 0; st < setTabs.length; st++) {
+    (function (b) { b.addEventListener('click', function () { selectSetTab(b.getAttribute('data-t')); }); })(setTabs[st]);
+  }
+  on($('rbCont'), 'click', function () { openSettings(false); });
+  on(setEl, 'click', function (e) { if (e.target === setEl) openSettings(false); });
+
+  var segs = $('rbVolSegs');
+  if (segs) {
+    segs.innerHTML = '';
+    for (var si = 0; si < 10; si++) {
+      var seg = document.createElement('i');
+      seg.setAttribute('data-v', String((si + 1) * 10));
+      seg.addEventListener('click', function () {
+        CFG.volume = Number(this.getAttribute('data-v'));
+        lsSet('amx_volume', CFG.volume);
+        if (window.AMX_SET) window.AMX_SET.volume = CFG.volume / 100;
+        paintSegs();
+      });
+      segs.appendChild(seg);
+    }
+  }
+  function paintSegs() {
+    if (!segs) return;
+    var kids = segs.querySelectorAll('i');
+    for (var i = 0; i < kids.length; i++) kids[i].classList.toggle('on', (i + 1) * 10 <= CFG.volume);
+  }
   function syncSettingsUI() {
-    var q = $('setQuality'); if (q) q.value = CFG.quality;
-    var v = $('setVolume'); if (v) v.value = CFG.volume;
-    var vv = $('setVolumeV'); if (vv) vv.textContent = CFG.volume;
-    var vr = $('setVoiceRange'); if (vr) vr.value = CFG.voiceRange;
-    var vrv = $('setVoiceRangeV'); if (vrv) vrv.textContent = CFG.voiceRange + 'm';
-    var s = $('setSens'); if (s) s.value = CFG.sens;
-    var sv = $('setSensV'); if (sv) sv.textContent = CFG.sens;
-    var mic = $('setMic'); if (mic) mic.value = CFG.mic ? 'on' : 'off';
-    var nm = $('setNames'); if (nm) nm.value = CFG.names ? 'on' : 'off';
+    var q = $('rbQuality'); if (q) q.value = CFG.quality;
+    var vr = $('rbVoiceRange'); if (vr) vr.value = CFG.voiceRange;
+    var vrv = $('rbVoiceRangeV'); if (vrv) vrv.textContent = CFG.voiceRange + 'm';
+    var s = $('rbSens'); if (s) s.value = CFG.sens;
+    var sv = $('rbSensV'); if (sv) sv.textContent = CFG.sens;
+    var nm = $('rbNames'); if (nm) nm.value = CFG.names ? 'on' : 'off';
+    var mic = $('rbMic'); if (mic) mic.textContent = voice.on ? (voice.muted ? 'MUDO (V)' : 'LIGADO (V)') : 'LIGAR (V)';
+    paintSegs();
   }
-
-  on($('setQuality'), 'change', function () {
+  on($('rbQuality'), 'change', function () {
     CFG.quality = this.value; lsSet('amx_quality', CFG.quality);
     if (window.WORLD && window.WORLD.setQuality) window.WORLD.setQuality(CFG.quality);
   });
-  on($('setVolume'), 'input', function () {
-    CFG.volume = Number(this.value); lsSet('amx_volume', CFG.volume);
-    var vv = $('setVolumeV'); if (vv) vv.textContent = CFG.volume;
-    if (window.AMX_SET) window.AMX_SET.volume = CFG.volume / 100;
-  });
-  on($('setVoiceRange'), 'input', function () {
+  on($('rbVoiceRange'), 'input', function () {
     CFG.voiceRange = Number(this.value); lsSet('amx_voice_range', CFG.voiceRange);
-    var vrv = $('setVoiceRangeV'); if (vrv) vrv.textContent = CFG.voiceRange + 'm';
+    var v = $('rbVoiceRangeV'); if (v) v.textContent = CFG.voiceRange + 'm';
     if (window.AMX_SET) window.AMX_SET.voiceRange = CFG.voiceRange;
   });
-  on($('setSens'), 'input', function () {
+  on($('rbSens'), 'input', function () {
     CFG.sens = Number(this.value); lsSet('amx_sens', CFG.sens);
-    var sv = $('setSensV'); if (sv) sv.textContent = CFG.sens;
+    var v = $('rbSensV'); if (v) v.textContent = CFG.sens;
     if (window.AMX_SET) window.AMX_SET.sens = CFG.sens / 100;
   });
-  on($('setMic'), 'change', function () {
-    CFG.mic = this.value === 'on'; lsSet('amx_mic', CFG.mic ? 'on' : 'off');
-    if (CFG.mic) startVoice(); else stopVoice();
-  });
-  on($('setNames'), 'change', function () {
+  on($('rbNames'), 'change', function () {
     CFG.names = this.value === 'on'; lsSet('amx_names', CFG.names ? 'on' : 'off');
     if (window.AMX_NAMES) window.AMX_NAMES(CFG.names);
   });
+  on($('rbMic'), 'click', function () { if (voice.on) toggleMute(); else startVoice(); syncSettingsUI(); });
 
-  function showHelp() {
-    var old = $('amxHelp'); if (old) old.parentNode.removeChild(old);
-    var box = document.createElement('div');
-    box.id = 'amxHelp';
-    box.style.cssText = 'position:fixed;inset:0;z-index:99998;display:flex;align-items:center;justify-content:center;background:rgba(4,7,16,.72);backdrop-filter:blur(8px);padding:18px';
-    box.innerHTML =
-      '<div style="max-width:520px;width:100%;background:linear-gradient(160deg,#141b2e,#0b1120);border:1px solid #2a3552;border-radius:18px;padding:22px;color:#dfe7ff;font-family:Inter,system-ui,sans-serif;box-shadow:0 24px 70px rgba(0,0,0,.6)">' +
-      '<h2 style="margin:0 0 10px;font-size:20px;letter-spacing:.5px">COMO JOGAR</h2>' +
-      '<p style="margin:6px 0;font-size:14px;line-height:1.55;color:#aab6d6">WASD ou setas para andar, Shift para correr, Espaço para pular. Arraste o mouse para girar a câmera e use o botão de câmera para alternar 1ª/3ª pessoa e modo tiro.</p>' +
-      '<p style="margin:6px 0;font-size:14px;line-height:1.55;color:#aab6d6">Toque no ícone da AMHEEX AI para pedir coisas em linguagem natural: “crie uma torre”, “coloque um botão de andar”, “mude para floresta”. A IA cria formas 3D no mapa, mas nunca edita o personagem de outro jogador.</p>' +
-      '<p style="margin:6px 0;font-size:14px;line-height:1.55;color:#aab6d6">Voz por proximidade: ligue o microfone (tecla V). Só quem estiver perto escuta — como no Roblox. Use o botão de som para mutar/desmutar.</p>' +
-      '<p style="margin:6px 0;font-size:14px;line-height:1.55;color:#aab6d6">Cada novo IP entra com uma bola vermelha no mapa fixo de chão verde. Seu personagem tem skin própria e aparece no mapa global para todos.</p>' +
-      '<button id="amxHelpClose" style="margin-top:14px;width:100%;padding:12px;border:0;border-radius:12px;background:linear-gradient(90deg,#00e0ff,#7a5cff,#ff3d81);color:#fff;font-weight:800;letter-spacing:.5px;cursor:pointer">ENTENDI</button>' +
-      '</div>';
-    document.body.appendChild(box);
-    var c = $('amxHelpClose');
-    if (c) c.addEventListener('click', function () { box.parentNode.removeChild(box); });
+  function renderGallery() {
+    var box = $('rbGallery'); if (!box) return;
+    var objs = (window.WORLD && window.WORLD.state && window.WORLD.state.objects) || [];
+    var html = '';
+    for (var i = 0; i < objs.length; i++) {
+      var o = objs[i];
+      if (o.isAvatar) continue;
+      html += '<div class="rbCard"><b>' + (o.nome || o.ent) + '</b>' + (o.forma || o.ent) + '</div>';
+    }
+    box.innerHTML = html || '<div class="rbCard"><b>Mapa vazio</b>peça algo para a IA</div>';
   }
+  on($('rbReportGo'), 'click', function () {
+    var who = $('rbReportWho'), why = $('rbReportWhy');
+    if (!who || !who.value) { if (window.MP) window.MP.toast('Nenhum jogador para denunciar.'); return; }
+    fetch('?api=mp_chat', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: 'denuncia', name: 'DENÚNCIA', msg: 'Denúncia contra ' + who.options[who.selectedIndex].text + ': ' + (why ? why.value : '') })
+    }).catch(function () {});
+    if (window.MP) window.MP.toast('Denúncia registrada.');
+  });
+  on($('rbRegen'), 'click', function () {
+    openSettings(false);
+    if (avatarEl) avatarEl.classList.add('on');
+    buildSwatches();
+    if (window.AMX_PREVIEW) window.AMX_PREVIEW(SKIN);
+  });
 
-  /* ---------------------------------------------------------
-     5) VOZ POR PROXIMIDADE (WebRTC + sinalização no servidor)
-     --------------------------------------------------------- */
-  var voice = {
-    on: false, muted: false, stream: null, peers: {}, pollTimer: null, starting: false
-  };
+  function sair() {
+    if (USER && USER.token) {
+      fetch('?api=sair', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: USER.token }) }).catch(function () {});
+    }
+    lsDel('amx_token');
+    USER = null; window.AMX_USER = null;
+    openSettings(false);
+    if (avatarEl) avatarEl.classList.remove('on');
+    var hud = $('rblx'); if (hud) hud.classList.remove('on');
+    if (window.MP && window.MP.enable) window.MP.enable(false);
+    if (loginEl) loginEl.classList.add('on');
+  }
+  on($('rbSair'), 'click', sair);
+
+  /* ---------------- 7) VOZ POR PROXIMIDADE ---------------- */
+  var voice = { on: false, muted: false, stream: null, peers: {}, pollTimer: null, starting: false };
   window.AMX_VOICE = voice;
-
-  var ICE = {
-    iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]
-  };
-
-  function voiceUI() {
-    var lbl = $('voiceLbl'), dot = $('voiceDot'), mic = $('voiceMic'), mute = $('voiceMute');
-    if (lbl) lbl.textContent = voice.on ? (voice.muted ? 'VOZ MUDO' : 'VOZ ON') : 'VOZ OFF';
-    if (dot) dot.style.background = voice.on ? (voice.muted ? '#ffb020' : '#25e08a') : '#6b7691';
-    if (mic) mic.classList.toggle('on', voice.on);
-    if (mute) mute.innerHTML = (voice.muted ? '🔇' : '🔊') + ' <span>Som</span>';
-  }
+  var ICE = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }] };
 
   function startVoice() {
     if (voice.on || voice.starting) return;
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      if (window.MP && window.MP.toast) window.MP.toast('Este navegador não suporta microfone.');
-      return;
+      if (window.MP) window.MP.toast('Este navegador não suporta microfone.'); return;
     }
     voice.starting = true;
     navigator.mediaDevices.getUserMedia({ audio: true, video: false }).then(function (st) {
-      voice.stream = st;
-      voice.on = true;
-      voice.starting = false;
-      voice.muted = false;
-      voiceUI();
-      startPolling();
-      if (window.MP && window.MP.toast) window.MP.toast('Voz ligada — só quem está perto escuta.');
-    }).catch(function () {
-      voice.starting = false;
-      if (window.MP && window.MP.toast) window.MP.toast('Microfone bloqueado pelo navegador.');
-    });
+      voice.stream = st; voice.on = true; voice.starting = false; voice.muted = false;
+      startPolling(); syncSettingsUI();
+      if (window.MP) window.MP.toast('Voz ligada — só quem está perto escuta.');
+    }).catch(function () { voice.starting = false; if (window.MP) window.MP.toast('Microfone bloqueado pelo navegador.'); });
   }
-
   function stopVoice() {
-    voice.on = false;
-    stopPolling();
+    voice.on = false; stopPolling();
     for (var id in voice.peers) closePeer(id);
     voice.peers = {};
-    if (voice.stream) {
-      try { voice.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {}
-      voice.stream = null;
-    }
-    voiceUI();
+    if (voice.stream) { try { voice.stream.getTracks().forEach(function (t) { t.stop(); }); } catch (e) {} voice.stream = null; }
+    syncSettingsUI();
   }
-
   function toggleMute() {
     voice.muted = !voice.muted;
-    if (voice.stream) {
-      try { voice.stream.getAudioTracks().forEach(function (t) { t.enabled = !voice.muted; }); } catch (e) {}
-    }
-    voiceUI();
-    if (window.MP && window.MP.toast) window.MP.toast(voice.muted ? 'Microfone mutado.' : 'Microfone ativo.');
+    if (voice.stream) { try { voice.stream.getAudioTracks().forEach(function (t) { t.enabled = !voice.muted; }); } catch (e) {} }
+    syncSettingsUI();
+    if (window.MP) window.MP.toast(voice.muted ? 'Microfone mutado.' : 'Microfone ativo.');
   }
-
   function rtcSend(to, kind, data) {
     if (!window.MP || !window.MP.id || !to) return;
     fetch('?api=rtc_send', {
@@ -3015,94 +3607,55 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       body: JSON.stringify({ from: window.MP.id, to: to, kind: kind, data: data })
     }).catch(function () {});
   }
-
-  function startPolling() {
-    if (voice.pollTimer) return;
-    voice.pollTimer = setInterval(pollSignals, 1200);
-    pollSignals();
-  }
-  function stopPolling() {
-    if (voice.pollTimer) { clearInterval(voice.pollTimer); voice.pollTimer = null; }
-  }
-
+  function startPolling() { if (voice.pollTimer) return; voice.pollTimer = setInterval(pollSignals, 1200); pollSignals(); }
+  function stopPolling() { if (voice.pollTimer) { clearInterval(voice.pollTimer); voice.pollTimer = null; } }
   function pollSignals() {
     if (!voice.on || !window.MP || !window.MP.id) return;
-    fetch('?api=rtc_poll&id=' + encodeURIComponent(window.MP.id), { method: 'GET' })
-      .then(function (r) { return r.json(); })
-      .then(function (j) {
-        if (!j || !j.ok || !j.msgs) return;
-        for (var i = 0; i < j.msgs.length; i++) handleSignal(j.msgs[i]);
-      }).catch(function () {});
+    fetch('?api=rtc_poll&id=' + encodeURIComponent(window.MP.id)).then(function (r) { return r.json(); })
+      .then(function (j) { if (!j || !j.ok || !j.msgs) return; for (var i = 0; i < j.msgs.length; i++) handleSignal(j.msgs[i]); })
+      .catch(function () {});
   }
-
   function handleSignal(m) {
     if (!m || !m.from) return;
     var id = m.from;
     if (m.kind === 'offer') {
       var pc = ensurePeer(id);
-      pc.setRemoteDescription(new RTCSessionDescription(m.data)).then(function () {
-        return pc.createAnswer();
-      }).then(function (ans) {
-        return pc.setLocalDescription(ans);
-      }).then(function () {
-        rtcSend(id, 'answer', pc.localDescription);
-      }).catch(function () {});
+      pc.setRemoteDescription(new RTCSessionDescription(m.data)).then(function () { return pc.createAnswer(); })
+        .then(function (ans) { return pc.setLocalDescription(ans); })
+        .then(function () { rtcSend(id, 'answer', pc.localDescription); }).catch(function () {});
     } else if (m.kind === 'answer') {
       var p2 = voice.peers[id];
-      if (p2 && !p2._answered) {
-        p2._answered = true;
-        p2.setRemoteDescription(new RTCSessionDescription(m.data)).catch(function () {});
-      }
+      if (p2 && !p2._answered) { p2._answered = true; p2.setRemoteDescription(new RTCSessionDescription(m.data)).catch(function () {}); }
     } else if (m.kind === 'ice') {
       var p3 = voice.peers[id];
-      if (p3 && m.data) {
-        try { p3.addIceCandidate(new RTCIceCandidate(m.data)).catch(function () {}); } catch (e) {}
-      }
-    } else if (m.kind === 'bye') {
-      closePeer(id);
-    }
+      if (p3 && m.data) { try { p3.addIceCandidate(new RTCIceCandidate(m.data)).catch(function () {}); } catch (e) {} }
+    } else if (m.kind === 'bye') { closePeer(id); }
   }
-
   function ensurePeer(id) {
     if (voice.peers[id]) return voice.peers[id];
     var pc = new RTCPeerConnection(ICE);
     pc._offered = false; pc._answered = false; pc._audio = null;
     voice.peers[id] = pc;
-
-    if (voice.stream) {
-      try { voice.stream.getTracks().forEach(function (t) { pc.addTrack(t, voice.stream); }); } catch (e) {}
-    }
-
-    pc.onicecandidate = function (e) {
-      if (e.candidate) rtcSend(id, 'ice', e.candidate);
-    };
+    if (voice.stream) { try { voice.stream.getTracks().forEach(function (t) { pc.addTrack(t, voice.stream); }); } catch (e) {} }
+    pc.onicecandidate = function (e) { if (e.candidate) rtcSend(id, 'ice', e.candidate); };
     pc.ontrack = function (e) {
       var audio = document.createElement('audio');
-      audio.autoplay = true;
-      audio.srcObject = e.streams[0];
-      audio.style.display = 'none';
+      audio.autoplay = true; audio.srcObject = e.streams[0]; audio.style.display = 'none';
       audio.volume = Math.max(0, Math.min(1, CFG.volume / 100));
-      document.body.appendChild(audio);
-      pc._audio = audio;
+      document.body.appendChild(audio); pc._audio = audio;
       try { audio.play().catch(function () {}); } catch (err) {}
     };
-    pc.onconnectionstatechange = function () {
-      if (pc.connectionState === 'failed' || pc.connectionState === 'closed') closePeer(id);
-    };
+    pc.onconnectionstatechange = function () { if (pc.connectionState === 'failed' || pc.connectionState === 'closed') closePeer(id); };
     return pc;
   }
-
   function offerTo(id) {
     var pc = ensurePeer(id);
     if (pc._offered) return;
     pc._offered = true;
-    pc.createOffer({ offerToReceiveAudio: true }).then(function (off) {
-      return pc.setLocalDescription(off);
-    }).then(function () {
-      rtcSend(id, 'offer', pc.localDescription);
-    }).catch(function () { pc._offered = false; });
+    pc.createOffer({ offerToReceiveAudio: true }).then(function (off) { return pc.setLocalDescription(off); })
+      .then(function () { rtcSend(id, 'offer', pc.localDescription); })
+      .catch(function () { pc._offered = false; });
   }
-
   function closePeer(id) {
     var pc = voice.peers[id];
     if (!pc) return;
@@ -3111,45 +3664,31 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     try { pc.close(); } catch (e) {}
     delete voice.peers[id];
   }
-
-  /* ativa/desativa áudio conforme a distância (voz por proximidade) */
   function proximityTick() {
     if (!voice.on || !window.MP || !window.MP.remotes) return;
     var me = window.WORLD && window.WORLD.player && window.WORLD.player.node;
     if (!me) return;
-    var range = CFG.voiceRange;
-    var vistos = {};
+    var range = CFG.voiceRange, vistos = {};
     for (var id in window.MP.remotes) {
       var r = window.MP.remotes[id];
       if (!r || !r.node) continue;
       vistos[id] = true;
-      var dx = r.node.position.x - me.position.x;
-      var dz = r.node.position.z - me.position.z;
+      var dx = r.node.position.x - me.position.x, dz = r.node.position.z - me.position.z;
       var dist = Math.sqrt(dx * dx + dz * dz);
       var perto = dist <= range;
       var pc = voice.peers[id];
       if (perto) {
-        if (!pc) { pc = ensurePeer(id); }
-        /* quem tem id menor inicia a oferta, evitando ofertas duplicadas */
+        if (!pc) pc = ensurePeer(id);
         if (String(window.MP.id) < String(id) && !pc._offered) offerTo(id);
       }
       if (pc && pc._audio) {
         pc._audio.muted = !perto || voice.muted;
         pc._audio.volume = Math.max(0.05, Math.min(1, (CFG.volume / 100) * (1 - dist / (range * 1.6))));
       }
-      if (!perto && pc) {
-        /* longe: mantém conexão, mas silencia */
-        if (pc._audio) pc._audio.muted = true;
-      }
     }
-    for (var pid in voice.peers) {
-      if (!vistos[pid]) closePeer(pid);
-    }
+    for (var pid in voice.peers) { if (!vistos[pid]) closePeer(pid); }
   }
   setInterval(proximityTick, 900);
-
-  on($('voiceMic'), 'click', function () { if (voice.on) stopVoice(); else startVoice(); });
-  on($('voiceMute'), 'click', function () { if (!voice.on) startVoice(); else toggleMute(); });
 
   document.addEventListener('keydown', function (e) {
     var tag = (e.target && e.target.tagName) || '';
@@ -3159,9 +3698,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     if (e.key === 'Escape') { toggleChat(false); openSettings(false); }
   });
 
-  /* ---------------------------------------------------------
-     6) BOOTSTRAP — aplica configurações salvas
-     --------------------------------------------------------- */
+  /* ---------------- 8) BOOTSTRAP ---------------- */
   function applySaved() {
     if (window.WORLD && window.WORLD.setQuality) window.WORLD.setQuality(CFG.quality);
     if (window.AMX_SET) {
@@ -3171,32 +3708,21 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     }
     if (window.AMX_NAMES) window.AMX_NAMES(CFG.names);
     syncSettingsUI();
-    voiceUI();
   }
-
-  /* espera o motor estar pronto (WORLD existe) */
   var tries = 0;
   var readyTimer = setInterval(function () {
     tries++;
-    if (window.WORLD && window.AMX_START) {
-      clearInterval(readyTimer);
-      applySaved();
-      if (pct > 92) finishBoot();
-    } else if (tries > 100) {
-      clearInterval(readyTimer);
-    }
+    if (window.WORLD && window.AMX_START) { clearInterval(readyTimer); applySaved(); if (pct > 92) finishBoot(); }
+    else if (tries > 120) { clearInterval(readyTimer); }
   }, 100);
+  window.addEventListener('load', function () { setTimeout(function () { if (!bootDone) finishBoot(); }, 2800); });
 
-  window.addEventListener('load', function () {
-    setTimeout(function () { if (!bootDone) finishBoot(); }, 2600);
-  });
-
-  /* expõe helpers para o resto do jogo */
   window.AMX_UI.openSettings = openSettings;
   window.AMX_UI.toggleChat = toggleChat;
   window.AMX_UI.startVoice = startVoice;
   window.AMX_UI.stopVoice = stopVoice;
   window.AMX_UI.toggleMute = toggleMute;
+  window.AMX_UI.sair = sair;
 })();
 </script>
 <script>
@@ -3566,6 +4092,14 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       var results = [];
       var acts = j.actions || [];
       acts.forEach(function (a) {
+        /* posiciona construções à frente do jogador, sem sobrepor */
+        if (a && a.t === 'spawn' && !a.preset && window.WORLD && WORLD.player && WORLD.player.node) {
+          var pp = WORLD.player.node.position;
+          var pry = WORLD.player.node.rotation.y || 0;
+          var dd = 6.5 + Math.random() * 3.5;
+          a.x = Math.round((pp.x + Math.sin(pry) * dd) * 100) / 100;
+          a.z = Math.round((pp.z + Math.cos(pry) * dd) * 100) / 100;
+        }
         var res = null;
         try { res = window.WORLD ? window.WORLD.apply(a) : null; } catch (e) { res = { ok: false }; }
         results.push({ label: actionLabel(a, res), ok: !res || res.ok !== false });

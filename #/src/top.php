@@ -64,6 +64,7 @@ function amx_mp_public(array $players): array {
             'id' => (string)($p['id'] ?? ''),
             'name' => (string)($p['name'] ?? 'Jogador'),
             'ip' => (string)($p['ip'] ?? ''),
+            'usuario' => (string)($p['usuario'] ?? ''),
             'x' => (float)($p['x'] ?? 0),
             'z' => (float)($p['z'] ?? 0),
             'ry' => (float)($p['ry'] ?? 0),
@@ -73,6 +74,45 @@ function amx_mp_public(array $players): array {
         ];
     }
     return $out;
+}
+
+
+/* ---------------- CONTAS: registro e login (usuário + senha) ---------------- */
+function amx_users_file(): string { return amx_path('usuarios.json'); }
+
+function amx_users(): array {
+    $db = amx_read_json(amx_users_file(), []);
+    if (!is_array($db) || !isset($db['users']) || !is_array($db['users'])) $db = ['users' => []];
+    return $db;
+}
+
+function amx_user_public(array $u): array {
+    return [
+        'usuario' => (string)($u['usuario'] ?? ''),
+        'nome' => (string)($u['nome'] ?? ($u['usuario'] ?? 'Jogador')),
+        'token' => (string)($u['token'] ?? ''),
+        'skin' => is_array($u['skin'] ?? null) ? $u['skin'] : [],
+        'criado' => (string)($u['criado'] ?? ''),
+    ];
+}
+
+function amx_user_por_token(string $token): ?array {
+    if ($token === '') return null;
+    $db = amx_users();
+    foreach ($db['users'] as $u) {
+        if (!is_array($u)) continue;
+        if (hash_equals((string)($u['token'] ?? ''), $token)) return $u;
+    }
+    return null;
+}
+
+function amx_mp_token(): string {
+    $t = (string)($_GET['token'] ?? '');
+    if ($t === '') {
+        $in = amx_body();
+        $t = (string)($in['token'] ?? '');
+    }
+    return preg_replace('/[^a-f0-9]/', '', $t) ?? '';
 }
 
 /* ------------------------------------------------------------------ */
@@ -160,6 +200,93 @@ if ($API !== '') {
             amx_out(['ok' => $out !== null, 'motor' => $eng, 'texto' => $out ?? '']);
         }
 
+        /* ---------------- CONTAS ---------------- */
+        case 'registrar': {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') amx_out(['ok' => false, 'erro' => 'use POST'], 405);
+            $in = amx_body();
+            $usuario = strtolower(amx_limpa((string)($in['usuario'] ?? ''), 18));
+            $usuario = preg_replace('/[^a-z0-9_.-]/', '', $usuario) ?? '';
+            $senha = (string)($in['senha'] ?? '');
+            $nome = amx_limpa((string)($in['nome'] ?? $usuario), 18);
+            if (strlen($usuario) < 3) amx_out(['ok' => false, 'erro' => 'Usuário precisa de 3 caracteres ou mais.'], 400);
+            if (strlen($senha) < 4) amx_out(['ok' => false, 'erro' => 'Senha precisa de 4 caracteres ou mais.'], 400);
+            $db = amx_users();
+            if (isset($db['users'][$usuario])) amx_out(['ok' => false, 'erro' => 'Esse usuário já existe. Faça login.'], 409);
+            $token = bin2hex(random_bytes(16));
+            $db['users'][$usuario] = [
+                'usuario' => $usuario,
+                'nome' => $nome !== '' ? $nome : $usuario,
+                'hash' => password_hash($senha, PASSWORD_DEFAULT),
+                'token' => $token,
+                'skin' => [
+                    'pele' => '#c68642', 'cor' => '#4f7cff', 'calca' => '#1f2a44',
+                    'cabelo' => '#1b1b1b', 'seed' => random_int(1, 999999),
+                ],
+                'criado' => date('c'),
+            ];
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true, 'user' => amx_user_public($db['users'][$usuario]), 'novo' => true]);
+        }
+
+        case 'login': {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') amx_out(['ok' => false, 'erro' => 'use POST'], 405);
+            $in = amx_body();
+            $usuario = strtolower(amx_limpa((string)($in['usuario'] ?? ''), 18));
+            $senha = (string)($in['senha'] ?? '');
+            $db = amx_users();
+            $u = $db['users'][$usuario] ?? null;
+            if (!is_array($u) || !password_verify($senha, (string)($u['hash'] ?? ''))) {
+                amx_out(['ok' => false, 'erro' => 'Usuário ou senha incorretos.'], 401);
+            }
+            $u['token'] = bin2hex(random_bytes(16));
+            $u['ultimo_login'] = date('c');
+            $db['users'][$usuario] = $u;
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true, 'user' => amx_user_public($u)]);
+        }
+
+        case 'perfil': {
+            $u = amx_user_por_token(amx_mp_token());
+            if (!$u) amx_out(['ok' => false, 'erro' => 'sessão expirada'], 401);
+            amx_out(['ok' => true, 'user' => amx_user_public($u)]);
+        }
+
+        case 'salvar_perfil': {
+            if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') amx_out(['ok' => false, 'erro' => 'use POST'], 405);
+            $in = amx_body();
+            $token = preg_replace('/[^a-f0-9]/', '', (string)($in['token'] ?? '')) ?? '';
+            $db = amx_users();
+            $achou = null;
+            foreach ($db['users'] as $k => $u) {
+                if (is_array($u) && $token !== '' && hash_equals((string)($u['token'] ?? ''), $token)) { $achou = $k; break; }
+            }
+            if ($achou === null) amx_out(['ok' => false, 'erro' => 'sessão expirada'], 401);
+            $skin = is_array($in['skin'] ?? null) ? $in['skin'] : [];
+            $db['users'][$achou]['skin'] = [
+                'pele' => amx_limpa((string)($skin['pele'] ?? '#c68642'), 16),
+                'cor' => amx_limpa((string)($skin['cor'] ?? '#4f7cff'), 16),
+                'calca' => amx_limpa((string)($skin['calca'] ?? '#1f2a44'), 16),
+                'cabelo' => amx_limpa((string)($skin['cabelo'] ?? '#1b1b1b'), 16),
+                'seed' => (int)($skin['seed'] ?? random_int(1, 999999)),
+            ];
+            if (!empty($in['nome'])) $db['users'][$achou]['nome'] = amx_limpa((string)$in['nome'], 18);
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true, 'user' => amx_user_public($db['users'][$achou])]);
+        }
+
+        case 'sair': {
+            $in = amx_body();
+            $token = preg_replace('/[^a-f0-9]/', '', (string)($in['token'] ?? '')) ?? '';
+            $db = amx_users();
+            foreach ($db['users'] as $k => $u) {
+                if (is_array($u) && $token !== '' && hash_equals((string)($u['token'] ?? ''), $token)) {
+                    $db['users'][$k]['token'] = '';
+                }
+            }
+            amx_write_json(amx_users_file(), $db);
+            amx_out(['ok' => true]);
+        }
+
         /* ---------------- MULTIPLAYER POR IP + MAPA COMPARTILHADO ---------------- */
         case 'mp_join':
         case 'mp_move':
@@ -175,7 +302,13 @@ if ($API !== '') {
             if (!is_array($mp['chat'])) $mp['chat'] = [];
 
             $ip = amx_mp_ip();
-            $id = amx_mp_id($ip);
+            $tokenMp = amx_mp_token();
+            $conta = $tokenMp !== '' ? amx_user_por_token($tokenMp) : null;
+            if ($conta) {
+                $id = 'u' . substr(hash('sha256', 'conta|' . (string)$conta['usuario']), 0, 15);
+            } else {
+                $id = amx_mp_id($ip);
+            }
             $now = time();
 
             /* remove jogadores inativos há mais de 25s */
@@ -186,8 +319,10 @@ if ($API !== '') {
             if ($API === 'mp_join') {
                 $in = amx_body();
                 $nome = amx_limpa((string)($in['name'] ?? 'Jogador'), 24);
+                if ($conta) $nome = amx_limpa((string)($conta['nome'] ?? $conta['usuario']), 24);
                 if ($nome === '') $nome = 'Jogador';
                 $skin = is_array($in['skin'] ?? null) ? $in['skin'] : [];
+                if ($conta && is_array($conta['skin'] ?? null) && !$skin) $skin = $conta['skin'];
                 $mp['players'][$id] = [
                     'id' => $id,
                     'name' => $nome,
@@ -195,9 +330,12 @@ if ($API !== '') {
                     'x' => (float)($in['x'] ?? 0),
                     'z' => (float)($in['z'] ?? 0),
                     'ry' => (float)($in['ry'] ?? 0),
+                    'usuario' => $conta ? (string)$conta['usuario'] : '',
                     'skin' => [
                         'pele' => amx_limpa((string)($skin['pele'] ?? '#c68642'), 16),
                         'cor' => amx_limpa((string)($skin['cor'] ?? '#4f7cff'), 16),
+                        'calca' => amx_limpa((string)($skin['calca'] ?? '#1f2a44'), 16),
+                        'cabelo' => amx_limpa((string)($skin['cabelo'] ?? '#1b1b1b'), 16),
                         'seed' => (int)($skin['seed'] ?? random_int(1, 999999)),
                     ],
                     'last' => $now,
@@ -223,6 +361,16 @@ if ($API !== '') {
                 $mp['players'][$id]['anim'] = amx_limpa((string)($in['anim'] ?? 'idle'), 16);
                 $mp['players'][$id]['last'] = $now;
                 if (isset($in['name'])) $mp['players'][$id]['name'] = amx_limpa((string)$in['name'], 24);
+                if (is_array($in['skin'] ?? null)) {
+                    $sk = $in['skin'];
+                    $mp['players'][$id]['skin'] = [
+                        'pele' => amx_limpa((string)($sk['pele'] ?? '#c68642'), 16),
+                        'cor' => amx_limpa((string)($sk['cor'] ?? '#4f7cff'), 16),
+                        'calca' => amx_limpa((string)($sk['calca'] ?? '#1f2a44'), 16),
+                        'cabelo' => amx_limpa((string)($sk['cabelo'] ?? '#1b1b1b'), 16),
+                        'seed' => (int)($sk['seed'] ?? 12345),
+                    ];
+                }
                 $mp['updated'] = date('c');
                 amx_write_json($mpFile, $mp);
                 amx_out(['ok' => true, 'players' => amx_mp_public($mp['players']), 'world_revision' => (int)$mp['world_revision']]);

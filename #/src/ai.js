@@ -364,6 +364,14 @@
       var results = [];
       var acts = j.actions || [];
       acts.forEach(function (a) {
+        /* posiciona construções à frente do jogador, sem sobrepor */
+        if (a && a.t === 'spawn' && !a.preset && window.WORLD && WORLD.player && WORLD.player.node) {
+          var pp = WORLD.player.node.position;
+          var pry = WORLD.player.node.rotation.y || 0;
+          var dd = 6.5 + Math.random() * 3.5;
+          a.x = Math.round((pp.x + Math.sin(pry) * dd) * 100) / 100;
+          a.z = Math.round((pp.z + Math.cos(pry) * dd) * 100) / 100;
+        }
         var res = null;
         try { res = window.WORLD ? window.WORLD.apply(a) : null; } catch (e) { res = { ok: false }; }
         results.push({ label: actionLabel(a, res), ok: !res || res.ok !== false });

@@ -261,6 +261,159 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   #voiceBar{bottom:80px}
   #topbar .tb span.lbl{display:none}
 }
+
+/* ================= AMHEEX — UI ESTILO ROBLOX ================= */
+#login{position:fixed;inset:0;z-index:99990;display:none;align-items:center;justify-content:center;padding:18px;
+  background:radial-gradient(120% 100% at 50% 0%,#123b6b 0%,#0a1a33 45%,#05070d 100%);font-family:var(--font)}
+#login.on{display:flex}
+#loginCard{width:min(392px,100%);background:linear-gradient(170deg,rgba(18,25,42,.97),rgba(8,12,22,.98));
+  border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:24px 22px 20px;text-align:center;
+  box-shadow:0 40px 90px -30px #000,0 0 0 1px rgba(255,255,255,.04) inset}
+#loginLogo{width:78px;height:78px;border-radius:20px;object-fit:cover;box-shadow:0 14px 40px -12px rgba(0,200,255,.55)}
+#loginCard h1{margin:12px 0 2px;font-size:25px;letter-spacing:.06em;font-weight:900;
+  background:linear-gradient(90deg,#00e0ff,#7a5cff,#ff3d81);-webkit-background-clip:text;background-clip:text;color:transparent}
+#loginCard .sub{margin:0 0 16px;font-size:12px;color:#93a1c2}
+#loginTabs{display:flex;gap:6px;background:rgba(255,255,255,.05);border-radius:12px;padding:4px;margin-bottom:14px}
+#loginTabs button{flex:1;padding:9px;border:0;border-radius:9px;background:transparent;color:#9aa8c7;font:800 11.5px var(--font);letter-spacing:.06em;cursor:pointer}
+#loginTabs button.on{background:linear-gradient(180deg,#2b6cff,#1b4fd8);color:#fff;box-shadow:0 8px 20px -8px #2b6cff}
+#loginCard label{display:block;text-align:left;font-size:10.5px;font-weight:800;letter-spacing:.1em;color:#7f8db0;margin:10px 0 5px}
+#loginCard input{width:100%;padding:12px 13px;border-radius:11px;border:1px solid rgba(255,255,255,.13);
+  background:#0a0f1c;color:#eaf0ff;font:600 14px var(--font);outline:none}
+#loginCard input:focus{border-color:#2b6cff;box-shadow:0 0 0 3px rgba(43,108,255,.18)}
+#loginMsg{min-height:18px;margin:10px 0 4px;font-size:12px;font-weight:700;color:#ff7a8a}
+#loginMsg.ok{color:#3ee08a}
+#loginGo{width:100%;padding:13px;border:0;border-radius:12px;cursor:pointer;color:#fff;font:900 14px var(--font);letter-spacing:.08em;
+  background:linear-gradient(90deg,#00c2ff,#2b6cff 55%,#7a5cff);box-shadow:0 16px 34px -14px #2b6cff}
+#loginGo:active{transform:scale(.985)}
+#loginCard .tiny{margin-top:10px;font-size:10.5px;color:#6f7d9e;line-height:1.5}
+
+/* editor de personagem */
+#avatar{position:fixed;inset:0;z-index:99980;display:none;font-family:var(--font);pointer-events:none}
+#avatar.on{display:block}
+#avHead{position:absolute;left:50%;top:16px;transform:translateX(-50%);text-align:center;pointer-events:none}
+#avHead b{display:block;font-size:13px;letter-spacing:.16em;color:#fff;text-shadow:0 3px 14px #000}
+#avHead small{font-size:10.5px;color:#b9c6e2}
+#avPanel{position:absolute;left:14px;top:50%;transform:translateY(-50%);width:min(280px,calc(100vw - 28px));
+  pointer-events:auto;background:rgba(8,12,22,.82);border:1px solid rgba(255,255,255,.12);border-radius:16px;
+  padding:14px;backdrop-filter:blur(14px);box-shadow:0 24px 60px -24px #000}
+.avRow{margin-bottom:10px}
+.avRow>span{display:block;font-size:10px;font-weight:800;letter-spacing:.12em;color:#8391b3;margin-bottom:6px}
+.avRow .sw{display:flex;gap:6px;flex-wrap:wrap}
+.avRow .sw i{width:26px;height:26px;border-radius:8px;cursor:pointer;border:2px solid transparent;box-shadow:0 0 0 1px rgba(255,255,255,.18) inset}
+.avRow .sw i.on{border-color:#fff;transform:scale(1.08)}
+.avBtns{display:flex;gap:8px;margin-top:14px}
+.avBtns button{flex:1;padding:11px 6px;border-radius:11px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.07);color:#e8eefc;font:800 11px var(--font);letter-spacing:.05em;cursor:pointer}
+.avBtns #avPlay{background:linear-gradient(90deg,#00c2ff,#2b6cff);border:0;color:#fff;font-size:12px}
+#avHint{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);font-size:11px;color:#c3cfe8;
+  background:rgba(8,12,22,.7);padding:7px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.1)}
+
+/* HUD */
+#rblx{position:fixed;inset:0;z-index:8;display:none;pointer-events:none;font-family:var(--font)}
+#rblx.on{display:block}
+#rbTopLeft{position:absolute;left:12px;top:12px;display:flex;align-items:center;gap:8px;pointer-events:auto}
+.rbCircle{width:40px;height:40px;border-radius:50%;border:0;background:rgba(10,14,24,.55);color:#fff;font-size:17px;
+  display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(8px);box-shadow:0 6px 18px -8px #000}
+.rbCircle:active{transform:scale(.94)}
+#rbAccount{display:flex;align-items:center;gap:6px;padding:6px 11px 6px 7px;border-radius:999px;
+  background:rgba(10,14,24,.55);backdrop-filter:blur(8px);font-size:11px;color:#dfe7ff;max-width:150px}
+#rbAccount b{font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rbAvatarDot{width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,#00e0ff,#7a5cff);flex:0 0 auto}
+
+#rbStats{position:absolute;left:50%;top:10px;transform:translateX(-50%);display:flex;gap:8px;pointer-events:none}
+.rbStat{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:10px;background:rgba(10,14,24,.55);
+  backdrop-filter:blur(8px);font-size:12px;color:#cfe0ff;font-weight:800}
+.rbStat b{color:#fff;font-size:13px}
+
+#rbChat{position:absolute;left:12px;top:62px;width:min(330px,calc(100vw - 100px));pointer-events:auto;display:none;
+  background:rgba(8,12,22,.78);border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden;backdrop-filter:blur(12px)}
+#rbChat.on{display:block}
+#rbChatTabs{display:flex;background:rgba(255,255,255,.05)}
+#rbChatTabs button{flex:1;padding:8px;border:0;background:transparent;color:#93a1c2;font:800 11px var(--font);cursor:pointer}
+#rbChatTabs button.on{background:rgba(255,255,255,.1);color:#fff}
+#rbChatLog{height:150px;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:5px;font-size:11.5px;line-height:1.4;color:#dbe4f7}
+#rbChatLog .m b{color:#22d3ee}
+#rbChatLog .m.me b{color:#3ee08a}
+#rbChatLog .sys{color:#7f8db3;font-style:italic}
+#rbChatForm{display:flex;gap:6px;padding:7px;border-top:1px solid rgba(255,255,255,.08)}
+#rbChatForm input{flex:1;min-width:0;padding:8px 10px;border-radius:9px;border:1px solid rgba(255,255,255,.12);
+  background:#0a0f1c;color:#eaf0ff;font:500 12px var(--font);outline:none}
+#rbChatForm button{width:36px;border:0;border-radius:9px;background:#2b6cff;color:#fff;font-size:14px;cursor:pointer}
+
+#rbLeft{position:absolute;left:12px;bottom:96px;display:flex;flex-direction:column;gap:6px;pointer-events:auto}
+.rbSide{width:118px;padding:9px 8px;border:0;border-radius:9px;cursor:pointer;color:#fff;font:900 11.5px var(--font);
+  letter-spacing:.05em;text-align:center;box-shadow:0 6px 16px -8px #000,0 0 0 2px rgba(0,0,0,.28) inset;transform:skewX(-4deg)}
+.rbSide:active{transform:skewX(-4deg) scale(.96)}
+.rbSide.loja{background:linear-gradient(180deg,#39d353,#1f9d3a)}
+.rbSide.skin{background:linear-gradient(180deg,#b06bff,#7a3fd6)}
+.rbSide.inv{background:linear-gradient(180deg,#c9d1de,#8d97a8);color:#20283a}
+.rbSide.cfg{background:linear-gradient(180deg,#4f8cff,#2b5fd6)}
+.rbSide.sair{background:linear-gradient(180deg,#ff5a6e,#c92b40)}
+
+#rbJoy{position:absolute;right:22px;bottom:74px;width:96px;height:96px;border-radius:50%;pointer-events:auto;
+  background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.28);backdrop-filter:blur(6px);touch-action:none}
+#rbJoyKnob{position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;
+  background:rgba(255,255,255,.85);box-shadow:0 6px 16px rgba(0,0,0,.35);transition:transform .06s linear}
+#rbJump{position:absolute;right:34px;bottom:186px;width:62px;height:62px;border-radius:50%;pointer-events:auto;
+  border:2px solid rgba(255,255,255,.35);background:rgba(255,255,255,.14);color:#fff;font-size:24px;cursor:pointer;backdrop-filter:blur(6px)}
+#rbJump:active{background:rgba(255,255,255,.32);transform:scale(.94)}
+#rbCam{position:absolute;right:150px;bottom:86px;width:44px;height:44px;border-radius:50%;pointer-events:auto;
+  border:2px solid rgba(255,255,255,.28);background:rgba(10,14,24,.5);color:#fff;font-size:17px;cursor:pointer;backdrop-filter:blur(6px)}
+#rbBottom{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);display:flex;gap:8px;pointer-events:auto}
+#rbBottom button{padding:10px 18px;border-radius:10px;border:1px solid rgba(255,255,255,.18);
+  background:rgba(10,14,24,.6);color:#e8eefc;font:800 11px var(--font);letter-spacing:.06em;cursor:pointer;backdrop-filter:blur(8px)}
+#rbBottom #rbRun.on{background:rgba(34,197,94,.35);border-color:rgba(34,197,94,.6)}
+
+/* modal de configurações */
+#rbSettings{position:fixed;inset:0;z-index:99985;display:none;align-items:center;justify-content:center;padding:14px;
+  background:rgba(4,7,14,.55);backdrop-filter:blur(6px);font-family:var(--font)}
+#rbSettings.on{display:flex}
+#rbSetCard{width:min(660px,100%);max-height:calc(100dvh - 28px);display:flex;flex-direction:column;
+  background:linear-gradient(180deg,rgba(26,28,36,.97),rgba(16,18,26,.98));border:1px solid rgba(255,255,255,.12);
+  border-radius:16px;overflow:hidden;box-shadow:0 40px 100px -30px #000}
+#rbSetTabs{display:flex;gap:2px;padding:8px 8px 0;border-bottom:1px solid rgba(255,255,255,.08);overflow:auto}
+#rbSetTabs button{flex:1;min-width:86px;padding:10px 8px;border:0;background:transparent;color:#9aa6bd;
+  font:700 11.5px var(--font);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap}
+#rbSetTabs button.on{color:#fff;border-bottom-color:#fff}
+.rbSetBody{display:none;padding:14px 18px;overflow:auto;color:#e6ecfa}
+.rbSetBody.on{display:block}
+.rbSetBody h4{margin:6px 0 8px;font-size:15px;font-weight:900;color:#fff}
+.rbRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0;
+  border-bottom:1px solid rgba(255,255,255,.06);font-size:12.5px;color:#c6d0e6}
+.rbRow b{font-weight:700;color:#fff;font-size:12px}
+.rbRow select,.rbSetBody select{padding:7px 9px;border-radius:8px;border:1px solid rgba(255,255,255,.16);
+  background:#12161f;color:#e8eefc;font:600 12px var(--font);outline:none}
+.rbRow input[type=range]{width:120px;accent-color:#2b6cff}
+#rbVolSegs{display:flex;gap:3px}
+#rbVolSegs i{width:13px;height:18px;border-radius:3px;background:rgba(255,255,255,.18);cursor:pointer}
+#rbVolSegs i.on{background:#fff}
+.rbHint{font-size:12px;line-height:1.6;color:#a8b4cc;margin:6px 0}
+#rbPeople{display:flex;flex-direction:column;gap:6px;margin-bottom:10px}
+.rbPerson{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:9px;background:rgba(255,255,255,.05);font-size:12px;color:#dfe7ff}
+.rbPerson i{width:10px;height:10px;border-radius:50%;background:#3ee08a}
+.rbPerson small{margin-left:auto;color:#7f8db3;font-size:10px}
+#rbGallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:8px}
+.rbCard{padding:10px;border-radius:10px;background:rgba(255,255,255,.05);font-size:11px;color:#cfd9ef;text-align:center}
+.rbCard b{display:block;color:#fff;font-size:11.5px;margin-bottom:2px}
+#rbSetFooter{display:flex;gap:8px;padding:10px 14px;border-top:1px solid rgba(255,255,255,.08);background:rgba(0,0,0,.25)}
+#rbSetFooter button{flex:1;padding:11px;border-radius:9px;border:1px solid rgba(255,255,255,.16);
+  background:rgba(255,255,255,.06);color:#dfe7ff;font:800 12px var(--font);cursor:pointer}
+#rbSetFooter #rbCont{background:linear-gradient(180deg,#2b6cff,#1b4fd8);border:0;color:#fff}
+#rbReportGo{margin-top:10px;width:100%;padding:11px;border:0;border-radius:9px;background:#c92b40;color:#fff;font:800 12px var(--font);cursor:pointer}
+
+@media (max-width:560px){
+  #rbLeft{bottom:92px;gap:5px}
+  .rbSide{width:104px;font-size:10.5px;padding:8px 6px}
+  #rbJoy{width:88px;height:88px;right:16px;bottom:70px}
+  #rbJump{right:28px;bottom:172px;width:56px;height:56px}
+  #rbCam{right:132px;bottom:78px}
+  #avPanel{left:10px;right:10px;top:auto;bottom:56px;transform:none;width:auto}
+  #avHint{bottom:12px}
+}
+
+
+/* ---- legado escondido: HUD Roblox substitui ---- */
+#controls,#health,#mpBtn,#mpPanel,#hint,#crosshair{display:none!important}
 </style>
 </head>
 <body>
@@ -280,60 +433,151 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   <div id="bootTip">Preparando o mundo, carregando a AMHEEX AI…</div>
 </div>
 
-<!-- ===== MENU INICIAL ===== -->
-<div id="menu">
-  <img id="menuLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
-  <h1 id="menuTitle">AMHEEX GAME</h1>
-  <div id="menuSub">Mundo 3D online • AMHEEX AI</div>
-  <div id="menuCard">
-    <label for="menuName">Seu nome no jogo</label>
-    <input id="menuName" maxlength="18" placeholder="Digite seu nome…" autocomplete="off">
-    <button id="menuPlay" type="button">▶ ENTRAR NO MUNDO</button>
-    <div id="menuRow">
-      <button id="menuCfg" type="button">⚙ CONFIGURAÇÕES</button>
-      <button id="menuHow" type="button">❔ COMO JOGAR</button>
+<!-- ================= LOGIN / REGISTRO ================= -->
+<div id="login">
+  <div id="loginCard">
+    <img id="loginLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
+    <h1>AMHEEX GAME</h1>
+    <p class="sub">Entre na sua conta para jogar no mundo global</p>
+    <div id="loginTabs">
+      <button type="button" data-tab="entrar" class="on">ENTRAR</button>
+      <button type="button" data-tab="criar">CRIAR CONTA</button>
     </div>
-    <div id="menuStats">Jogadores online: <b id="menuPlayers">0</b> • seu IP identifica seu personagem</div>
+    <label for="loginUser">Usuário</label>
+    <input id="loginUser" maxlength="18" autocomplete="username" placeholder="seu usuário">
+    <label for="loginPass">Senha</label>
+    <input id="loginPass" type="password" maxlength="40" autocomplete="current-password" placeholder="sua senha">
+    <div id="loginNomeWrap" hidden>
+      <label for="loginNome">Nome no jogo</label>
+      <input id="loginNome" maxlength="18" placeholder="como quer aparecer">
+    </div>
+    <div id="loginMsg"></div>
+    <button id="loginGo" type="button">ENTRAR NO MUNDO</button>
+    <div class="tiny">Sua conta guarda personagem, skin e posição no mapa global.</div>
   </div>
 </div>
 
-<!-- ===== BARRA SUPERIOR ===== -->
-<div id="topbar">
-  <div id="tbBrand"><img src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt=""><div><b>AMHEEX GAME</b><small>AMHEEX AI</small></div></div>
-  <button class="tb icon" id="tbMenu" type="button" title="Menu">☰</button>
-  <button class="tb" id="tbChat" type="button" title="Chat">💬 <span class="lbl">Chat</span></button>
-  <button class="tb" id="tbPlayers" type="button" title="Jogadores">🌐 <b id="tbCount">0</b></button>
-  <button class="tb icon" id="tbSettings" type="button" title="Configurações">⚙</button>
+<!-- ================= EDITOR DE PERSONAGEM ================= -->
+<div id="avatar">
+  <div id="avHead">
+    <b>EDITOR DE PERSONAGEM</b>
+    <small>Monte seu avatar antes de entrar no mundo</small>
+  </div>
+  <div id="avPanel">
+    <div class="avRow"><span>Tom de pele</span><div class="sw" id="avPele"></div></div>
+    <div class="avRow"><span>Camisa</span><div class="sw" id="avCamisa"></div></div>
+    <div class="avRow"><span>Calça</span><div class="sw" id="avCalca"></div></div>
+    <div class="avRow"><span>Cabelo</span><div class="sw" id="avCabelo"></div></div>
+    <div class="avBtns">
+      <button id="avRandom" type="button">🎲 ALEATÓRIO</button>
+      <button id="avPlay" type="button">▶ JOGAR</button>
+    </div>
+  </div>
+  <div id="avHint">Arraste para girar o personagem</div>
 </div>
 
-<!-- ===== CHAT ===== -->
-<div id="chatPanel">
-  <div id="chatHead"><span>CHAT DO MUNDO</span><button id="chatClose" type="button">×</button></div>
-  <div id="chatLog"></div>
-  <form id="chatForm" autocomplete="off"><input id="chatInput" maxlength="180" placeholder="Digite e pressione Enter…"><button type="submit">Enviar</button></form>
-</div>
+<!-- ================= HUD ESTILO ROBLOX ================= -->
+<div id="rblx">
+  <div id="rbTopLeft">
+    <button id="rbMenu" class="rbCircle" type="button" title="Menu">☰</button>
+    <button id="rbChatBtn" class="rbCircle" type="button" title="Chat">💬</button>
+    <div id="rbAccount"><i id="rbAvatarDot"></i><b id="rbUser">Jogador</b></div>
+  </div>
 
-<!-- ===== VOZ ===== -->
-<div id="voiceBar">
-  <button id="voiceMic" type="button"><i id="voiceDot"></i> <span id="voiceLbl">VOZ OFF</span></button>
-  <button id="voiceMute" type="button">🔊 <span>Som</span></button>
-</div>
+  <div id="rbStats">
+    <div class="rbStat"><span>👥</span><b id="rbOnline">0</b></div>
+    <div class="rbStat"><span>💬</span><b id="rbChatCount">0</b></div>
+  </div>
 
-<!-- ===== CONFIGURAÇÕES ===== -->
-<div id="settings">
-  <div id="settingsCard">
-    <h3>Configurações</h3>
-    <p class="hint">Ajustes do jogo. Não alteram o mapa nem o personagem dos outros jogadores.</p>
-    <div class="setRow"><span>Qualidade gráfica</span><select id="setQuality"><option value="low">Baixa</option><option value="mid" selected>Média</option><option value="high">Alta</option></select></div>
-    <div class="setRow"><span>Volume geral</span><input id="setVolume" type="range" min="0" max="100" value="80"><span class="val" id="setVolumeV">80</span></div>
-    <div class="setRow"><span>Alcance da voz</span><input id="setVoiceRange" type="range" min="5" max="40" value="16"><span class="val" id="setVoiceRangeV">16m</span></div>
-    <div class="setRow"><span>Sensibilidade da câmera</span><input id="setSens" type="range" min="20" max="200" value="100"><span class="val" id="setSensV">100</span></div>
-    <div class="setRow"><span>Microfone</span><select id="setMic"><option value="off">Desligado</option><option value="on">Ligado (tecla V)</option></select></div>
-    <div class="setRow"><span>Mostrar nomes</span><select id="setNames"><option value="on" selected>Sim</option><option value="off">Não</option></select></div>
-    <button id="settingsClose" type="button">FECHAR</button>
+  <div id="rbChat">
+    <div id="rbChatTabs">
+      <button type="button" data-tab="aqui" class="on">Aqui</button>
+      <button type="button" data-tab="global">Global</button>
+    </div>
+    <div id="rbChatLog"></div>
+    <form id="rbChatForm" autocomplete="off">
+      <input id="rbChatInput" maxlength="180" placeholder="Toque aqui para escrever">
+      <button type="submit">➤</button>
+    </form>
+  </div>
+
+  <div id="rbLeft">
+    <button class="rbSide loja" type="button" data-open="loja">LOJA</button>
+    <button class="rbSide skin" type="button" data-open="skin">SKINS</button>
+    <button class="rbSide inv" type="button" data-open="inv">INVENTÁRIO</button>
+    <button class="rbSide cfg" type="button" data-open="config">CONFIG.</button>
+    <button class="rbSide sair" type="button" data-open="sair">SAIR</button>
+  </div>
+
+  <div id="rbJoy"><div id="rbJoyKnob"></div></div>
+  <button id="rbJump" type="button" title="Pular">⬆</button>
+  <button id="rbCam" type="button" title="Câmera">🎥</button>
+  <div id="rbBottom">
+    <button id="rbRun" type="button">CORRER</button>
+    <button id="rbAction" type="button">AÇÃO</button>
   </div>
 </div>
 
+<!-- ================= CONFIGURAÇÕES ESTILO ROBLOX ================= -->
+<div id="rbSettings">
+  <div id="rbSetCard">
+    <div id="rbSetTabs">
+      <button type="button" data-t="pessoas">👥 Pessoas</button>
+      <button type="button" data-t="config" class="on">⚙ Config.</button>
+      <button type="button" data-t="galeria">🖼 Galeria</button>
+      <button type="button" data-t="denunciar">🚩 Denunciar</button>
+      <button type="button" data-t="ajuda">❓ Ajuda</button>
+    </div>
+
+    <div class="rbSetBody on" data-body="config">
+      <h4>Áudio</h4>
+      <div class="rbRow"><span>Volume</span><div id="rbVolSegs"></div></div>
+      <div class="rbRow"><span>Dispositivo de saída</span><b>Padrão (alto-falante)</b></div>
+      <h4>Chat e idioma</h4>
+      <div class="rbRow"><span>Mensagens reformuladas</span><b>Ligado</b></div>
+      <div class="rbRow"><span>Alcance da voz</span><input id="rbVoiceRange" type="range" min="5" max="40" value="16"><b id="rbVoiceRangeV">16m</b></div>
+      <h4>Gráficos</h4>
+      <div class="rbRow"><span>Qualidade</span><select id="rbQuality"><option value="low">Baixa</option><option value="mid" selected>Média</option><option value="high">Alta</option></select></div>
+      <div class="rbRow"><span>Sensibilidade</span><input id="rbSens" type="range" min="20" max="200" value="100"><b id="rbSensV">100</b></div>
+      <div class="rbRow"><span>Mostrar nomes</span><select id="rbNames"><option value="on" selected>Sim</option><option value="off">Não</option></select></div>
+      <h4>Microfone</h4>
+      <div class="rbRow"><span>Voz por proximidade</span><button id="rbMic" type="button">LIGAR (V)</button></div>
+    </div>
+
+    <div class="rbSetBody" data-body="pessoas">
+      <h4>Neste servidor</h4>
+      <div id="rbPeople"></div>
+      <div class="rbRow"><span>Convidar amigos</span><b>Compartilhe o link do jogo</b></div>
+    </div>
+
+    <div class="rbSetBody" data-body="galeria">
+      <h4>Galeria do mundo</h4>
+      <p class="rbHint">Tudo que a AMHEEX AI cria no mapa aparece aqui. Peça no chat da IA: “crie uma torre”, “coloque uma casa”, “mude para floresta”.</p>
+      <div id="rbGallery"></div>
+    </div>
+
+    <div class="rbSetBody" data-body="denunciar">
+      <h4>Denunciar jogador</h4>
+      <p class="rbHint">Escolha um jogador e o motivo. A denúncia fica registrada no servidor.</p>
+      <select id="rbReportWho"></select>
+      <select id="rbReportWhy"><option>Linguagem ofensiva</option><option>Assédio</option><option>Spam</option><option>Outro</option></select>
+      <button id="rbReportGo" type="button">ENVIAR DENÚNCIA</button>
+    </div>
+
+    <div class="rbSetBody" data-body="ajuda">
+      <h4>Como jogar</h4>
+      <p class="rbHint"><b>Mover:</b> WASD/setas ou o joystick flutuante. <b>Pular:</b> Espaço ou botão ⬆. <b>Correr:</b> Shift ou CORRER. <b>Câmera:</b> arraste na tela ou botão 🎥.</p>
+      <p class="rbHint"><b>IA:</b> toque no ícone da AMHEEX AI e peça em português. Ela cria formas 3D no mapa, mas nunca edita o personagem de outro jogador.</p>
+      <p class="rbHint"><b>Voz:</b> tecla V liga/desliga. Só quem está perto escuta, como no Roblox.</p>
+    </div>
+
+    <div id="rbSetFooter">
+      <button id="rbSair" type="button">Sair</button>
+      <button id="rbRegen" type="button">Regenerar</button>
+      <button id="rbCont" type="button">Continuar</button>
+    </div>
+  </div>
+</div>
 
 <div id="crosshair"></div>
 <div id="health"><span>HP</span><div class="bar"><i id="healthBar"></i></div><b id="healthN">100</b></div>
