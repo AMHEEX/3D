@@ -1,0 +1,17 @@
+# AMHEEX IA 3D — proteção básica (Apache)
+Options -Indexes
+
+# não expõe JSONs internos, fontes de build nem o LEIA-ME
+<FilesMatch "\.(json|md|sh|log)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# tipos corretos para modelos 3D
+AddType model/gltf-binary .glb
+AddType model/gltf+json .gltf
