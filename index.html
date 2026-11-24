@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMHEEX - Soluções em Tecnologia e Programação</title>
+    
+    <link rel="icon" type="image/png" href="https://amheex.onrender.com/icon.png">
+    
+    <meta property="og:title" content="AMHEEX - Tecnologia, Programação e Automação">
+    <meta property="og:description" content="Transformando Código em Vitórias. Desenvolvimento de sites, aplicativos, automações e sistemas inteligentes com AMHEEX.">
+    <meta property="og:image" content="https://amheex.onrender.com/icon.png">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://amheex.onrender.com/">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ANIMAÇÃO RGB PARA O TEXTO E BORDAS */
+        @keyframes rgb-animation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Orbitron', sans-serif;
+            color: white;
+            /* Fundo Animado RGB Escuro */
+            background: linear-gradient(45deg, #050510, #150020, #001520, #002010, #050510);
+            background-size: 400% 400%;
+            animation: rgb-animation 15s ease infinite;
+            overflow-x: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            top: 0;
+            left: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 40px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid;
+            border-image: linear-gradient(90deg, red, orange, yellow, green, blue, indigo, violet) 1;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: linear-gradient(to right, red, orange, yellow, green, #00f2ff, blue, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: rgb-animation 3s linear infinite;
+        }
+
+        .logo img {
+            width: 35px;
+            height: 35px;
+            margin-right: 12px;
+            object-fit: contain;
+        }
+
+        .menu a {
+            margin-left: 20px;
+            color: white;
+            text-decoration: none;
+            font-size: 13px;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
+
+        .menu a:hover {
+            opacity: 1;
+            color: #00f2ff;
+            text-shadow: 0 0 10px #00f2ff;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 120px 20px;
+        }
+
+        .hero img {
+            width: 140px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0 0 25px red) drop-shadow(0 0 40px blue);
+            animation: pulse 3s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.05); }
+        }
+
+        .hero h1 {
+            font-size: clamp(30px, 5vw, 55px);
+            margin: 10px 0;
+            background: linear-gradient(to right, red, orange, yellow, green, #00f2ff, blue, violet, red);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: rgb-animation 4s linear infinite;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin: 20px auto;
+            opacity: 0.9;
+            line-height: 1.6;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+        }
+
+        /* Botão Único RGB */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn-comprar {
+            display: inline-block;
+            padding: 20px 50px;
+            border-radius: 14px;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.3s;
+            width: 320px; 
+            text-align: center;
+            border: none;
+            position: relative;
+            color: white;
+            z-index: 1;
+            background: #050510;
+            letter-spacing: 1.5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        }
+
+        .btn-comprar::before {
+            content: '';
+            position: absolute;
+            top: -3px; left: -3px; right: -3px; bottom: -3px;
+            background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet, red);
+            background-size: 400%;
+            z-index: -1;
+            border-radius: 16px;
+            animation: rgb-animation 8s linear infinite;
+        }
+
+        .btn-comprar:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 35px rgba(255, 0, 255, 0.4);
+        }
+
+        .counter {
+            margin-top: 25px;
+            font-size: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            display: inline-block;
+            padding: 10px 24px;
+            border-radius: 20px;
+            border: 1px solid;
+            border-image: linear-gradient(to right, red, yellow, green, blue, violet) 1;
+            letter-spacing: 1px;
+        }
+
+        section {
+            padding: 80px 20px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 50px;
+            font-size: 28px;
+            background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: rgb-animation 5s linear infinite;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+        }
+
+        .card {
+            background: rgba(10, 10, 20, 0.85);
+            border-radius: 14px;
+            padding: 30px;
+            position: relative;
+            transition: 0.3s;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        /* Efeito de Borda RGB Arco-Íris para os Cards */
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 14px;
+            padding: 2px;
+            background: linear-gradient(to bottom right, red, orange, yellow, green, blue, violet, red);
+            background-size: 300% 300%;
+            animation: rgb-animation 10s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 0 25px rgba(255, 0, 255, 0.2);
+        }
+
+        /* LISTVIEW DE REDES SOCIAIS ESTILO RGB */
+        .social-listview {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(10, 10, 25, 0.9);
+            border-radius: 16px;
+            padding: 15px;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        .social-listview::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 16px;
+            padding: 2px;
+            background: linear-gradient(to right, red, yellow, green, cyan, blue, magenta, red);
+            background-size: 300% 300%;
+            animation: rgb-animation 12s linear infinite;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .social-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            margin-bottom: 12px;
+            background: rgba(5, 5, 10, 0.95);
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .social-item:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Efeito Arco-íris Interno ao Passar o Mouse */
+        .social-item::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 12px;
+            padding: 1px;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .social-item:hover {
+            transform: scale(1.02);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .social-item:hover::before {
+            background: linear-gradient(to right, red, orange, yellow, green, blue, violet);
+            background-size: 200%;
+            animation: rgb-animation 3s linear infinite;
+        }
+
+        .social-img-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 20px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-img-container img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .social-name {
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .social-arrow {
+            margin-left: auto;
+            color: white;
+            font-size: 18px;
+            transition: transform 0.3s;
+        }
+
+        .social-item:hover .social-arrow {
+            transform: translateX(5px);
+            color: #ff007f;
+        }
+
+        .loading-text {
+            text-align: center;
+            font-size: 14px;
+            color: #ffffff;
+            padding: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .coin-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .coin {
+            background: #0f0f1a;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .coin::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 10px;
+            padding: 1px;
+            background: linear-gradient(to right, red, yellow, green, blue, violet);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .cta {
+            text-align: center;
+            background: rgba(5, 5, 15, 0.95);
+            padding: 100px 20px;
+            border-top: 2px solid;
+            border-image: linear-gradient(90deg, violet, indigo, blue, green, yellow, orange, red) 1;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            background: #030307;
+            opacity: 0.8;
+            font-size: 12px;
+            line-height: 1.5;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 15px;
+            }
+            .menu {
+                margin-top: 15px;
+            }
+            .menu a {
+                margin: 5px 8px;
+                font-size: 11px;
+            }
+            .hero { padding: 60px 20px; }
+            .hero h1 { font-size: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="particles-js"></div>
+
+<div class="navbar">
+    <div class="logo">
+        <img src="https://amheex.onrender.com/icon.png" alt="Logo">
+        AMHEEX Pro
+    </div>
+    <div class="menu">
+        <a href="#conteudos">Conteúdos</a>
+        <a href="#missao">Missão</a>
+        <a href="#redes">Redes Sociais</a>
+        <a href="#diferenciais">Diferenciais</a>
+        <a href="#comprar">Adquirir</a>
+    </div>
+</div>
+
+<section class="hero">
+    <img src="https://amheex.onrender.com/icon.png" alt="AMHEEX Logo">
+    <h1>AMHEEX</h1>
+    <p>Tecnologia • Programação • Automação • Games. <br>
+    Seja bem-vindo ao AMHEEX, um canal dedicado à tecnologia, inovação e desenvolvimento. Aqui você encontra as soluções mais completas do mercado para criar e evoluir no mundo digital.</p>
+    
+    <div class="btn-container">
+        <a class="btn-comprar" href="https://wa.me/+5546999020341?text=Ol%C3%A1,%20Quero%20comprar%20%22AMHEEX%20PRO%22!!!">COMPRAR DESENVOLVEDOR</a>
+    </div>
+
+    <div class="counter">
+        🔥 <span id="compras-count">1384</span> pessoas compraram sistemas AMHEEX
+    </div>
+</section>
+
+<section id="redes" class="reveal">
+    <h2>Nossas Redes Sociais</h2>
+    <div class="social-listview" id="social-listview-container">
+        <div class="loading-text" id="loading-redes">Buscando redes sociais...</div>
+    </div>
+</section>
+
+<section id="conteudos" class="reveal">
+    <h2>Conteúdos & Programação</h2>
+    <div class="grid">
+        <div class="card">
+            <h3>🌐 Desenvolvimento Web</h3>
+            <p>Criação e estruturação de Sites Modernos, Landing Pages interativas e soluções corporativas Full Stack de alta performance.</p>
+        </div>
+        <div class="card">
+            <h3>📱 Aplicativos Mobile</h3>
+            <p>Desenvolvimento avançado de aplicativos Android modernos com otimização completa e integração fluida de sistemas.</p>
+        </div>
+        <div class="card">
+            <h3>⚙️ Automação & Bots</h3>
+            <p>Criação de Bots Inteligentes, Automação via APIs robustas e Scripts personalizados que economizam tempo e aumentam sua produtividade.</p>
+        </div>
+        <div class="card">
+            <h3>🔐 Segurança & Cloud</h3>
+            <p>Hospedagem profissional, configuração de Servidores dedicados (FTP, VPS, Cloud), proteção de Bancos de Dados e Segurança Digital.</p>
+        </div>
+        <div class="card">
+            <h3>🎮 Games & Tecnologia</h3>
+            <p>Tutoriais avançados, conteúdo gamer focado em performance, análise de sistemas de jogos e integração inteligente de inteligência artificial.</p>
+        </div>
+        <div class="card">
+            <h3>🧠 Projetos Exclusivos</h3>
+            <p>Soluções e truques tecnológicos desenvolvidos sob demanda do absoluto zero até a publicação final do produto.</p>
+        </div>
+    </div>
+</section>
+
+<section id="missao" class="reveal" style="text-align: center;">
+    <h2>Nossa Missão</h2>
+    <p style="max-width: 800px; margin: 0 auto; line-height: 1.8; font-size: 18px; color: rgba(255, 255, 255, 0.9);">
+        Transformar ideias em soluções reais através da tecnologia. Compartilhamos conhecimento de forma prática, organizada e estritamente profissional para ajudar desenvolvedores, criadores de conteúdo e apaixonados por tecnologia a alcançar novos níveis.
+    </p>
+    <p style="margin-top: 30px; font-weight: bold; font-size: 20px; letter-spacing: 2px; color: #ff007f;">
+        "AMHEEX: Transformando Código em Vitórias."
+    </p>
+</section>
+
+<section id="diferenciais" class="reveal">
+    <h2>Por que escolher nossos Sistemas?</h2>
+    <div class="coin-list">
+        <div class="coin">Tutoriais Completos</div>
+        <div class="coin">Desenvolvimento Web & Mobile</div>
+        <div class="coin">Automações Profissionais</div>
+        <div class="coin">Suporte e Integrações de APIs</div>
+    </div>
+</section>
+
+<section id="comprar" class="cta">
+    <h2>Pronto para tirar suas ideias do papel?</h2>
+    <p style="max-width: 600px; margin: 20px auto;">Adquira soluções profissionais desenvolvidas de ponta a ponta pelo desenvolvedor AMHEEX.</p>
+    
+    <div class="btn-container">
+        <a href="https://wa.me/+5546999020341?text=Ol%C3%A1,%20Quero%20comprar%20%22AMHEEX%20PRO%22!!!" class="btn-comprar">COMPRAR AGORA</a>
+    </div>
+</section>
+
+<div class="footer">
+    ⚠️ O AMHEEX é uma marca de desenvolvimento de software e soluções em TI independente.<br>
+    © 2026 AMHEEX - Todos os direitos reservados.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/particles.js"></script>
+<script>
+    // Configuração do Fundo Espacial (Configurado com cor neutra clara para brilhar junto ao RGB)
+    particlesJS("particles-js", {
+        particles: {
+            number: { value: 45, density: { enable: true, value_area: 800 } },
+            color: { value: "#ffffff" },
+            shape: { type: "circle" },
+            opacity: { value: 0.25 },
+            size: { value: 2 },
+            line_linked: {
+                enable: true,
+                distance: 140,
+                color: "#ffffff",
+                opacity: 0.15,
+                width: 1
+            },
+            move: { enable: true, speed: 1 }
+        },
+        interactivity: { detect_on: "canvas", events: { onhover: { enable: true, mode: "grab" } } },
+        retina_detect: true
+    });
+
+    // Contador Dinâmico de Pessoas que Compraram
+    setInterval(() => {
+        let n = document.getElementById("compras-count");
+        let value = parseInt(n.innerText);
+        // Simula novas compras de forma realista de tempos em tempos
+        if (Math.random() > 0.5) {
+            value += Math.floor(Math.random() * 2) + 1;
+            n.innerText = value;
+        }
+    }, 12000);
+
+    // Efeito de Revelar ao Rolar
+    function reveal() {
+        let reveals = document.querySelectorAll(".reveal");
+        for (let i = 0; i < reveals.length; i++) {
+            let windowHeight = window.innerHeight;
+            let elementTop = reveals[i].getBoundingClientRect().top;
+            if (elementTop < windowHeight - 100) {
+                reveals[i].classList.add("active");
+            }
+        }
+    }
+    window.addEventListener("scroll", reveal);
+    reveal();
+
+    // INTEGRANDO O SISTEMA DE REDES SOCIAIS DO FIREBASE DB
+    async function carregarRedesSociais() {
+        const container = document.getElementById('social-listview-container');
+        const dbUrl = "https://enterprise-rede-server-private-default-rtdb.asia-southeast1.firebasedatabase.app/Redes.json";
+
+        const iconesRedes = {
+            instagram: "https://cdn-icons-png.flaticon.com/512/2111/2111463.png",
+            youtube: "https://cdn-icons-png.flaticon.com/512/1384/1384060.png",
+            telegram: "https://cdn-icons-png.flaticon.com/512/2111/2111646.png",
+            whatsapp: "https://cdn-icons-png.flaticon.com/512/733/733585.png",
+            tiktok: "https://cdn-icons-png.flaticon.com/512/3046/3046121.png",
+            twitter: "https://cdn-icons-png.flaticon.com/512/3256/3256013.png",
+            x: "https://cdn-icons-png.flaticon.com/512/3256/3256013.png",
+            facebook: "https://cdn-icons-png.flaticon.com/512/733/733547.png",
+            default: "https://amheex.onrender.com/icon.png"
+        };
+
+        try {
+            const response = await fetch(dbUrl);
+            if (!response.ok) throw new Error("Erro de conexão ao banco");
+            
+            const redes = await response.json();
+
+            if (!redes) {
+                container.innerHTML = "<div class='loading-text'>Nenhuma rede cadastrada.</div>";
+                return;
+            }
+
+            container.innerHTML = "";
+
+            // MODIFICAÇÃO DE LEITURA DINÂMICA COMPATÍVEL COM QUALQUER CHAVE/ID DO FIREBASE
+            // Lê todas as propriedades no objeto "redes" retornado diretamente
+            Object.keys(redes).forEach(chave => {
+                const redeData = redes[chave];
+                
+                // Garante que só monta o link se o objeto contiver a chave "URL" preenchida
+                if (redeData && redeData.URL) {
+                    const url = redeData.URL;
+                    let nomeRede = "Rede Social";
+                    let logoUrl = iconesRedes.default;
+
+                    const urlLower = url.toLowerCase();
+                    if (urlLower.includes("instagram.com")) {
+                        nomeRede = "Instagram";
+                        logoUrl = iconesRedes.instagram;
+                    } else if (urlLower.includes("youtube.com") || urlLower.includes("youtu.be")) {
+                        nomeRede = "YouTube";
+                        logoUrl = iconesRedes.youtube;
+                    } else if (urlLower.includes("t.me") || urlLower.includes("telegram.org")) {
+                        nomeRede = "Telegram";
+                        logoUrl = iconesRedes.telegram;
+                    } else if (urlLower.includes("wa.me") || urlLower.includes("whatsapp.com")) {
+                        nomeRede = "WhatsApp";
+                        logoUrl = iconesRedes.whatsapp;
+                    } else if (urlLower.includes("tiktok.com")) {
+                        nomeRede = "TikTok";
+                        logoUrl = iconesRedes.tiktok;
+                    } else if (urlLower.includes("twitter.com") || urlLower.includes("x.com")) {
+                        nomeRede = "Twitter / X";
+                        logoUrl = iconesRedes.x;
+                    } else if (urlLower.includes("facebook.com")) {
+                        nomeRede = "Facebook";
+                        logoUrl = iconesRedes.facebook;
+                    } else {
+                        try {
+                            const parsedUrl = new URL(url);
+                            nomeRede = parsedUrl.hostname.replace("www.", "").split('.')[0];
+                        } catch(e) {
+                            nomeRede = "Acessar Link";
+                        }
+                    }
+
+                    // Se existir o atributo "Nome" explicitamente cadastrado no Firebase, usa ele
+                    if (redeData.Nome) {
+                        nomeRede = redeData.Nome;
+                    }
+
+                    // Se existir o atributo de imagem customizado ("Icone" ou "Foto"), usa ele
+                    if (redeData.Icone || redeData.Foto) {
+                        logoUrl = redeData.Icone || redeData.Foto;
+                    }
+
+                    const itemHtml = `
+                        <a href="${url}" target="_blank" rel="noopener noreferrer" class="social-item">
+                            <div class="social-img-container">
+                                <img src="${logoUrl}" alt="${nomeRede}" onerror="this.src='https://amheex.onrender.com/icon.png'">
+                            </div>
+                            <div class="social-name">${nomeRede}</div>
+                            <div class="social-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                        </a>
+                    `;
+                    container.innerHTML += itemHtml;
+                }
+            });
+
+            if (container.children.length === 0) {
+                container.innerHTML = "<div class='loading-text'>Nenhuma rede encontrada.</div>";
+            }
+
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = "<div class='loading-text' style='color: #ff3333;'>Erro ao conectar com as redes.</div>";
+        }
+    }
+
+    window.addEventListener("DOMContentLoaded", carregarRedesSociais);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+# 1. Ativa a reescrita de URL
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
+
+# 2. Executa o S.php automaticamente em todo script PHP
+# php_value auto_prepend_file "index.php"
+
+# 3. Configurações de limites do PHP para suportar arquivos de até 1TB
+php_value upload_max_filesize 1048576M
+php_value post_max_size 1048576M
+php_value max_execution_time 0
+php_value max_input_time 0
+php_value memory_limit 4096M

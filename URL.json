@@ -1,0 +1,25 @@
+{
+  "domains": [
+    ".mp4",
+    ".ogg",
+    ".apk",
+    ".jpeg",
+    ".jpg",
+    ".png",
+    "gmail",
+
+    "amheex.workers.dev",
+    "amheex.web.app",
+    "amheex.onrender.com/api/",
+    "amheex.onrender.com/erro/",
+    "amheex.onrender.com/",
+    "google.com",
+    "accounts.google.com",
+    "account.google.com",
+    "apis.google.com",
+    "oauth2.googleapis.com",
+    "ssl.gstatic.com",
+    "gstatic.com",
+    "googleusercontent.com"
+  ]
+}

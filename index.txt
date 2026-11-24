@@ -1,0 +1,675 @@
+<?php
+//  =========================================================================
+// PHP FILE SERVER - EXECUÇÃO REAL DE PHP
+// =========================================================================
+
+ignore_user_abort(true);
+set_time_limit(0);
+
+@ini_set('upload_max_filesize', '1024M');
+@ini_set('post_max_size', '1024M');
+@ini_set('memory_limit', '4096M');
+@ini_set('max_execution_time', '0');
+@ini_set('max_input_time', '0');
+@ini_set('output_buffering', '0');
+@ini_set('implicit_flush', '1');
+
+// =========================================================================
+// 1. DOMÍNIO DO SERVIDOR E ORIGEM DA REQUISIÇÃO (IFRAME / CLIENTE)
+// =========================================================================
+
+// Domínio do próprio servidor PHP
+$rawHost = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? '';
+$currentDomain = strtolower(trim(explode(':', $rawHost)[0]));
+
+// Origem de quem faz a requisição (o site onde o iframe/script está embutido)
+$rawOrigin = $_SERVER['HTTP_ORIGIN'] ?? '';
+
+// Se HTTP_ORIGIN estiver vazio, tenta extrair do HTTP_REFERER
+if (empty($rawOrigin) && !empty($_SERVER['HTTP_REFERER'])) {
+    $rawOrigin = $_SERVER['HTTP_REFERER'];
+}
+
+$requestOriginDomain = '';
+
+if (!empty($rawOrigin)) {
+    $parsedUrl = parse_url($rawOrigin);
+    if (isset($parsedUrl['host'])) {
+        $requestOriginDomain = strtolower(trim($parsedUrl['host']));
+    }
+}
+
+// Se ainda estiver vazio e a requisição veio de um iframe/embbed de outro site,
+// tenta verificar se o navegador enviou o parâmetro de origem via query string ou header customizado
+if (empty($requestOriginDomain) && isset($_GET['_origin'])) {
+    $parsedUrl = parse_url($_GET['_origin']);
+    if (isset($parsedUrl['host'])) {
+        $requestOriginDomain = strtolower(trim($parsedUrl['host']));
+        $rawOrigin = $_GET['_origin'];
+    }
+}
+
+// Fallback final: Se não houver qualquer indício de origem externa, assume o próprio servidor
+if (empty($requestOriginDomain)) {
+    $requestOriginDomain = $currentDomain;
+}
+
+$isHttps =
+    (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+    ||
+    (
+        isset($_SERVER['SERVER_PORT'])
+        && (int)$_SERVER['SERVER_PORT'] === 443
+    )
+    ||
+    (
+        isset($_SERVER['HTTP_X_FORWARDED_PROTO'])
+        && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https'
+    );
+
+$currentScheme = $isHttps ? 'https' : 'http';
+
+// =========================================================================
+// 2. CORS DINÂMICO E CABEÇALHOS DE IFRAME
+// =========================================================================
+
+// Se tivermos um Origin detectado, enviamos exatamente ele no cabeçalho CORS
+$corsOrigin = !empty($rawOrigin) ? $rawOrigin : '*';
+
+header("Access-Control-Allow-Origin: {$corsOrigin}");
+header('Access-Control-Allow-Credentials: true');
+header('Access-Control-Allow-Methods: GET, POST, OPTIONS, HEAD');
+header(
+    'Access-Control-Allow-Headers: ' .
+    'Content-Type, Authorization, X-Requested-With, ' .
+    'Range, Content-Range, Content-Length'
+);
+header(
+    'Access-Control-Expose-Headers: ' .
+    'Content-Length, Content-Range, Accept-Ranges, Content-Type'
+);
+
+// Importante para permitir renderização em iframe cruzado
+header('Cross-Origin-Resource-Policy: cross-origin');
+header_remove('X-Frame-Options'); // Dynamic handling via URL.json
+
+// =========================================================================
+// 3. OPTIONS
+// =========================================================================
+
+$method = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+
+if ($method === 'OPTIONS') {
+    http_response_code(204);
+    exit;
+}
+
+// =========================================================================
+// 4. URL.JSON (VALIDAÇÃO DE DOMÍNIO E SUBDOMÍNIOS)
+// =========================================================================
+
+$jsonFile = __DIR__ . '/URL.json';
+$domainAllowed = false;
+
+if (!is_file($jsonFile)) {
+    $domainAllowed = true;
+} else {
+    $jsonContent = @file_get_contents($jsonFile);
+
+    if ($jsonContent !== false && trim($jsonContent) !== '') {
+        $allowedDomains = json_decode($jsonContent, true);
+
+        if (
+            is_array($allowedDomains) &&
+            isset($allowedDomains['domains']) &&
+            is_array($allowedDomains['domains'])
+        ) {
+            $allowedDomains = $allowedDomains['domains'];
+        }
+
+        if (is_array($allowedDomains)) {
+            foreach ($allowedDomains as $domain) {
+                if (!is_string($domain)) {
+                    continue;
+                }
+
+                $domain = strtolower(trim($domain));
+                $domain = preg_replace('#^https?://#i', '', $domain);
+                $domain = explode('/', $domain)[0];
+                $domain = explode(':', $domain)[0];
+
+                // Permite se for o próprio servidor
+                if ($domain === $currentDomain) {
+                    $domainAllowed = true;
+                    break;
+                }
+
+                // Comparação exata OU validação de subdomínio (Ex: apis.google.com bate com google.com)
+                if (
+                    $domain === $requestOriginDomain ||
+                    str_ends_with($requestOriginDomain, '.' . $domain)
+                ) {
+                    $domainAllowed = true;
+                    break;
+                }
+            }
+        }
+    }
+}
+
+if (!$domainAllowed) {
+    header('Location: https://amheex.onrender.com/erro/494.html', true, 302);
+    exit;
+}
+
+// =========================================================================
+// 5. DIRETÓRIOS
+// =========================================================================
+
+$STORAGE_DIRS = [
+    __DIR__ . '/#',
+    '/var/www/html/#',
+    '/app/#',
+    '/data/#',
+    '/mnt/data/#'
+];
+
+// =========================================================================
+// 6. CRIA DIRETÓRIOS
+// =========================================================================
+
+foreach ($STORAGE_DIRS as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0777, true);
+    }
+}
+
+// =========================================================================
+// 7. LIMPAR CAMINHO (AJUSTADO PARA ACEITAR O CARACTERE '#')
+// =========================================================================
+
+function sanitizaCaminho($path)
+{
+    $path = rawurldecode($path);
+    $path = str_replace('\\', '/', $path);
+    $path = explode('?', $path)[0];
+    $path = ltrim($path, '/');
+
+    // Remove /#/ ou /X/ duplicado
+    $path = preg_replace('#^(?:[X\#]/)+#i', '', $path);
+
+    // Impedir traversal
+    $parts = explode('/', $path);
+    $safe = [];
+
+    foreach ($parts as $part) {
+        if ($part === '' || $part === '.' || $part === '..') {
+            continue;
+        }
+
+        if (strpos($part, "\0") !== false) {
+            continue;
+        }
+
+        // Permitir o caractere '#' nos arquivos/pastas
+        $part = preg_replace('/[^a-zA-Z0-9_\-.@\#]/', '', $part);
+
+        if ($part !== '') {
+            $safe[] = $part;
+        }
+    }
+
+    return implode('/', $safe);
+}
+
+// =========================================================================
+// 8. LOCALIZAR ARQUIVO
+// =========================================================================
+
+function localizarArquivoLocal($relativePath, &$foundPath = null, &$searched = []) {
+    global $STORAGE_DIRS;
+
+    $foundPath = null;
+    $searched = [];
+
+    foreach ($STORAGE_DIRS as $baseDir) {
+        $baseReal = realpath($baseDir);
+
+        if ($baseReal === false) {
+            continue;
+        }
+
+        $candidate = rtrim($baseReal, '/\\') . DIRECTORY_SEPARATOR . $relativePath;
+        $searched[] = $candidate;
+
+        clearstatcache(true, $candidate);
+        $realCandidate = realpath($candidate);
+
+        if (
+            $realCandidate !== false &&
+            is_file($realCandidate) &&
+            is_readable($realCandidate)
+        ) {
+            $prefix = rtrim($baseReal, '/\\') . DIRECTORY_SEPARATOR;
+
+            if (str_starts_with($realCandidate, $prefix)) {
+                $foundPath = $realCandidate;
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+// =========================================================================
+// 9. URL PÚBLICA
+// =========================================================================
+
+function buildPublicUrl($relativePath)
+{
+    global $currentScheme;
+
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+
+    return $currentScheme . '://' . $host . '/#/' . ltrim($relativePath, '/');
+}
+
+// =========================================================================
+// 10. MIME
+// =========================================================================
+
+function detectarMime($file)
+{
+    if (function_exists('mime_content_type')) {
+        $mime = @mime_content_type($file);
+
+        if ($mime !== false && $mime !== '') {
+            return $mime;
+        }
+    }
+
+    return 'application/octet-stream';
+}
+
+// =========================================================================
+// 11. REQUEST PATH
+// =========================================================================
+
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+$requestPath = parse_url($requestUri, PHP_URL_PATH);
+
+if (!is_string($requestPath)) {
+    $requestPath = '/';
+}
+
+$cleanPath = preg_replace('#^/(?:X|\#)/?#i', '', $requestPath);
+$fileRelPath = sanitizaCaminho($cleanPath);
+
+// =========================================================================
+// 12. DEBUG
+// =========================================================================
+
+if (isset($_GET['debug']) && $_GET['debug'] === '1') {
+
+    $foundPath = null;
+    $searched = [];
+
+    $found = localizarArquivoLocal($fileRelPath, $foundPath, $searched);
+
+    header('Content-Type: application/json; charset=utf-8');
+
+    echo json_encode(
+        [
+            'ok' => true,
+            'method' => $method,
+            'request_uri' => $requestUri,
+            'request_path' => $requestPath,
+            'file' => $fileRelPath,
+            'server_domain' => $currentDomain,
+            'request_origin_raw' => $rawOrigin,
+            'request_origin_domain' => $requestOriginDomain,
+            'local_found' => $found,
+            'local_path' => $foundPath,
+            'searched_paths' => $searched,
+            'document_root' => $_SERVER['DOCUMENT_ROOT'] ?? null,
+            'script_filename' => $_SERVER['SCRIPT_FILENAME'] ?? null,
+            'cwd' => getcwd()
+        ],
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+    );
+
+    exit;
+}
+
+// =========================================================================
+// 13. RAIZ
+// =========================================================================
+
+if ($fileRelPath === '') {
+
+    $foundPath = null;
+    $searched = [];
+
+    if (localizarArquivoLocal('index.php', $foundPath, $searched)) {
+        $_SERVER['SCRIPT_FILENAME'] = $foundPath;
+        $_SERVER['SCRIPT_NAME'] = '/#/index.php';
+        $_SERVER['PHP_SELF'] = '/#/index.php';
+
+        chdir(dirname($foundPath));
+        require $foundPath;
+        exit;
+    }
+
+    if (localizarArquivoLocal('index.html', $foundPath, $searched)) {
+        header('Location: /#/index.html', true, 302);
+        exit;
+    }
+
+    header('Location: https://amheex.onrender.com/index.html', true, 302);
+    exit;
+}
+
+// =========================================================================
+// 14. GET / HEAD
+// =========================================================================
+
+if ($method === 'GET' || $method === 'HEAD') {
+
+    $foundPath = null;
+    $searched = [];
+
+    if (localizarArquivoLocal($fileRelPath, $foundPath, $searched)) {
+
+        clearstatcache(true, $foundPath);
+
+        $extension = strtolower(pathinfo($foundPath, PATHINFO_EXTENSION));
+
+        if ($extension === 'php') {
+
+            if ($method === 'HEAD') {
+                exit;
+            }
+
+            $_SERVER['SCRIPT_FILENAME'] = $foundPath;
+            $_SERVER['SCRIPT_NAME'] = '/#/' . $fileRelPath;
+            $_SERVER['PHP_SELF'] = '/#/' . $fileRelPath;
+
+            chdir(dirname($foundPath));
+            require $foundPath;
+            exit;
+        }
+
+        $size = @filesize($foundPath);
+        $mime = detectarMime($foundPath);
+
+        header('Content-Type: ' . $mime);
+        header('Accept-Ranges: bytes');
+
+        if ($size !== false) {
+            header('Content-Length: ' . $size);
+        }
+
+        if ($method === 'HEAD') {
+            exit;
+        }
+
+        @readfile($foundPath);
+        exit;
+    }
+
+    header('Location: https://amheex.onrender.com/erro/404.html', true, 302);
+    exit;
+}
+
+// =========================================================================
+// 15. POST / UPLOAD OU EXECUÇÃO DE PHP VIA POST
+// =========================================================================
+
+if ($method === 'POST') {
+
+    if ($fileRelPath === '') {
+        http_response_code(400);
+        echo 'null';
+        exit;
+    }
+
+    // VERIFICAÇÃO: Se o arquivo solicitado for um script .php existente, executa-o via POST
+    $foundPath = null;
+    $searched = [];
+    if (localizarArquivoLocal($fileRelPath, $foundPath, $searched)) {
+        $extension = strtolower(pathinfo($foundPath, PATHINFO_EXTENSION));
+        if ($extension === 'php') {
+            $_SERVER['SCRIPT_FILENAME'] = $foundPath;
+            $_SERVER['SCRIPT_NAME'] = '/#/' . $fileRelPath;
+            $_SERVER['PHP_SELF'] = '/#/' . $fileRelPath;
+
+            chdir(dirname($foundPath));
+            require $foundPath;
+            exit;
+        }
+    }
+
+    // Se não for um script PHP existente, prossegue com a rotina de Upload de Arquivo
+    while (ob_get_level()) {
+        @ob_end_clean();
+    }
+
+    $writeBase = null;
+
+    foreach ($STORAGE_DIRS as $dir) {
+        if (is_dir($dir) && is_writable($dir)) {
+            $writeBase = $dir;
+            break;
+        }
+    }
+
+    if ($writeBase === null) {
+        $writeBase = $STORAGE_DIRS[0];
+        @mkdir($writeBase, 0777, true);
+    }
+
+    $finalFilePath = rtrim($writeBase, '/\\') . DIRECTORY_SEPARATOR . $fileRelPath;
+    $fileDir = dirname($finalFilePath);
+
+    if (!is_dir($fileDir)) {
+        if (!@mkdir($fileDir, 0777, true)) {
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+    }
+
+    // MULTIPART CHUNKS
+    if (isset($_POST['chunkIndex']) && isset($_POST['totalChunks'])) {
+
+        $chunkIndex = max(0, intval($_POST['chunkIndex']));
+        $totalChunks = max(1, intval($_POST['totalChunks']));
+
+        $chunkTmp = null;
+
+        foreach ($_FILES as $fileInfo) {
+            if (
+                isset($fileInfo['tmp_name']) &&
+                isset($fileInfo['error']) &&
+                $fileInfo['error'] === UPLOAD_ERR_OK
+            ) {
+                $chunkTmp = $fileInfo['tmp_name'];
+                break;
+            }
+        }
+
+        if ($chunkTmp === null || !is_file($chunkTmp)) {
+            http_response_code(400);
+            echo 'null';
+            exit;
+        }
+
+        $lockFile = $finalFilePath . '.lock';
+        $lock = @fopen($lockFile, 'c');
+
+        if (!$lock) {
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        @flock($lock, LOCK_EX);
+
+        $mode = $chunkIndex === 0 ? 'wb' : 'ab';
+        $out = @fopen($finalFilePath, $mode);
+        $in = @fopen($chunkTmp, 'rb');
+
+        if (!$out || !$in) {
+            if ($out) @fclose($out);
+            if ($in) @fclose($in);
+            @flock($lock, LOCK_UN);
+            @fclose($lock);
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        $copied = @stream_copy_to_stream($in, $out);
+
+        @fclose($in);
+        @fclose($out);
+        @flock($lock, LOCK_UN);
+        @fclose($lock);
+
+        if ($copied === false) {
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        clearstatcache(true, $finalFilePath);
+
+        if ($chunkIndex >= ($totalChunks - 1)) {
+            if (is_file($finalFilePath)) {
+                echo buildPublicUrl($fileRelPath);
+                exit;
+            }
+
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        echo 'chunk_ok';
+        exit;
+    }
+
+    // CONTENT-RANGE
+    $contentRange = $_SERVER['HTTP_CONTENT_RANGE'] ?? '';
+
+    if (
+        $contentRange !== '' &&
+        preg_match('/bytes\s+(\d+)-(\d+)\/(\d+|\*)/i', $contentRange, $matches)
+    ) {
+        $startByte = intval($matches[1]);
+        $totalSize = $matches[3] !== '*' ? intval($matches[3]) : 0;
+
+        $lockFile = $finalFilePath . '.lock';
+        $lock = @fopen($lockFile, 'c');
+
+        if (!$lock) {
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        @flock($lock, LOCK_EX);
+
+        $out = @fopen($finalFilePath, $startByte === 0 ? 'wb' : 'c+b');
+        $input = @fopen('php://input', 'rb');
+
+        if (!$out || !$input) {
+            if ($out) @fclose($out);
+            if ($input) @fclose($input);
+            @flock($lock, LOCK_UN);
+            @fclose($lock);
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        if ($startByte > 0) {
+            @fseek($out, $startByte);
+        }
+
+        $copied = @stream_copy_to_stream($input, $out);
+
+        @fclose($input);
+        @fclose($out);
+        @flock($lock, LOCK_UN);
+        @fclose($lock);
+
+        if ($copied === false) {
+            http_response_code(500);
+            echo 'null';
+            exit;
+        }
+
+        clearstatcache(true, $finalFilePath);
+
+        $currentSize = is_file($finalFilePath) ? filesize($finalFilePath) : 0;
+
+        if ($totalSize > 0 && $currentSize >= $totalSize) {
+            echo buildPublicUrl($fileRelPath);
+            exit;
+        }
+
+        echo 'chunk_ok';
+        exit;
+    }
+
+    // UPLOAD RAW
+    $input = @fopen('php://input', 'rb');
+
+    if (!$input) {
+        http_response_code(400);
+        echo 'null';
+        exit;
+    }
+
+    $out = @fopen($finalFilePath, 'wb');
+
+    if (!$out) {
+        @fclose($input);
+        http_response_code(500);
+        echo 'null';
+        exit;
+    }
+
+    $copied = @stream_copy_to_stream($input, $out);
+
+    @fclose($input);
+    @fclose($out);
+
+    if ($copied === false) {
+        http_response_code(500);
+        echo 'null';
+        exit;
+    }
+
+    clearstatcache(true, $finalFilePath);
+
+    if (is_file($finalFilePath)) {
+        echo buildPublicUrl($fileRelPath);
+        exit;
+    }
+
+    http_response_code(500);
+    echo 'null';
+    exit;
+}
+
+// =========================================================================
+// 16. MÉTODO NÃO SUPORTADO
+// =========================================================================
+
+http_response_code(405);
+header('Allow: GET, POST, OPTIONS, HEAD');
+echo 'null';
+exit;
