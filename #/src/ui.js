@@ -156,6 +156,7 @@
     });
   }
   function enterAvatar() {
+    var hud0 = $('rblx'); if (hud0) hud0.classList.remove('on');
     if (avatarEl) avatarEl.classList.add('on');
     if (avatarEl && !avatarEl._built) { buildSwatches(); avatarEl._built = true; }
     paintSwatches();
@@ -222,7 +223,7 @@
       b.addEventListener('click', function () {
         var o = b.getAttribute('data-open');
         if (o === 'sair') { sair(); return; }
-        if (o === 'skin') { if (avatarEl) avatarEl.classList.add('on'); return; }
+        if (o === 'skin') { enterAvatar(); return; }
         openSettings(true, (o === 'loja' || o === 'inv') ? 'galeria' : 'config');
       });
     })(sides[sd]);

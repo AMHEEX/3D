@@ -2851,7 +2851,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   function previewSkin(skin) {
     var r = applySkin(skin);
     setControlMode('third');
-    if (camera) { camera.beta = 1.18; camera.radius = 5.4; camera.alpha = Math.PI / 2 + 0.35; }
+    if (npc && npc.node) npc.node.setEnabled(false);
+    if (camera) { camera.beta = 1.22; camera.radius = 6.6; camera.alpha = Math.PI / 2 + 0.32; }
     return r;
   }
   window.AMX_PREVIEW = previewSkin;
@@ -2866,6 +2867,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     }
     setControlMode('third');
     if (!npc) spawnNPC('AMHEEX BOT');
+    if (npc && npc.node) npc.node.setEnabled(true);
     MP._quiet = true;
     setTimeout(function () { MP._quiet = false; }, 2600);
     MP.enable(true);
@@ -3325,6 +3327,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     });
   }
   function enterAvatar() {
+    var hud0 = $('rblx'); if (hud0) hud0.classList.remove('on');
     if (avatarEl) avatarEl.classList.add('on');
     if (avatarEl && !avatarEl._built) { buildSwatches(); avatarEl._built = true; }
     paintSwatches();
@@ -3391,7 +3394,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       b.addEventListener('click', function () {
         var o = b.getAttribute('data-open');
         if (o === 'sair') { sair(); return; }
-        if (o === 'skin') { if (avatarEl) avatarEl.classList.add('on'); return; }
+        if (o === 'skin') { enterAvatar(); return; }
         openSettings(true, (o === 'loja' || o === 'inv') ? 'galeria' : 'config');
       });
     })(sides[sd]);

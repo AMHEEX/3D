@@ -1596,7 +1596,8 @@
   function previewSkin(skin) {
     var r = applySkin(skin);
     setControlMode('third');
-    if (camera) { camera.beta = 1.18; camera.radius = 5.4; camera.alpha = Math.PI / 2 + 0.35; }
+    if (npc && npc.node) npc.node.setEnabled(false);
+    if (camera) { camera.beta = 1.22; camera.radius = 6.6; camera.alpha = Math.PI / 2 + 0.32; }
     return r;
   }
   window.AMX_PREVIEW = previewSkin;
@@ -1611,6 +1612,7 @@
     }
     setControlMode('third');
     if (!npc) spawnNPC('AMHEEX BOT');
+    if (npc && npc.node) npc.node.setEnabled(true);
     MP._quiet = true;
     setTimeout(function () { MP._quiet = false; }, 2600);
     MP.enable(true);
