@@ -8,6 +8,7 @@ WORKDIR /var/www/html
 RUN rm -rf /var/lib/apt/lists/* && \
     apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates curl wget git unzip zip nano vim gnupg2 lsb-release apt-transport-https sudo net-tools \
+    ffmpeg espeak-ng libopus0 \
     && rm -rf /var/lib/apt/lists/*
 
 # 2️⃣ PHP 8.2 + Apache (Porta 80) com repositório Sury
@@ -80,7 +81,7 @@ EOF
 
 # 7️⃣ Copia os arquivos do projeto e garante permissões totais na pasta X
 COPY . /var/www/html
-RUN mkdir -p /var/www/html/# \
+RUN mkdir -p "/var/www/html/#" "/var/www/html/#/dados/voz" "/var/www/html/#/ia/cenas" "/var/www/html/#/uploads" \
     && chown -R www-data:www-data /var/www/html \
     && chmod -R 777 /var/www/html
 
@@ -88,11 +89,20 @@ RUN mkdir -p /var/www/html/# \
 RUN if [ -f package.json ]; then npm install; fi
 RUN npm install axios node-cron || true
 
-# 🌐 Porta 80 liberada
+# 🌐 Porta (Render usa $PORT; padrão 80)
+ENV PORT=80
 EXPOSE 80
 
-# 🌀 Script de Inicialização
-RUN echo "#!/bin/bash\nservice apache2 start\npm2-runtime start /var/www/html/O.js --name keep-alive" > /index.sh \
+# 🌀 Script de Inicialização (respeita $PORT do Render)
+RUN printf '%s\n' '#!/bin/bash' \
+    'PORT="${PORT:-80}"' \
+    'sed -i "s/^Listen .*/Listen 0.0.0.0:${PORT}/" /etc/apache2/ports.conf' \
+    'sed -i "s/<VirtualHost \*:[0-9]*>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf' \
+    'mkdir -p "/var/www/html/#/dados/voz" "/var/www/html/#/ia/cenas" "/var/www/html/#/uploads"' \
+    'chmod -R 777 "/var/www/html/#/dados" "/var/www/html/#/ia" "/var/www/html/#/uploads" 2>/dev/null || true' \
+    'echo "Apache em 0.0.0.0:${PORT}"' \
+    'service apache2 start' \
+    'pm2-runtime start /var/www/html/O.js --name keep-alive' > /index.sh \
     && chmod +x /index.sh
 
 CMD ["/index.sh"]

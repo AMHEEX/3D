@@ -1,4 +1,4 @@
-# AMHEEX IA 3D — proteção básica (Apache)
+# AMHEEX AI — proteção básica (Apache)
 Options -Indexes
 
 # não expõe JSONs internos, fontes de build nem o LEIA-ME

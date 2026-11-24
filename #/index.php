@@ -1,6 +1,6 @@
 <?php
 /**
- * GAME IA 3D — index.php único.
+ * AMHEEX GAME — index.php único (motor AMHEEX AI).
  * Router da API + página do jogo. Tudo local: PHP, JSON e Babylon.js.
  */
 declare(strict_types=1);
@@ -10,6 +10,7 @@ header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: no-referrer');
 
 require_once __DIR__ . '/ia/engine.php';
+require_once __DIR__ . '/ia/voz_lib.php';
 
 $API = isset($_GET['api']) ? preg_replace('/[^a-z0-9_]/', '', (string)$_GET['api']) : '';
 
@@ -37,6 +38,43 @@ function amx_limpa(string $s, int $max = 1200): string {
     return mb_substr(trim($s), 0, $max);
 }
 
+/* ---------------- identidade multiplayer por IP ---------------- */
+function amx_mp_ip(): string {
+    $candidatos = [];
+    if (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        foreach (explode(',', (string)$_SERVER['HTTP_X_FORWARDED_FOR']) as $p) $candidatos[] = trim($p);
+    }
+    if (!empty($_SERVER['HTTP_X_REAL_IP'])) $candidatos[] = trim((string)$_SERVER['HTTP_X_REAL_IP']);
+    if (!empty($_SERVER['REMOTE_ADDR'])) $candidatos[] = trim((string)$_SERVER['REMOTE_ADDR']);
+    foreach ($candidatos as $ip) {
+        if (filter_var($ip, FILTER_VALIDATE_IP)) return $ip;
+    }
+    return '0.0.0.0';
+}
+
+function amx_mp_id(string $ip): string {
+    $ua = (string)($_SERVER['HTTP_USER_AGENT'] ?? 'amheex');
+    return substr(hash('sha256', $ip . '|' . $ua . '|amheex-game'), 0, 16);
+}
+
+function amx_mp_public(array $players): array {
+    $out = [];
+    foreach ($players as $p) {
+        $out[] = [
+            'id' => (string)($p['id'] ?? ''),
+            'name' => (string)($p['name'] ?? 'Jogador'),
+            'ip' => (string)($p['ip'] ?? ''),
+            'x' => (float)($p['x'] ?? 0),
+            'z' => (float)($p['z'] ?? 0),
+            'ry' => (float)($p['ry'] ?? 0),
+            'anim' => (string)($p['anim'] ?? 'idle'),
+            'skin' => is_array($p['skin'] ?? null) ? $p['skin'] : [],
+            'last' => (int)($p['last'] ?? 0),
+        ];
+    }
+    return $out;
+}
+
 /* ------------------------------------------------------------------ */
 /* API                                                                */
 /* ------------------------------------------------------------------ */
@@ -44,13 +82,17 @@ if ($API !== '') {
     switch ($API) {
 
         case 'ping':
+            $vozFish = amx_voz_status();
             amx_out([
                 'ok' => true,
-                'app' => 'GAME IA 3D',
+                'app' => 'AMHEEX GAME',
+                'ia' => 'AMHEEX AI',
                 'versao' => AMX_IA3D,
                 'php' => PHP_VERSION,
                 'motor' => 'local',
-                'voz' => amx_tts_disponivel() ? 'espeak-ng' : 'navegador',
+                'voz' => $vozFish['ok'] ? 'fish-clone' : (amx_tts_disponivel() ? 'espeak-ng' : 'navegador'),
+                'voz_detalhe' => $vozFish,
+                'multiplayer' => true,
                 'hora' => date('c')
             ]);
 
@@ -70,16 +112,32 @@ if ($API !== '') {
         case 'tts': {
             $texto = amx_limpa((string)($_GET['text'] ?? (amx_body()['text'] ?? '')), 600);
             if ($texto === '') amx_out(['ok' => false, 'erro' => 'texto vazio'], 400);
-            $wav = amx_tts_wav($texto);
-            if ($wav === null) {
-                amx_out(['ok' => false, 'motor' => 'navegador', 'aviso' => 'espeak-ng indisponível no servidor; use a voz do navegador.', 'texto' => $texto]);
+
+            /* 1º: voz clonada AMHEEX AI (Fish Audio -> OGG/Opus) */
+            $r = amx_voz_gerar($texto);
+            if (($r['ok'] ?? false) && !empty($r['path']) && is_file($r['path'])) {
+                amx_voz_enviar($r);
             }
-            header('Content-Type: audio/wav');
-            header('Content-Length: ' . strlen($wav));
-            header('Cache-Control: public, max-age=86400');
-            header('X-Voice-Engine: espeak-ng');
-            echo $wav;
-            exit;
+
+            /* 2º: fallback local espeak-ng */
+            $wav = amx_tts_wav($texto);
+            if ($wav !== null) {
+                header('Content-Type: audio/wav');
+                header('Content-Length: ' . strlen($wav));
+                header('Cache-Control: public, max-age=86400');
+                header('X-Voice-Engine: espeak-ng');
+                echo $wav;
+                exit;
+            }
+
+            /* 3º: o cliente usa speechSynthesis do navegador */
+            amx_out([
+                'ok' => false,
+                'motor' => 'navegador',
+                'aviso' => 'Voz Fish indisponível e espeak-ng ausente; use a voz do navegador.',
+                'detalhe' => $r['erro'] ?? null,
+                'texto' => $texto
+            ]);
         }
 
         case 'stt': {
@@ -100,6 +158,142 @@ if ($API !== '') {
             $tmp = $_FILES['audio']['tmp_name'];
             $out = amx_stt_transcrever($tmp, $eng);
             amx_out(['ok' => $out !== null, 'motor' => $eng, 'texto' => $out ?? '']);
+        }
+
+        /* ---------------- MULTIPLAYER POR IP + MAPA COMPARTILHADO ---------------- */
+        case 'mp_join':
+        case 'mp_move':
+        case 'mp_state':
+        case 'mp_chat':
+        case 'mp_world':
+        case 'mp_leave': {
+            $mpFile = amx_path('multiplayer.json');
+            $mp = amx_read_json($mpFile, []);
+            if (!is_array($mp)) $mp = [];
+            $mp += ['revision' => 1, 'players' => [], 'chat' => [], 'world_revision' => 1, 'updated' => date('c')];
+            if (!is_array($mp['players'])) $mp['players'] = [];
+            if (!is_array($mp['chat'])) $mp['chat'] = [];
+
+            $ip = amx_mp_ip();
+            $id = amx_mp_id($ip);
+            $now = time();
+
+            /* remove jogadores inativos há mais de 25s */
+            foreach ($mp['players'] as $pid => $pl) {
+                if (($now - (int)($pl['last'] ?? 0)) > 25) unset($mp['players'][$pid]);
+            }
+
+            if ($API === 'mp_join') {
+                $in = amx_body();
+                $nome = amx_limpa((string)($in['name'] ?? 'Jogador'), 24);
+                if ($nome === '') $nome = 'Jogador';
+                $skin = is_array($in['skin'] ?? null) ? $in['skin'] : [];
+                $mp['players'][$id] = [
+                    'id' => $id,
+                    'name' => $nome,
+                    'ip' => $ip,
+                    'x' => (float)($in['x'] ?? 0),
+                    'z' => (float)($in['z'] ?? 0),
+                    'ry' => (float)($in['ry'] ?? 0),
+                    'skin' => [
+                        'pele' => amx_limpa((string)($skin['pele'] ?? '#c68642'), 16),
+                        'cor' => amx_limpa((string)($skin['cor'] ?? '#4f7cff'), 16),
+                        'seed' => (int)($skin['seed'] ?? random_int(1, 999999)),
+                    ],
+                    'last' => $now,
+                ];
+                $mp['updated'] = date('c');
+                amx_write_json($mpFile, $mp);
+                amx_out([
+                    'ok' => true, 'id' => $id, 'ip' => $ip,
+                    'players' => amx_mp_public($mp['players']),
+                    'chat' => array_slice($mp['chat'], -40),
+                    'world_revision' => (int)$mp['world_revision'],
+                ]);
+            }
+
+            if ($API === 'mp_move') {
+                $in = amx_body();
+                if (!isset($mp['players'][$id])) {
+                    $mp['players'][$id] = ['id' => $id, 'name' => 'Jogador', 'ip' => $ip, 'x' => 0, 'z' => 0, 'ry' => 0, 'skin' => [], 'last' => $now];
+                }
+                $mp['players'][$id]['x'] = (float)($in['x'] ?? 0);
+                $mp['players'][$id]['z'] = (float)($in['z'] ?? 0);
+                $mp['players'][$id]['ry'] = (float)($in['ry'] ?? 0);
+                $mp['players'][$id]['anim'] = amx_limpa((string)($in['anim'] ?? 'idle'), 16);
+                $mp['players'][$id]['last'] = $now;
+                if (isset($in['name'])) $mp['players'][$id]['name'] = amx_limpa((string)$in['name'], 24);
+                $mp['updated'] = date('c');
+                amx_write_json($mpFile, $mp);
+                amx_out(['ok' => true, 'players' => amx_mp_public($mp['players']), 'world_revision' => (int)$mp['world_revision']]);
+            }
+
+            if ($API === 'mp_state') {
+                amx_out([
+                    'ok' => true, 'id' => $id, 'ip' => $ip,
+                    'players' => amx_mp_public($mp['players']),
+                    'chat' => array_slice($mp['chat'], -40),
+                    'world_revision' => (int)$mp['world_revision'],
+                    'online' => count($mp['players']),
+                ]);
+            }
+
+            if ($API === 'mp_chat') {
+                if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+                    $in = amx_body();
+                    $msg = amx_limpa((string)($in['msg'] ?? ''), 240);
+                    if ($msg === '') amx_out(['ok' => false, 'erro' => 'mensagem vazia'], 400);
+                    $nome = amx_limpa((string)($in['name'] ?? ($mp['players'][$id]['name'] ?? 'Jogador')), 24);
+                    $mp['chat'][] = ['id' => $id, 'name' => $nome, 'ip' => $ip, 'msg' => $msg, 'h' => date('c')];
+                    if (count($mp['chat']) > 120) $mp['chat'] = array_slice($mp['chat'], -120);
+                    $mp['updated'] = date('c');
+                    amx_write_json($mpFile, $mp);
+                }
+                amx_out(['ok' => true, 'chat' => array_slice($mp['chat'], -40), 'players' => amx_mp_public($mp['players'])]);
+            }
+
+            if ($API === 'mp_world') {
+                $worldFile = amx_path('cenas/mundo.json');
+                if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+                    $in = amx_body();
+                    $cena = $in['cena'] ?? null;
+                    if (!is_array($cena)) amx_out(['ok' => false, 'erro' => 'cena inválida'], 400);
+                    $cena['_preset'] = amx_limpa((string)($in['preset'] ?? ''), 40);
+                    $cena['_rev'] = (int)$mp['world_revision'] + 1;
+                    amx_write_json($worldFile, $cena);
+                    $mp['world_revision'] = (int)$cena['_rev'];
+                    $mp['updated'] = date('c');
+                    amx_write_json($mpFile, $mp);
+                    amx_out(['ok' => true, 'world_revision' => $mp['world_revision']]);
+                }
+                amx_out([
+                    'ok' => true,
+                    'world_revision' => (int)$mp['world_revision'],
+                    'cena' => amx_read_json($worldFile, null),
+                ]);
+            }
+
+            if ($API === 'mp_leave') {
+                unset($mp['players'][$id]);
+                $mp['updated'] = date('c');
+                amx_write_json($mpFile, $mp);
+                amx_out(['ok' => true]);
+            }
+
+            amx_out(['ok' => false, 'erro' => 'ação multiplayer desconhecida'], 400);
+        }
+
+        case 'treino': {
+            $a = amx_aprendizado();
+            $kb = amx_read_json(amx_path('knowledge.json'), []);
+            amx_out([
+                'ok' => true,
+                'ia' => 'AMHEEX AI',
+                'fatos_aprendidos' => count($a['fatos'] ?? []),
+                'treinos' => (int)($a['treinos'] ?? 0),
+                'areas_conhecimento' => count($kb['areas'] ?? []),
+                'fatos' => $a['fatos'] ?? [],
+            ]);
         }
 
         case 'memoria':
@@ -218,8 +412,8 @@ function amx_stt_transcrever(string $arquivo, string $motor): ?string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#05070d">
-<title>GAME IA 3D — mundo local gerado por IA</title>
-<meta name="description" content="GAME IA 3D: mundo 3D local com IA que constrói qualquer objeto, personagem, avatar e fase por voz ou texto. Babylon.js local, PHP local, memória local.">
+<title>AMHEEX GAME — mundo 3D com AMHEEX AI</title>
+<meta name="description" content="AMHEEX GAME: mundo 3D com a AMHEEX AI. Crie qualquer objeto, personagem realista, controles, câmera, multiplayer por IP e mapas compartilhados por voz ou texto.">
 <link rel="icon" href="assets/ia-icon.png">
 <style>
 :root{
@@ -263,6 +457,57 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 .pos-centro{left:50%;top:50%;transform:translate(-50%,-50%)}
 .pos-esq{left:16px;top:50%;transform:translateY(-50%)}
 .pos-dir{right:16px;top:50%;transform:translateY(-50%)}
+
+
+/* ---------- AMHEEX GAME: controles virtuais ---------- */
+#controls{position:fixed;left:0;right:0;bottom:0;z-index:8;pointer-events:none;display:none;justify-content:space-between;align-items:flex-end;padding:0 16px 18px;gap:12px}
+#controls.on{display:flex}
+#controls .dpad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(3,54px);gap:6px;pointer-events:auto}
+#controls .dpad button,#controls .acts button{width:54px;height:54px;border-radius:14px;border:1px solid rgba(255,255,255,.18);background:rgba(10,14,24,.62);backdrop-filter:blur(10px);color:#e8eefc;font-size:20px;font-weight:800;display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none;cursor:pointer;box-shadow:0 8px 24px -10px #000}
+#controls .dpad button:active,#controls .acts button:active{background:rgba(79,124,255,.45);transform:scale(.96)}
+#controls .dpad .up{grid-column:2;grid-row:1}#controls .dpad .left{grid-column:1;grid-row:2}#controls .dpad .down{grid-column:2;grid-row:3}#controls .dpad .right{grid-column:3;grid-row:2}
+#controls .acts{display:flex;flex-direction:column;gap:8px;pointer-events:auto;align-items:flex-end;margin-right:72px}
+#controls .acts button{width:64px;height:48px;font-size:12px;letter-spacing:.04em}
+#controls .acts .jump{background:rgba(34,211,238,.24);border-color:rgba(34,211,238,.5)}
+#controls .acts .run{background:rgba(34,197,94,.20);border-color:rgba(34,197,94,.45)}
+#controls .acts .fire{background:rgba(239,68,68,.28);border-color:rgba(239,68,68,.55);display:none}
+#controls.shooter .acts .fire{display:grid}
+#controls .cam{position:fixed;right:16px;bottom:250px;pointer-events:auto}
+#controls .cam button{width:48px;height:40px;border-radius:12px;border:1px solid rgba(255,255,255,.18);background:rgba(10,14,24,.62);color:#e8eefc;font-size:11px;font-weight:800;backdrop-filter:blur(10px)}
+#crosshair{position:fixed;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;z-index:7;pointer-events:none;display:none}
+#crosshair.on{display:block}
+#crosshair:before,#crosshair:after{content:'';position:absolute;background:rgba(255,255,255,.9);box-shadow:0 0 8px #000}
+#crosshair:before{left:12px;top:0;width:2px;height:26px}#crosshair:after{top:12px;left:0;height:2px;width:26px}
+#health{position:fixed;left:16px;bottom:18px;z-index:7;display:none;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:rgba(8,11,20,.62);border:1px solid var(--bd);backdrop-filter:blur(10px);font-size:12px;color:#cfd8ee}
+#health.on{display:flex}#health b{color:#fff}
+#health .bar{width:110px;height:8px;border-radius:99px;background:rgba(255,255,255,.14);overflow:hidden}#health .bar i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#22c55e,#4ade80)}
+
+/* ---------- AMHEEX GAME: multiplayer ---------- */
+#mpPanel{position:fixed;right:16px;top:16px;z-index:9;width:min(300px,calc(100vw - 32px));display:none;flex-direction:column;background:rgba(10,14,24,.82);border:1px solid var(--bd);border-radius:16px;backdrop-filter:blur(14px);box-shadow:0 20px 60px -20px #000;overflow:hidden}
+#mpPanel.on{display:flex}
+#mpHead{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--bd);font-size:12px;font-weight:800;color:#fff}
+#mpHead small{font-weight:500;color:var(--mut);font-size:10.5px}
+#mpPlayers{max-height:150px;overflow:auto;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+.mp-player{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#cfd8ee}
+.mp-player .sw{width:10px;height:10px;border-radius:50%;flex:0 0 auto}
+.mp-player b{color:#fff;font-weight:700}.mp-player small{color:#7f8db3;margin-left:auto;font-size:10px}
+#mpChat{max-height:130px;overflow:auto;padding:8px 10px;border-top:1px solid var(--bd);display:flex;flex-direction:column;gap:5px;font-size:11.5px;line-height:1.4}
+#mpChat .who{color:#22d3ee;font-weight:700}#mpChat .msg{color:#dbe4f7}
+#mpForm{display:flex;gap:6px;padding:8px 10px;border-top:1px solid var(--bd)}
+#mpForm input{flex:1;min-width:0;background:#0a0e18;border:1px solid var(--bd);border-radius:9px;color:#e8eefc;padding:7px 9px;font-size:12px;font-family:inherit;outline:none}
+#mpForm button{border:1px solid rgba(79,124,255,.5);background:rgba(79,124,255,.2);color:#fff;border-radius:9px;padding:0 10px;font-size:12px;font-weight:700;cursor:pointer}
+#mpBtn{position:fixed;right:16px;top:16px;z-index:8;display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:999px;border:1px solid rgba(34,211,238,.4);background:rgba(34,211,238,.14);color:#9fe9f7;font-size:11.5px;font-weight:700;backdrop-filter:blur(10px);cursor:pointer}
+#mpBtn.on{display:inline-flex}
+#mpBtn b{color:#fff}
+#mpToast{position:fixed;left:50%;top:18px;transform:translate(-50%,-16px);z-index:20;padding:10px 16px;border-radius:12px;background:rgba(10,14,24,.9);border:1px solid rgba(34,211,238,.45);color:#dff6fb;font-size:12.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100vw - 32px);text-align:center;backdrop-filter:blur(12px)}
+#mpToast.on{opacity:1;transform:translate(-50%,0)}
+.mp-player{display:flex;align-items:center;gap:7px;font-size:11.5px;color:#c7d2e8}
+.mp-player .dot{width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e}
+.mp-player.me .dot{background:#22d3ee;box-shadow:0 0 8px #22d3ee}
+.mp-player b{color:#fff;font-size:11.5px}.mp-player small{color:#7c89a8;margin-left:auto;font-size:10px}
+.mp-msg{color:#dbe4f7}.mp-msg b{color:#22d3ee}
+
+@media (max-width:560px){#controls .dpad{grid-template-columns:repeat(3,48px);grid-template-rows:repeat(3,48px)}#controls .dpad button{width:48px;height:48px}#controls .acts button{width:56px;height:44px}#mpPanel{top:auto;bottom:90px;right:8px;width:calc(100vw - 16px)}#mpBtn{top:auto;bottom:88px;right:10px}}
 
 /* ---------- FAB (ícone flutuante extraído do AMHEEX DRIVE) ---------- */
 #amxai-root{position:fixed;inset:0;z-index:2147483000;pointer-events:none;font-family:var(--font)}
@@ -352,20 +597,45 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 <div id="vignette"></div>
 
 <div id="hud"></div>
+
+<div id="crosshair"></div>
+<div id="health"><span>HP</span><div class="bar"><i id="healthBar"></i></div><b id="healthN">100</b></div>
+<button id="mpBtn" type="button">🌐 <b id="mpCount">0</b> online</button>
+<div id="mpPanel">
+  <div id="mpHead"><span>MULTIPLAYER <small>por IP</small></span><button id="mpClose" type="button" style="background:none;border:0;color:#8b97b4;font-size:18px;cursor:pointer">×</button></div>
+  <div id="mpPlayers"></div>
+  <div id="mpChat"></div>
+  <form id="mpForm" autocomplete="off"><input id="mpMsg" maxlength="180" placeholder="Chat do mundo…"><button type="submit">Enviar</button></form>
+</div>
+<div id="controls">
+  <div class="dpad">
+    <button type="button" class="up" data-move="f">▲</button>
+    <button type="button" class="left" data-move="l">◀</button>
+    <button type="button" class="down" data-move="b">▼</button>
+    <button type="button" class="right" data-move="r">▶</button>
+  </div>
+  <div class="acts">
+    <button type="button" class="run" data-act="run">CORRER</button>
+    <button type="button" class="jump" data-act="jump">PULAR</button>
+    <button type="button" class="fire" data-act="fire">ATIRAR</button>
+  </div>
+  <div class="cam"><button type="button" id="camToggle">CÂMERA</button></div>
+</div>
+
 <div id="hint" class="off" style="display:none">Arraste para girar a câmera · toque no chão para mover a bola · fale com a IA no ícone</div>
 
 <div id="amxai-root" data-mode="float" data-open="0">
-  <button id="amxai-fab" type="button" aria-label="Abrir GAME IA 3D" title="GAME IA 3D">
-    <img src="assets/ia-icon.png" alt="GAME IA 3D" onerror="this.style.display='none'">
+  <button id="amxai-fab" type="button" aria-label="Abrir AMHEEX AI" title="AMHEEX AI">
+    <img src="assets/ia-icon.png" alt="AMHEEX AI" onerror="this.style.display='none'">
     <span class="amxai-pro" aria-hidden="true"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9L12 3z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15z"/></svg></span>
     <span class="amxai-ping"></span>
   </button>
 
-  <section id="amxai-panel" hidden aria-label="GAME IA 3D">
+  <section id="amxai-panel" hidden aria-label="AMHEEX AI">
     <header id="amxai-head">
       <div class="amxai-id">
         <span class="amxai-avatar"><img src="assets/ia-icon.png" alt="" onerror="this.style.display='none'"></span>
-        <div><b>GAME IA 3D</b><small><i></i><span id="amxai-status">Online · motor local</span></small></div>
+        <div><b>AMHEEX AI</b><small><i></i><span id="amxai-status">Online · motor local</span></small></div>
       </div>
       <div class="amxai-head-btns">
         <button id="amxai-pin" type="button" title="Fixar / voltar a flutuar" aria-label="Fixar painel">
@@ -380,7 +650,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     <div id="amxai-msgs" aria-live="polite"></div>
     <div id="amxai-chips"></div>
     <form id="amxai-form" autocomplete="off">
-      <textarea id="amxai-input" rows="1" placeholder="Fale ou escreva: “crie uma casa à direita”…" aria-label="Mensagem para a IA"></textarea>
+      <textarea id="amxai-input" rows="1" placeholder="Fale ou escreva: “crie game”, “ative o multiplayer”…" aria-label="Mensagem para a IA"></textarea>
       <button id="amxai-mic" type="button" aria-label="Falar com a IA" title="Falar com a IA" aria-pressed="false">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3z"/><path d="M19 11a7 7 0 0 1-14 0"/><path d="M12 18v3"/><path d="M8.5 21h7"/></svg>
       </button>
@@ -407,7 +677,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 <script src="lib/babylonjs.loaders.min.js"></script>
 <script>
 /* =====================================================================
-   GAME IA 3D — motor do mundo (Babylon.js local)
+   AMHEEX GAME — motor do mundo (Babylon.js local) + AMHEEX AI
    Chão verde + bola vermelha por padrão. A IA adiciona tudo por comandos.
    Qualidade adaptativa por hardware + watchdog de FPS.
    ===================================================================== */
@@ -588,6 +858,95 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     box('olho2', 0.09, 0.09, 0.05, r, 0.12, 2.28, 0.29, escuro);
     return r;
   };
+  /* ---------------- personagem realista procedural ----------------
+     Corpo em polígonos geométricos + textura de pele/roupa gerada em canvas.
+     Sem GLB externo: cada seed cria uma variação única. */
+  function skinTexture(hex, seed) {
+    var dt = new BABYLON.DynamicTexture('skin' + seed, { width: 256, height: 256 }, scene, true);
+    var ctx = dt.getContext();
+    ctx.fillStyle = hex || '#c68642';
+    ctx.fillRect(0, 0, 256, 256);
+    var rnd = (function (s) { return function () { s = (s * 9301 + 49297) % 233280; return s / 233280; }; })(seed || 1);
+    for (var i = 0; i < 1600; i++) {
+      var a = 0.025 + rnd() * 0.07;
+      ctx.fillStyle = rnd() > 0.5 ? 'rgba(255,235,215,' + a + ')' : 'rgba(70,35,20,' + a + ')';
+      var s = 1 + rnd() * 3;
+      ctx.fillRect(rnd() * 256, rnd() * 256, s, s);
+    }
+    /* sombra suave nas laterais (dá volume à pele) */
+    var g = ctx.createLinearGradient(0, 0, 256, 0);
+    g.addColorStop(0, 'rgba(0,0,0,.16)'); g.addColorStop(.5, 'rgba(255,255,255,.05)'); g.addColorStop(1, 'rgba(0,0,0,.16)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, 256, 256);
+    dt.update();
+    return dt;
+  }
+  function clothTexture(hex, seed) {
+    var dt = new BABYLON.DynamicTexture('cloth' + seed, { width: 256, height: 256 }, scene, true);
+    var ctx = dt.getContext();
+    ctx.fillStyle = hex || '#4f7cff'; ctx.fillRect(0, 0, 256, 256);
+    var rnd = (function (s) { return function () { s = (s * 1103515245 + 12345) % 2147483648; return s / 2147483648; }; })(seed || 7);
+    ctx.globalAlpha = 0.16;
+    for (var y = 0; y < 256; y += 8) {
+      ctx.fillStyle = rnd() > 0.5 ? '#ffffff' : '#000000';
+      ctx.fillRect(0, y, 256, 2);
+    }
+    ctx.globalAlpha = 1;
+    dt.update();
+    return dt;
+  }
+  B.personagem = function (o) {
+    var r = root('personagem');
+    var seed = Number(o.seed || 1);
+    var peleHex = o.pele || '#c68642';
+    var roupaHex = o.cor || '#4f7cff';
+    var peleTex = skinTexture(peleHex, seed);
+    var roupaTex = clothTexture(roupaHex, seed + 11);
+    var pele = new BABYLON.StandardMaterial('pele' + seed, scene);
+    pele.diffuseTexture = peleTex; pele.specularColor = new BABYLON.Color3(.12, .12, .12); pele.specularPower = 32;
+    var roupa = new BABYLON.StandardMaterial('roupa' + seed, scene);
+    roupa.diffuseTexture = roupaTex; roupa.specularColor = new BABYLON.Color3(.08, .08, .08);
+    var cabelo = mat(['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c'][seed % 4]);
+    var olho = mat('#f8fafc', { emissive: .08 });
+    var pupila = mat('#111827');
+    var boca = mat('#7f1d1d');
+    var sapato = mat('#111827');
+
+    /* pernas + sapatos */
+    cyl('pernaE', .24, .22, .95, r, -.19, .55, 0, roupa, 10);
+    cyl('pernaD', .24, .22, .95, r, .19, .55, 0, roupa, 10);
+    box('peE', .28, .16, .46, r, -.19, .10, .10, sapato);
+    box('peD', .28, .16, .46, r, .19, .10, .10, sapato);
+    /* cintura/torso */
+    cyl('quadril', .56, .5, .38, r, 0, 1.02, 0, roupa, 12);
+    cyl('torso', .62, .52, 1.02, r, 0, 1.62, 0, roupa, 14);
+    /* braços + mãos */
+    cyl('bracoE', .17, .15, .92, r, -.42, 1.62, 0, pele, 10);
+    cyl('bracoD', .17, .15, .92, r, .42, 1.62, 0, pele, 10);
+    sph('maoE', .22, r, -.42, 1.14, 0, pele, 8);
+    sph('maoD', .22, r, .42, 1.14, 0, pele, 8);
+    /* pescoço + cabeça */
+    cyl('pescoco', .2, .22, .22, r, 0, 2.19, 0, pele, 10);
+    sph('cabeca', .66, r, 0, 2.55, 0, pele, 16);
+    /* cabelo (calota + franja) */
+    var topo = sph('cabelo', .70, r, 0, 2.62, -.03, cabelo, 14);
+    topo.scaling.y = .62; topo.scaling.z = 1.02;
+    box('franja', .5, .12, .12, r, 0, 2.80, .27, cabelo);
+    /* olhos, sobrancelhas, nariz, boca */
+    sph('olhoE', .11, r, -.14, 2.59, .28, olho, 8);
+    sph('olhoD', .11, r, .14, 2.59, .28, olho, 8);
+    sph('pupilaE', .05, r, -.14, 2.59, .335, pupila, 6);
+    sph('pupilaD', .05, r, .14, 2.59, .335, pupila, 6);
+    box('sobrancelhaE', .14, .035, .04, r, -.14, 2.68, .30, cabelo);
+    box('sobrancelhaD', .14, .035, .04, r, .14, 2.68, .30, cabelo);
+    cyl('nariz', .07, .10, .16, r, 0, 2.51, .33, pele, 6).rotation.x = Math.PI / 2;
+    box('boca', .16, .035, .04, r, 0, 2.40, .31, boca);
+    /* orelhas */
+    sph('orelhaE', .13, r, -.33, 2.55, 0, pele, 6).scaling.z = .6;
+    sph('orelhaD', .13, r, .33, 2.55, 0, pele, 6).scaling.z = .6;
+    r.metadata = { humanoid: true, seed: seed, pele: peleHex, cor: roupaHex };
+    return r;
+  };
+
   B.robo = function (o) {
     var r = root('robo'); var metal = mat(o.cor, { spec: 0.55 }), olho = mat('#22d3ee', { emissive: 1 });
     box('torso', 0.95, 1.1, 0.6, r, 0, 1.35, 0, metal);
@@ -943,7 +1302,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     if (!build) {
       build = function (o) { return B.livre({ cor: o.cor, forma: o.forma || forma, nome: o.nome || nomeEnt }); };
     }
-    var node = build({ cor: opts.cor || '#3b82f6', forma: forma, nome: nomeEnt });
+    var node = build({ cor: opts.cor || '#3b82f6', forma: forma, nome: nomeEnt, pele: opts.pele, seed: opts.seed });
     var baseX = Number(opts.x || 0), baseZ = Number(opts.z || 0);
     var n = Math.max(1, Math.min(Number(opts.n || 1), 24));
     var made = [];
@@ -1204,9 +1563,130 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   WORLD.ball = ball;
   var ballTarget = new BABYLON.Vector3(0, 0, 0);
   var keys = {};
+  var moveInput = { f: 0, b: 0, l: 0, r: 0 };
+  var player = {
+    node: ball, y: 0, vy: 0, grounded: true, mode: 'third', run: false,
+    health: 100, speed: 7.2, skin: { pele: '#c68642', cor: '#4f7cff', seed: 12345 },
+    isCharacter: false
+  };
+  var controlOn = false;
 
-  window.addEventListener('keydown', function (e) { keys[e.key.toLowerCase()] = true; });
+  window.addEventListener('keydown', function (e) {
+    var k = e.key.toLowerCase();
+    keys[k] = true;
+    if (k === ' ' || k === 'arrowup' || k === 'arrowdown' || k === 'arrowleft' || k === 'arrowright') {
+      if (document.activeElement && /input|textarea/i.test(document.activeElement.tagName)) return;
+      e.preventDefault();
+    }
+    if (k === ' ') doJump();
+    if (k === 'f') doFire();
+  });
   window.addEventListener('keyup', function (e) { keys[e.key.toLowerCase()] = false; });
+
+  function updateHealth() {
+    var bar = $('healthBar'), n = $('healthN'), box = $('health');
+    if (bar) bar.style.width = Math.max(0, Math.min(100, player.health)) + '%';
+    if (n) n.textContent = Math.round(player.health);
+    if (box) box.classList.toggle('on', controlOn || player.mode === 'shooter');
+  }
+
+  function setPlayerNode(node, isChar) {
+    player.node = node || ball;
+    player.isCharacter = !!isChar;
+    if (ball && ball !== player.node) ball.setEnabled(false);
+    if (player.node && player.node !== ball) {
+      player.node.setEnabled(true);
+      try { player.node.unfreezeWorldMatrix(); } catch (e) {}
+    }
+    updateHealth();
+  }
+
+  function setControlMode(mode) {
+    mode = mode || 'pad';
+    if (mode === 'shooter') {
+      player.mode = 'shooter'; controlOn = true;
+      camera.beta = 1.45; camera.radius = 0.55; camera.lowerRadiusLimit = 0.3;
+      if (player.isCharacter && player.node) player.node.setEnabled(false);
+      var ch = $('crosshair'); if (ch) ch.classList.add('on');
+      var ctl = $('controls'); if (ctl) ctl.classList.add('shooter');
+    } else if (mode === 'third') {
+      player.mode = 'third'; controlOn = true;
+      camera.radius = 13; camera.beta = 1.02; camera.lowerRadiusLimit = 4;
+      if (player.isCharacter && player.node) player.node.setEnabled(true);
+      var ch2 = $('crosshair'); if (ch2) ch2.classList.remove('on');
+      var ctl2 = $('controls'); if (ctl2) ctl2.classList.remove('shooter');
+    } else if (mode === 'run') {
+      player.run = true; controlOn = true;
+    } else if (mode === 'jump') {
+      doJump(); controlOn = true;
+    } else {
+      /* pad: controles na tela em terceira pessoa */
+      player.mode = 'third'; controlOn = true;
+      camera.radius = 13; camera.beta = 1.02; camera.lowerRadiusLimit = 4;
+      if (player.isCharacter && player.node) player.node.setEnabled(true);
+      var chp = $('crosshair'); if (chp) chp.classList.remove('on');
+      var ctlp = $('controls'); if (ctlp) ctlp.classList.remove('shooter');
+    }
+    var c = $('controls'); if (c) c.classList.add('on');
+    updateHealth();
+    return { ok: true, mode: mode };
+  }
+
+  function doJump() {
+    if (!player.grounded) return;
+    player.vy = 6.2; player.grounded = false;
+  }
+
+  var lastShot = 0;
+  function doFire() {
+    if (player.mode !== 'shooter') return;
+    var now = performance.now();
+    if (now - lastShot < 180) return;
+    lastShot = now;
+    /* flash + raycast simples: acerta objetos e reduz "vida" deles */
+    var ray = new BABYLON.Ray(camera.position.clone(), camera.getForwardRay().direction, 80);
+    var pick = scene.pickWithRay(ray, function (m) { return m.isPickable && m.name !== 'ground'; });
+    if (pick && pick.hit && pick.pickedMesh) {
+      var mesh = pick.pickedMesh;
+      var rec = WORLD.objects.find(function (o) { return o.node === mesh.parent || o.node === mesh; });
+      if (rec) {
+        rec.hits = (rec.hits || 0) + 1;
+        if (rec.hits >= 3) { rec.node.getChildMeshes().forEach(function (m) { m.material = mat('#ef4444', { emissive: .7 }); }); }
+      }
+      try { mesh.material = mat('#f97316', { emissive: 1 }); } catch (e) {}
+    }
+    var ch = $('crosshair');
+    if (ch) { ch.style.transform = 'scale(1.35)'; setTimeout(function () { ch.style.transform = ''; }, 90); }
+  }
+
+  /* botões virtuais */
+  (function bindControls() {
+    var c = $('controls');
+    if (!c) return;
+    c.querySelectorAll('[data-move]').forEach(function (btn) {
+      var dir = btn.getAttribute('data-move');
+      var on = function (e) { e.preventDefault(); moveInput[dir] = 1; btn.classList.add('active'); };
+      var off = function (e) { e.preventDefault(); moveInput[dir] = 0; btn.classList.remove('active'); };
+      btn.addEventListener('pointerdown', on);
+      btn.addEventListener('pointerup', off);
+      btn.addEventListener('pointercancel', off);
+      btn.addEventListener('pointerleave', off);
+    });
+    c.querySelectorAll('[data-act]').forEach(function (btn) {
+      btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        var a = btn.getAttribute('data-act');
+        if (a === 'jump') doJump();
+        else if (a === 'run') { player.run = !player.run; btn.classList.toggle('active', player.run); }
+        else if (a === 'fire') doFire();
+      });
+    });
+    var cam = $('camToggle');
+    if (cam) cam.addEventListener('click', function () {
+      if (player.mode === 'shooter') setControlMode('third');
+      else setControlMode('shooter');
+    });
+  })();
 
   scene.onPointerObservable.add(function (info) {
     if (info.type !== BABYLON.PointerEventTypes.POINTERTAP) return;
@@ -1279,9 +1759,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 
   /* ---------------- avatar / personagem ---------------- */
   function createAvatar(a) {
-    var r = spawn('boneco', {
+    a = a || {};
+    var ent = a.t === 'character' || a.pele || a.seed ? 'personagem' : 'boneco';
+    var r = spawn(ent, {
       cor: a.cor || '#4f7cff', x: Number(a.x || 0), z: Number(a.z || 0),
-      escala: Number(a.escala || 1), y: Number(a.y || 0)
+      escala: Number(a.escala || 1), y: Number(a.y || 0),
+      pele: a.pele || '#c68642', seed: Number(a.seed || 12345)
     });
     if (r.ok) {
       var rec = WORLD.objects[WORLD.objects.length - 1];
@@ -1289,6 +1772,12 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       rec.nome = a.nome || 'Jogador';
       WORLD.avatar = rec;
       WORLD.avatarName = a.nome || 'Jogador';
+      if (ent === 'personagem') {
+        player.skin = { pele: a.pele || '#c68642', cor: a.cor || '#4f7cff', seed: Number(a.seed || 12345) };
+        setPlayerNode(rec.node, true);
+        ballTarget.x = rec.node.position.x; ballTarget.z = rec.node.position.z;
+        setControlMode('third');
+      }
       saveScene();
     }
     return r;
@@ -1346,6 +1835,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       case 'physics': WORLD.physics = !!a.on; return { ok: true };
       case 'skin': return recolor(a.ent, a.cor);
       case 'world': return buildWorld(a.preset);
+      case 'character': return createAvatar(Object.assign({}, a, { t: 'character' }));
+      case 'control': return setControlMode(a.mode || 'third');
+      case 'multiplayer': return (window.MP ? window.MP.enable(a.on !== false) : { ok: false, erro: 'multiplayer indisponivel' });
       default: return { ok: false, erro: 'ação desconhecida' };
     }
   }
@@ -1478,6 +1970,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       try {
         fetch('?api=salvar', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cena: data }) });
       } catch (e) {}
+      if (window.MP && window.MP.active) { try { window.MP.saveWorld(); } catch (e) {} }
     }, 1200);
   }
 
@@ -1503,22 +1996,64 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   scene.registerBeforeRender(function () {
     var dt = Math.min(0.05, (performance.now() - lastT) / 1000); lastT = performance.now();
 
-    /* movimento por teclado */
-    var sp = 9 * dt;
-    if (keys['w'] || keys['arrowup']) ballTarget.z += sp;
-    if (keys['s'] || keys['arrowdown']) ballTarget.z -= sp;
-    if (keys['a'] || keys['arrowleft']) ballTarget.x -= sp;
-    if (keys['d'] || keys['arrowright']) ballTarget.x += sp;
+    /* movimento do jogador (teclado + botões virtuais) */
+    var node = player.node || ball;
+    var mx = 0, mz = 0;
+    if (keys['w'] || keys['arrowup'] || moveInput.f) mz += 1;
+    if (keys['s'] || keys['arrowdown'] || moveInput.b) mz -= 1;
+    if (keys['a'] || keys['arrowleft'] || moveInput.l) mx -= 1;
+    if (keys['d'] || keys['arrowright'] || moveInput.r) mx += 1;
+    var moving = !!(mx || mz);
+    if (moving) {
+      /* direção relativa à câmera */
+      var camA = camera.alpha;
+      var dirX = Math.sin(camA) * mz + Math.cos(camA) * mx;
+      var dirZ = Math.cos(camA) * mz - Math.sin(camA) * mx;
+      var len = Math.sqrt(dirX * dirX + dirZ * dirZ) || 1;
+      dirX /= len; dirZ /= len;
+      var spd = (player.run ? 13.5 : player.speed) * dt;
+      ballTarget.x += dirX * spd;
+      ballTarget.z += dirZ * spd;
+      var targetRot = Math.atan2(dirX, dirZ);
+      node.rotation.y += (targetRot - node.rotation.y) * Math.min(1, dt * 10);
+    }
+    ballTarget.x = BABYLON.Scalar.Clamp(ballTarget.x, -70, 70);
+    ballTarget.z = BABYLON.Scalar.Clamp(ballTarget.z, -70, 70);
+    node.position.x += (ballTarget.x - node.position.x) * Math.min(1, dt * 9);
+    node.position.z += (ballTarget.z - node.position.z) * Math.min(1, dt * 9);
 
-    ball.position.x += (ballTarget.x - ball.position.x) * Math.min(1, dt * 6);
-    ball.position.z += (ballTarget.z - ball.position.z) * Math.min(1, dt * 6);
-    ball.position.y = 0.58 + Math.sin(performance.now() / 420) * 0.06;
-    ball.rotation.z -= (ballTarget.x - ball.position.x) * 0.05;
-    ball.rotation.x += (ballTarget.z - ball.position.z) * 0.05;
+    /* gravidade / pulo */
+    if (!player.grounded) {
+      player.vy -= 18 * dt;
+      player.y += player.vy * dt;
+      if (player.y <= 0) { player.y = 0; player.vy = 0; player.grounded = true; }
+    }
+    node.position.y = player.y + (player.isCharacter ? 0 : 0.58 + Math.sin(performance.now() / 420) * 0.06);
 
-    camera.target.x += (ball.position.x - camera.target.x) * Math.min(1, dt * 2.2);
-    camera.target.z += (ball.position.z - camera.target.z) * Math.min(1, dt * 2.2);
-    camera.target.y = 1;
+    /* animação de caminhada do personagem */
+    if (player.isCharacter && node.metadata && node.metadata.humanoid) {
+      var tt = performance.now() / 1000;
+      var amp = moving ? (player.run ? 0.95 : 0.55) : 0;
+      var swing = Math.sin(tt * (player.run ? 14 : 9)) * amp;
+      var parts = node.getChildMeshes();
+      for (var pi = 0; pi < parts.length; pi++) {
+        var pn = parts[pi].name;
+        if (pn === 'pernaE') parts[pi].rotation.x = swing;
+        else if (pn === 'pernaD') parts[pi].rotation.x = -swing;
+        else if (pn === 'bracoE') parts[pi].rotation.x = -swing * 0.8;
+        else if (pn === 'bracoD') parts[pi].rotation.x = swing * 0.8;
+      }
+    }
+
+    /* câmera segue o jogador */
+    var camLerp = player.mode === 'shooter' ? 14 : 2.6;
+    var camY = node.position.y + (player.mode === 'shooter' ? 1.65 : 1.2);
+    camera.target.x += (node.position.x - camera.target.x) * Math.min(1, dt * camLerp);
+    camera.target.z += (node.position.z - camera.target.z) * Math.min(1, dt * camLerp);
+    camera.target.y += (camY - camera.target.y) * Math.min(1, dt * camLerp);
+
+    /* multiplayer: envia posição e atualiza jogadores remotos */
+    if (window.MP && window.MP.active) window.MP.tick(dt, node);
 
     /* objetos caindo (gravidade simples) */
     if (WORLD.physics) {
@@ -1536,7 +2071,8 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       if (!coin || coin.isDisposed) { WORLD.coins.splice(c, 1); continue; }
       coin.rotation.y += dt * 3;
       var p = coin.getAbsolutePosition();
-      var dx = p.x - ball.position.x, dz = p.z - ball.position.z, dy = p.y - (ball.position.y + 0.6);
+      var pnode = player.node || ball;
+      var dx = p.x - pnode.position.x, dz = p.z - pnode.position.z, dy = p.y - (pnode.position.y + 0.6);
       if (dx * dx + dz * dz + dy * dy < 2.2) {
         coin.dispose();
         WORLD.coins.splice(c, 1);
@@ -1580,12 +2116,265 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   window.addEventListener('resize', function () { engine.resize(); });
   window.addEventListener('orientationchange', function () { setTimeout(function () { engine.resize(); }, 250); });
 
+  /* ---------------- MULTIPLAYER (por IP, mapa compartilhado) ---------------- */
+  var MP = {
+    active: false, id: null, ip: '', name: 'Jogador', players: [], remotes: {},
+    lastMove: 0, lastPoll: 0, lastChat: 0, worldRev: 0, panelOpen: false
+  };
+  window.MP = MP;
+
+  MP.nome = function () {
+    var n = '';
+    try { n = localStorage.getItem('amx_nome') || ''; } catch (e) {}
+    if (!n) {
+      n = 'Jogador-' + Math.floor(1000 + Math.random() * 9000);
+      try { localStorage.setItem('amx_nome', n); } catch (e) {}
+    }
+    return n;
+  };
+
+  MP.api = function (action, body, cb) {
+    var opt = body ? {
+      method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body)
+    } : { method: 'GET' };
+    fetch('?api=' + action, opt).then(function (r) { return r.json(); })
+      .then(function (j) { if (cb) cb(j); }).catch(function () {});
+  };
+
+  MP.enable = function (on) {
+    MP.active = !!on;
+    if (on) {
+      MP.name = MP.nome();
+      MP.join();
+      var btn = $('mpBtn'); if (btn) btn.classList.add('on');
+      MP.toast('Multiplayer ativado — seu IP identifica seu personagem.');
+    } else {
+      MP.api('mp_leave', { id: MP.id });
+      MP.clearRemotes();
+      var b2 = $('mpBtn'); if (b2) b2.classList.remove('on');
+    }
+    return { ok: true, multiplayer: MP.active };
+  };
+
+  MP.join = function () {
+    var skin = player.skin || { pele: '#c68642', cor: '#4f7cff', seed: 12345 };
+    MP.api('mp_join', {
+      name: MP.name, x: player.node ? player.node.position.x : 0,
+      z: player.node ? player.node.position.z : 0,
+      ry: player.node ? player.node.rotation.y : 0,
+      skin: skin
+    }, function (j) {
+      if (!j || !j.ok) return;
+      MP.id = j.id; MP.ip = j.ip || ''; MP.worldRev = j.world_revision || 0;
+      MP.applyState(j);
+      if (j.chat && j.chat.length) { MP.chat = j.chat; MP.renderChat(); }
+      MP.syncWorld();
+      MP.toast('Conectado como ' + MP.name + ' • IP ' + (MP.ip || 'local'));
+    });
+  };
+
+  MP.tick = function (dt, node) {
+    var now = performance.now();
+    if (now - MP.lastMove > 130) {
+      MP.lastMove = now;
+      MP.api('mp_move', {
+        id: MP.id, name: MP.name, x: +node.position.x.toFixed(2),
+        z: +node.position.z.toFixed(2), ry: +node.rotation.y.toFixed(2),
+        anim: (moveInput.f || moveInput.b || moveInput.l || moveInput.r || keys['w'] || keys['a'] || keys['s'] || keys['d']) ? 'walk' : 'idle'
+      }, function (j) { if (j && j.ok) { MP.applyState(j); if (j.world_revision && j.world_revision !== MP.worldRev) { MP.worldRev = j.world_revision; MP.syncWorld(); } } });
+    }
+    if (now - MP.lastPoll > 1400) {
+      MP.lastPoll = now;
+      MP.api('mp_state', null, function (j) {
+        if (!j || !j.ok) return;
+        MP.applyState(j);
+        if (j.chat) { MP.chat = j.chat; MP.renderChat(); }
+        if (j.world_revision && j.world_revision !== MP.worldRev) { MP.worldRev = j.world_revision; MP.syncWorld(); }
+      });
+    }
+    /* anima avatares remotos */
+    for (var id in MP.remotes) {
+      var r = MP.remotes[id];
+      if (!r || !r.node || r.node.isDisposed) continue;
+      var dx = r.node.position.x - (r.px || r.node.position.x);
+      var dz = r.node.position.z - (r.pz || r.node.position.z);
+      r.moving = (dx * dx + dz * dz) > 0.0004;
+      r.px = r.node.position.x; r.pz = r.node.position.z;
+      if (r.node.metadata && r.node.metadata.humanoid) {
+        var t = performance.now() / 1000;
+        var sw = r.moving ? Math.sin(t * 9) * 0.55 : 0;
+        var parts = r.node.getChildMeshes();
+        for (var i = 0; i < parts.length; i++) {
+          var nm = parts[i].name;
+          if (nm === 'pernaE') parts[i].rotation.x = sw;
+          else if (nm === 'pernaD') parts[i].rotation.x = -sw;
+          else if (nm === 'bracoE') parts[i].rotation.x = -sw * 0.8;
+          else if (nm === 'bracoD') parts[i].rotation.x = sw * 0.8;
+        }
+      }
+      if (r.label) r.label.position.y = 2.95;
+    }
+  };
+
+  MP.applyState = function (j) {
+    if (!j) return;
+    var list = j.players || [];
+    MP.players = list;
+    var seen = {};
+    for (var i = 0; i < list.length; i++) {
+      var p = list[i];
+      if (!p || p.id === MP.id) continue;
+      seen[p.id] = true;
+      if (!MP.remotes[p.id]) MP.addRemote(p);
+      var r = MP.remotes[p.id];
+      if (!r) continue;
+      var tx = Number(p.x || 0), tz = Number(p.z || 0), ty = Number(p.ry || 0);
+      r.node.position.x += (tx - r.node.position.x) * 0.35;
+      r.node.position.z += (tz - r.node.position.z) * 0.35;
+      r.node.rotation.y += (ty - r.node.rotation.y) * 0.35;
+      if (r.label) {
+        r.label.position.x = r.node.position.x;
+        r.label.position.z = r.node.position.z;
+      }
+    }
+    for (var id in MP.remotes) {
+      if (!seen[id]) MP.removeRemote(id);
+    }
+    var cnt = $('mpCount');
+    if (cnt) cnt.textContent = Math.max(0, list.length);
+    MP.renderPlayers();
+  };
+
+  MP.addRemote = function (p) {
+    try {
+      var skin = p.skin || {};
+      var node = B.personagem({
+        pele: skin.pele || '#c68642', cor: skin.cor || '#4f7cff',
+        seed: Number(skin.seed || 12345)
+      });
+      node.position.set(Number(p.x || 0), 0, Number(p.z || 0));
+      node.rotation.y = Number(p.ry || 0);
+      node.getChildMeshes().forEach(function (m) { m.isPickable = false; });
+      /* etiqueta com nome */
+      var dt = new BABYLON.DynamicTexture('lbl' + p.id, { width: 512, height: 128 }, scene, true);
+      dt.hasAlpha = true;
+      dt.drawText((p.name || 'Jogador'), 20, 84, 'bold 56px Arial', '#ffffff', 'rgba(0,0,0,0)', true);
+      var lm = new BABYLON.StandardMaterial('lblm' + p.id, scene);
+      lm.diffuseTexture = dt; lm.emissiveColor = new BABYLON.Color3(1, 1, 1);
+      lm.opacityTexture = dt; lm.disableLighting = true; lm.backFaceCulling = false;
+      var label = BABYLON.MeshBuilder.CreatePlane('lblp' + p.id, { width: 2.6, height: 0.65 }, scene);
+      label.material = lm; label.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+      label.position.set(node.position.x, 2.95, node.position.z);
+      label.isPickable = false;
+      MP.remotes[p.id] = { node: node, label: label, name: p.name, px: node.position.x, pz: node.position.z };
+    } catch (e) {}
+  };
+
+  MP.removeRemote = function (id) {
+    var r = MP.remotes[id];
+    if (!r) return;
+    try { if (r.node) r.node.dispose(); } catch (e) {}
+    try { if (r.label) r.label.dispose(); } catch (e) {}
+    delete MP.remotes[id];
+  };
+
+  MP.clearRemotes = function () {
+    for (var id in MP.remotes) MP.removeRemote(id);
+  };
+
+  MP.renderPlayers = function () {
+    var box = $('mpPlayers');
+    if (!box) return;
+    var html = '';
+    for (var i = 0; i < MP.players.length; i++) {
+      var p = MP.players[i];
+      var me = p.id === MP.id;
+      html += '<div class="mp-player' + (me ? ' me' : '') + '"><span class="dot"></span>' +
+        '<b>' + (p.name || 'Jogador') + '</b>' + (me ? ' (você)' : '') +
+        '<small>' + (p.ip || '') + '</small></div>';
+    }
+    box.innerHTML = html || '<div class="mp-player"><small>Ninguém conectado ainda</small></div>';
+  };
+
+  MP.renderChat = function () {
+    var box = $('mpChat');
+    if (!box) return;
+    var html = '';
+    var arr = MP.chat || [];
+    for (var i = Math.max(0, arr.length - 40); i < arr.length; i++) {
+      var c = arr[i];
+      html += '<div class="mp-msg"><b>' + (c.name || 'Jogador') + ':</b> ' + (c.msg || '') + '</div>';
+    }
+    box.innerHTML = html;
+    box.scrollTop = box.scrollHeight;
+  };
+
+  MP.sendChat = function (msg) {
+    if (!msg) return;
+    MP.api('mp_chat', { id: MP.id, name: MP.name, msg: msg }, function (j) {
+      if (j && j.ok) { MP.chat = j.chat || MP.chat; MP.renderChat(); }
+    });
+  };
+
+  MP.syncWorld = function () {
+    MP.api('mp_world', null, function (j) {
+      if (!j || !j.ok) return;
+      if (j.world_revision && j.world_revision !== MP.worldRev) MP.worldRev = j.world_revision;
+      if (j.cena && Array.isArray(j.cena.objects) && j.cena.objects.length && !WORLD.objects.length) {
+        restoreScene(j.cena);
+        MP.toast('Mapa compartilhado carregado (' + j.cena.objects.length + ' objetos).');
+      }
+    });
+  };
+
+  MP.saveWorld = function () {
+    var data = {
+      preset: WORLD.preset, terrain: WORLD.terrain, weather: WORLD.weather,
+      objects: WORLD.objects.filter(function (o) { return !o.isAvatar; }).map(function (o) {
+        return { ent: o.ent, cor: o.cor, x: +o.node.position.x.toFixed(2), z: +o.node.position.z.toFixed(2), s: +o.base.s.toFixed(2), y: +o.node.position.y.toFixed(2), ry: +o.node.rotation.y.toFixed(2), nome: o.nome || o.ent, forma: o.forma || '' };
+      })
+    };
+    MP.api('mp_world', { cena: data }, function (j) {
+      if (j && j.ok) { MP.worldRev = j.world_revision || MP.worldRev; MP.toast('Mapa compartilhado salvo para todos.'); }
+    });
+  };
+
+  MP.toast = function (txt) {
+    var el = $('mpToast');
+    if (!el) { el = document.createElement('div'); el.id = 'mpToast'; document.body.appendChild(el); }
+    el.textContent = txt; el.classList.add('on');
+    clearTimeout(MP._tt); MP._tt = setTimeout(function () { el.classList.remove('on'); }, 3200);
+  };
+
+  /* UI do painel multiplayer */
+  (function bindMP() {
+    var btn = $('mpBtn');
+    if (btn) btn.addEventListener('click', function () {
+      var p = $('mpPanel');
+      if (p) { MP.panelOpen = !MP.panelOpen; p.classList.toggle('on', MP.panelOpen); }
+      if (!MP.active) MP.enable(true);
+      MP.renderPlayers(); MP.renderChat();
+    });
+    var close = $('mpClose');
+    if (close) close.addEventListener('click', function () {
+      var p = $('mpPanel'); if (p) p.classList.remove('on'); MP.panelOpen = false;
+    });
+    var form = $('mpForm');
+    if (form) form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var inp = $('mpMsg');
+      if (inp && inp.value.trim()) { MP.sendChat(inp.value.trim()); inp.value = ''; }
+    });
+    window.addEventListener('beforeunload', function () { if (MP.active) MP.api('mp_leave', { id: MP.id }); });
+  })();
+
   /* ---------------- API pública ---------------- */
   window.WORLD = {
     scene: scene, engine: engine, camera: camera, ball: ball,
     state: WORLD, spawn: spawn, apply: applyAction, build: buildWorld,
     setTerrain: setTerrain, setWeather: setWeather, clear: clearWorld,
     setLayout: setLayout, clearLayout: clearLayout, avatar: createAvatar, modify: modifyEnt,
+    multiplayer: MP, control: setControlMode, player: player,
     save: saveScene, restore: restoreScene, setQuality: function (t) {
       if (!TIERS[t]) return;
       tier = t; T = TIERS[t];
@@ -1611,7 +2400,7 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 </script>
 <script>
 /* =====================================================================
-   GAME IA 3D — ícone flutuante + chat + voz (TTS local / STT navegador)
+   AMHEEX AI — ícone flutuante + chat + voz (Fish Audio / TTS local / STT navegador)
    Layout e lógica do FAB extraídos do AMHEEX DRIVE e adaptados ao mundo 3D.
    ===================================================================== */
 (function () {
@@ -1812,6 +2601,9 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
       case 'physics': return icon + ' gravidade ' + (a.on ? 'on' : 'off');
       case 'skin': return icon + ' skin ' + a.ent;
       case 'world': return icon + ' mundo: ' + a.preset;
+      case 'character': return icon + ' personagem ' + (a.nome || 'realista');
+      case 'control': return icon + ' controle: ' + (a.mode || 'pad');
+      case 'multiplayer': return icon + ' multiplayer ' + (a.on === false ? 'off' : 'on');
       default: return icon + ' ' + a.t;
     }
   }
@@ -2047,10 +2839,10 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   }
 
   /* ---------------- boot ---------------- */
-  /* uma vez, ao atualizar para o GAME IA 3D 2.0, limpa o histórico antigo */
+  /* uma vez, ao atualizar para o AMHEEX GAME 3.0, limpa o histórico antigo */
   try {
-    if (load('amx3d_ver', '') !== '2.0') {
-      store('amx3d_hist', []); store('amx3d_ver', '2.0');
+    if (load('amx3d_ver', '') !== '3.0') {
+      store('amx3d_hist', []); store('amx3d_ver', '3.0');
     }
   } catch (e) {}
   var saved = load('amx3d_hist', []);
@@ -2058,17 +2850,21 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
     history = saved.slice(-40);
     history.forEach(function (m) { addMsg(m.r === 'user' ? 'user' : 'bot', m.t); });
   } else {
-    addMsg('bot', 'Oi! Eu sou a **GAME IA 3D**. O mundo começa vazio de propósito: só **chão verde** e a **bola vermelha**. Todo o resto eu crio quando você pedir.\n\nPosso criar **qualquer coisa 3D** (prédio, casa, guarda-roupa, dinossauro, o que você inventar), **avatares**, **elementos na tela** (título, contador, mira, barra de vida) e **modificar** objetos que já existem. Diga **“crie game”** para eu montar um jogo inteiro. Fale pelo microfone ou escreva.');
+    addMsg('bot', 'Oi! Eu sou a **AMHEEX AI**, a inteligência do **AMHEEX GAME**. O mundo começa vazio de propósito: só **chão verde** e a **bola vermelha**. Todo o resto eu crio quando você pedir.\n\nPosso criar **qualquer coisa 3D** (prédio, casa, dinossauro, o que você inventar), **personagens realistas com skin procedural**, **controles** (andar, correr, pular, câmera em 1ª/3ª pessoa, modo tiro), **multiplayer por IP com mapa compartilhado e chat**, **elementos na tela** e **modificar** objetos que já existem. Diga **“crie game”** para montar um jogo inteiro, ou **“ative o multiplayer”**. Fale pelo microfone ou escreva.');
   }
   updateCount();
   applyFabPos();
 
   fetch('?api=ping').then(function (r) { return r.json(); }).then(function (j) {
-    if (j && j.ok) toast('Online · ' + (j.voz === 'espeak-ng' ? 'voz local' : 'voz navegador') + ' · PHP ' + j.php);
+    if (j && j.ok) {
+      var vm = j.voz === 'fish-clone' ? 'voz AMHEEX (Fish)' : (j.voz === 'espeak-ng' ? 'voz local' : 'voz navegador');
+      toast('Online · ' + vm + ' · PHP ' + j.php + (j.multiplayer ? ' · multiplayer' : ''));
+    }
   }).catch(function () { toast('Motor offline (PHP não respondeu)'); });
 
   /* API pública para integrar em qualquer página */
   window.AMHEEX_IA3D = {
+    version: '3.0.0',
     chat: function (text) { input.value = text; sendMsg(); },
     speak: speak,
     listen: startListen,

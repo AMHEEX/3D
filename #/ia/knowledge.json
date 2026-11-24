@@ -1,0 +1,78 @@
+{
+  "versao": "1.0",
+  "nome": "Base de conhecimento AMHEEX AI",
+  "areas": [
+    {
+      "id": "game_design",
+      "titulo": "Design de jogos",
+      "tags": ["jogo", "game design", "mecanica", "diversao", "loop", "core loop", "nivel", "fase"],
+      "resposta": "Um jogo forte nasce de um **loop principal** claro: o jogador faz uma ação, recebe feedback, melhora e repete. Defina primeiro a fantasia (o que o jogador quer sentir), depois a mecânica que entrega essa fantasia, depois o desafio e a recompensa. Em 3D, comece com uma área pequena e legível: ponto de spawn, objetivo visível, obstáculos e uma saída. Só aumente o mapa quando o loop já estiver divertido."
+    },
+    {
+      "id": "engines",
+      "titulo": "Engines e tecnologia",
+      "tags": ["engine", "unity", "unreal", "godot", "babylon", "three", "webgl", "motor", "render"],
+      "resposta": "Para web 3D, Babylon.js e Three.js são as opções mais diretas porque rodam no navegador com WebGL/WebGPU. Unity e Unreal brilham em jogos pesados e builds nativas. O AMHEEX GAME usa **Babylon.js local**, sem CDN, e um motor de linguagem em PHP: isso deixa o jogo leve, offline e fácil de hospedar no Render com Docker."
+    },
+    {
+      "id": "fisica",
+      "titulo": "Física de movimento",
+      "tags": ["fisica", "gravidade", "colisao", "pulo", "movimento", "aceleracao", "atrito", "personagem"],
+      "resposta": "Um controlador 3D convincente usa aceleração, atrito e gravidade separados. No chão, aplique velocidade com aceleração e limite por atrito; no ar, reduza o controle e mantenha a gravidade constante. Para pulo, use uma velocidade vertical inicial e desligue o chão enquanto o personagem sobe. Faça a colisão com cápsula ou esfera para não travar em quinas. O AMHEEX GAME já aplica esse modelo no jogador e nos objetos com física."
+    },
+    {
+      "id": "multiplayer",
+      "titulo": "Multiplayer por IP",
+      "tags": ["multiplayer", "ip", "jogadores", "rede", "servidor", "sincronizar", "mapa compartilhado", "outro dispositivo"],
+      "resposta": "O AMHEEX GAME identifica cada jogador pelo IP (com hash do navegador) e sincroniza posição, nome, skin e chat por polling no servidor PHP. O mapa compartilhado fica em JSON no servidor. Para produção com muitos jogadores, troque o polling por WebSocket e um banco como Redis/PostgreSQL; para até dezenas de jogadores, o modelo atual com arquivos e trava de escrita funciona bem e não precisa de banco externo."
+    },
+    {
+      "id": "procedural",
+      "titulo": "Geração procedural e skins",
+      "tags": ["procedural", "skin", "personagem", "avatar", "poligono", "textura", "realista", "modelagem", "3d"],
+      "resposta": "A skin realista do AMHEEX GAME é gerada por **polígonos geométricos** (cabeça, tronco, braços, pernas, cabelo, olhos) e uma **textura procedural** criada em canvas: tom de pele com ruído, sombreamento, roupa e detalhes faciais. Isso evita depender de arquivos GLB pesados e permite criar infinitas variações por seed. Para mais realismo, o próximo passo é normal map, subsurface scattering e rig de esqueleto."
+    },
+    {
+      "id": "shooter",
+      "titulo": "Jogo de tiro",
+      "tags": ["tiro", "shooter", "arma", "mira", "fps", "inimigo", "bala", "combate"],
+      "resposta": "Um shooter básico precisa de: câmera em primeira pessoa, mira central, arma com cadência, raycast para acertar alvos, feedback de dano e um objetivo. No AMHEEX GAME, peça **“modo tiro”** e a IA ativa a mira, a câmera FPS e o botão de atirar. Para inimigos, use máquinas de estado simples: patrulhar, perseguir, atacar e morrer."
+    },
+    {
+      "id": "otimizacao",
+      "titulo": "Performance",
+      "tags": ["performance", "fps", "otimizacao", "lag", "celular", "mobile", "qualidade"],
+      "resposta": "Em web 3D, os maiores custos são draw calls, sombras e partículas. O AMHEEX GAME detecta o hardware e escolhe qualidade leve, média ou alta; também reduz a resolução e as partículas se o FPS cair. Reaproveite materiais, congele matrizes de objetos estáticos, use LOD e evite criar texturas novas a cada frame."
+    },
+    {
+      "id": "ia_local",
+      "titulo": "IA local e aprendizado",
+      "tags": ["ia", "inteligencia artificial", "aprender", "treinamento", "memoria", "local", "voz", "llm"],
+      "resposta": "A AMHEEX AI roda localmente: interpreta comandos em português, mantém memória em JSON, aprende fatos que você ensina e usa uma base de conhecimento de jogos. Ela não depende de LLM externo para o jogo funcionar. A voz usa a API Fish Audio com clonagem por ID público, mas o texto e as decisões ficam no seu servidor."
+    },
+    {
+      "id": "controles",
+      "titulo": "Controles e câmera",
+      "tags": ["controle", "botao", "andar", "correr", "pular", "camera", "primeira pessoa", "terceira pessoa", "joystick"],
+      "resposta": "O AMHEEX GAME tem teclado (WASD/setas), toque no chão, botões virtuais de andar/correr/pular e alternância de câmera. Peça **“adicione botão de andar para frente”**, **“câmera primeira pessoa”** ou **“modo tiro”** e a IA configura o controlador. A câmera orbital acompanha o jogador; no modo FPS ela fica na altura dos olhos."
+    },
+    {
+      "id": "render",
+      "titulo": "Hospedagem no Render",
+      "tags": ["render", "docker", "deploy", "hospedagem", "servidor", "porta", "php"],
+      "resposta": "O projeto inclui Dockerfile com Apache, PHP 8.2, ffmpeg e espeak-ng. No Render, crie um **Web Service** do tipo Docker apontando para o repositório; o container ajusta o Apache para a porta definida em `$PORT`. As pastas `#/ia`, `#/dados` e `#/uploads` precisam ser graváveis. Em plano gratuito o disco é efêmero: memória, mapa e áudios podem resetar a cada deploy; para persistir, use um disco do Render ou um banco externo."
+    },
+    {
+      "id": "mapa",
+      "titulo": "Mapas e níveis",
+      "tags": ["mapa", "level design", "cenario", "mundo", "labirinto", "cidade", "floresta", "ilha"],
+      "resposta": "Um bom mapa ensina sem texto: use pontos de referência, funil de caminhos, luz para guiar e espaços abertos para descanso. O AMHEEX GAME cria presets de plataforma, corrida, labirinto, fazenda, cidade, ilha, floresta, deserto, espaço e medieval. Peça **“crie um mapa de floresta”** ou **“crie game”** para a IA montar tudo."
+    },
+    {
+      "id": "voz",
+      "titulo": "Voz clonada",
+      "tags": ["voz", "audio", "tts", "falar", "fish", "clone", "ogg", "opus"],
+      "resposta": "A voz da AMHEEX AI é gerada pela Fish Audio com o ID público de clonagem e convertida para OGG/Opus no servidor via ffmpeg. O navegador só recebe o áudio; a chave fica em `ia/config.php` ou em variáveis de ambiente. Se a API falhar, o jogo cai automaticamente para a voz do navegador."
+    }
+  ]
+}

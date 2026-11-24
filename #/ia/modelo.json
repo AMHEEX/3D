@@ -1,0 +1,2024 @@
+{
+  "nome": "AMHEEX AI",
+  "versao": "3.0.0",
+  "idioma": "pt-BR",
+  "motor": "local-procedural-nlu-universal",
+  "descricao": "AMHEEX AI: IA local do AMHEEX GAME. Cria qualquer coisa 3D, personagens com skin procedural, controles, câmera, multiplayer por IP, voz clonada e aprende com o usuário.",
+  "personalidade": "Fala português do Brasil, é direta, criativa e confirma em uma frase o que construiu no mundo 3D. Nunca diz que não sabe criar algo: inventa a forma mais próxima.",
+  "paleta": {
+    "vermelho": "#e63946",
+    "vermelha": "#e63946",
+    "rubro": "#e63946",
+    "carmim": "#dc2626",
+    "azul": "#3b82f6",
+    "azulzinho": "#60a5fa",
+    "azul escuro": "#1e3a8a",
+    "celeste": "#7dd3fc",
+    "verde": "#22c55e",
+    "verdinho": "#4ade80",
+    "verde escuro": "#166534",
+    "lima": "#84cc16",
+    "amarelo": "#facc15",
+    "amarela": "#facc15",
+    "dourado": "#f5b301",
+    "ouro": "#f5b301",
+    "laranja": "#f97316",
+    "roxo": "#8b5cf6",
+    "roxa": "#8b5cf6",
+    "violeta": "#a78bfa",
+    "rosa": "#ec4899",
+    "pink": "#ec4899",
+    "preto": "#111827",
+    "preta": "#111827",
+    "branco": "#f8fafc",
+    "branca": "#f8fafc",
+    "cinza": "#94a3b8",
+    "cinzento": "#94a3b8",
+    "marrom": "#8b5e34",
+    "castanho": "#8b5e34",
+    "bege": "#e7d3b3",
+    "creme": "#f5ead6",
+    "ciano": "#22d3ee",
+    "turquesa": "#14b8a6",
+    "prateado": "#cbd5e1",
+    "prata": "#cbd5e1",
+    "vinho": "#7f1d1d",
+    "salmao": "#fb7185",
+    "neon": "#39ff14",
+    "roxo neon": "#a855f7",
+    "arco iris": "#ff00aa"
+  },
+  "entidades": {
+    "bola": {
+      "tags": [
+        "bola",
+        "bolinha",
+        "esfera",
+        "ball"
+      ],
+      "cor": "#e63946",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "cubo": {
+      "tags": [
+        "cubo",
+        "caixa",
+        "bloco",
+        "box"
+      ],
+      "cor": "#3b82f6",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "casa": {
+      "tags": [
+        "casa",
+        "casinha",
+        "sobrado",
+        "moradia",
+        "construcao",
+        "construção"
+      ],
+      "cor": "#e7d3b3",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "predio": {
+      "tags": [
+        "predio",
+        "prédio",
+        "edificio",
+        "edifício",
+        "arranha ceu",
+        "arranha-céu",
+        "torre de escritorio"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "arvore": {
+      "tags": [
+        "arvore",
+        "árvore",
+        "arvores",
+        "árvores",
+        "planta",
+        "folhagem"
+      ],
+      "cor": "#22c55e",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "pinheiro": {
+      "tags": [
+        "pinheiro",
+        "pinheiros",
+        "abeto",
+        "conifera"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "palmeira": {
+      "tags": [
+        "palmeira",
+        "palmeiras",
+        "coqueiro"
+      ],
+      "cor": "#22c55e",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "boneco": {
+      "tags": [
+        "boneco",
+        "boneca",
+        "humano",
+        "pessoa",
+        "homem",
+        "mulher"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "robo": {
+      "tags": [
+        "robo",
+        "robô",
+        "robos",
+        "robôs",
+        "androide",
+        "maquina"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "cachorro": {
+      "tags": [
+        "cachorro",
+        "cao",
+        "cão",
+        "cachorros",
+        "dog",
+        "pet"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "gato": {
+      "tags": [
+        "gato",
+        "gata",
+        "gatos",
+        "cat"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "dinossauro": {
+      "tags": [
+        "dinossauro",
+        "dino",
+        "tiranossauro",
+        "rex"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "dragao": {
+      "tags": [
+        "dragao",
+        "dragão",
+        "dragoes",
+        "dragões"
+      ],
+      "cor": "#7f1d1d",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "carro": {
+      "tags": [
+        "carro",
+        "carros",
+        "veiculo",
+        "automovel",
+        "carrinho"
+      ],
+      "cor": "#3b82f6",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "caminhao": {
+      "tags": [
+        "caminhao",
+        "caminhão",
+        "truck",
+        "caminhoes"
+      ],
+      "cor": "#f97316",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "nave": {
+      "tags": [
+        "nave",
+        "foguete",
+        "espaconave",
+        "espaçonave",
+        "ufo",
+        "disco voador"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "montanha": {
+      "tags": [
+        "montanha",
+        "montanhas",
+        "serra",
+        "pico"
+      ],
+      "cor": "#64748b",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "lago": {
+      "tags": [
+        "lago",
+        "lagoa",
+        "agua",
+        "água",
+        "rio",
+        "piscina"
+      ],
+      "cor": "#22d3ee",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "ilha": {
+      "tags": [
+        "ilha",
+        "praia",
+        "atol"
+      ],
+      "cor": "#e7d3b3",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "pedra": {
+      "tags": [
+        "pedra",
+        "pedras",
+        "rocha",
+        "rochas"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "flor": {
+      "tags": [
+        "flor",
+        "flores",
+        "jardim"
+      ],
+      "cor": "#ec4899",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "castelo": {
+      "tags": [
+        "castelo",
+        "fortaleza",
+        "palacio",
+        "palácio"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "torre": {
+      "tags": [
+        "torre",
+        "torres",
+        "farol"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "ponte": {
+      "tags": [
+        "ponte",
+        "pontes"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "cerca": {
+      "tags": [
+        "cerca",
+        "cercas",
+        "grade"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "estrada": {
+      "tags": [
+        "estrada",
+        "rua",
+        "asfalto",
+        "pista",
+        "rodovia"
+      ],
+      "cor": "#334155",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "tocha": {
+      "tags": [
+        "tocha",
+        "fogueira",
+        "chama"
+      ],
+      "cor": "#f97316",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "cristal": {
+      "tags": [
+        "cristal",
+        "cristais",
+        "gema",
+        "joia"
+      ],
+      "cor": "#22d3ee",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "portal": {
+      "tags": [
+        "portal",
+        "portais",
+        "buraco negro",
+        "passagem"
+      ],
+      "cor": "#8b5cf6",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "moeda": {
+      "tags": [
+        "moeda",
+        "moedas",
+        "tesouro"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "bau": {
+      "tags": [
+        "bau",
+        "baú",
+        "caixa de tesouro",
+        "cofre"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "nuvem": {
+      "tags": [
+        "nuvem",
+        "nuvens",
+        "neblina"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "ceu"
+    },
+    "sol": {
+      "tags": [
+        "sol"
+      ],
+      "cor": "#facc15",
+      "escala": 1.0,
+      "categoria": "ceu"
+    },
+    "lua": {
+      "tags": [
+        "lua",
+        "luar"
+      ],
+      "cor": "#e2e8f0",
+      "escala": 1.0,
+      "categoria": "ceu"
+    },
+    "estrela": {
+      "tags": [
+        "estrela",
+        "estrelas"
+      ],
+      "cor": "#facc15",
+      "escala": 1.0,
+      "categoria": "ceu"
+    },
+    "banco": {
+      "tags": [
+        "banco",
+        "assento"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "poste": {
+      "tags": [
+        "poste",
+        "lampada",
+        "lâmpada",
+        "iluminacao"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "placa": {
+      "tags": [
+        "placa",
+        "letreiro",
+        "aviso"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "moinho": {
+      "tags": [
+        "moinho",
+        "catavento"
+      ],
+      "cor": "#e7d3b3",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "poco": {
+      "tags": [
+        "poco",
+        "poço",
+        "cisterna"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "boneco_neve": {
+      "tags": [
+        "boneco de neve",
+        "snowman"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "piramide": {
+      "tags": [
+        "piramide",
+        "pirâmide",
+        "piramides"
+      ],
+      "cor": "#e7d3b3",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "estatua": {
+      "tags": [
+        "estatua",
+        "estátua",
+        "monumento"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "cogumelo": {
+      "tags": [
+        "cogumelo",
+        "cogumelos",
+        "mushroom"
+      ],
+      "cor": "#e63946",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "arbusto": {
+      "tags": [
+        "arbusto",
+        "arbustos",
+        "moita",
+        "cerca viva"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "diamante": {
+      "tags": [
+        "diamante",
+        "diamantes"
+      ],
+      "cor": "#7dd3fc",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "prisma": {
+      "tags": [
+        "prisma",
+        "octaedro",
+        "poliedro"
+      ],
+      "cor": "#a78bfa",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "capsula": {
+      "tags": [
+        "capsula",
+        "cápsula",
+        "pilula",
+        "pílula",
+        "remedio",
+        "remédio"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "ovo": {
+      "tags": [
+        "ovo",
+        "ovos"
+      ],
+      "cor": "#f5ead6",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "donut": {
+      "tags": [
+        "donut",
+        "rosquinha",
+        "rosca",
+        "anel",
+        "aro"
+      ],
+      "cor": "#f97316",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "guarda_roupa": {
+      "tags": [
+        "guarda roupa",
+        "guarda-roupa",
+        "armario",
+        "armário",
+        "roupeiro"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "geladeira": {
+      "tags": [
+        "geladeira",
+        "frigorifico",
+        "frigorífico",
+        "refrigerador"
+      ],
+      "cor": "#e2e8f0",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "tv": {
+      "tags": [
+        "tv",
+        "televisao",
+        "televisão",
+        "televisor"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "monitor": {
+      "tags": [
+        "monitor",
+        "computador",
+        "pc",
+        "tela de pc"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "livro": {
+      "tags": [
+        "livro",
+        "livros",
+        "caderno",
+        "biblioteca"
+      ],
+      "cor": "#dc2626",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "mesa": {
+      "tags": [
+        "mesa",
+        "mesinha"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "cadeira": {
+      "tags": [
+        "cadeira",
+        "cadeiras"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "cama": {
+      "tags": [
+        "cama",
+        "camas",
+        "colchao"
+      ],
+      "cor": "#e2e8f0",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "sofa": {
+      "tags": [
+        "sofa",
+        "sofá",
+        "poltrona"
+      ],
+      "cor": "#334155",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "estante": {
+      "tags": [
+        "estante",
+        "prateleira",
+        "prateleiras"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "movel"
+    },
+    "barril": {
+      "tags": [
+        "barril",
+        "barris",
+        "tonel",
+        "tambor"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "roda": {
+      "tags": [
+        "roda",
+        "rodas",
+        "pneu",
+        "pneus"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "cano": {
+      "tags": [
+        "cano",
+        "canos",
+        "tubo",
+        "tubos",
+        "encanamento"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "parede": {
+      "tags": [
+        "parede",
+        "paredes",
+        "muro",
+        "muros"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "tela": {
+      "tags": [
+        "tela",
+        "telao",
+        "telão",
+        "painel de led"
+      ],
+      "cor": "#0ea5e9",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "quadro": {
+      "tags": [
+        "quadro",
+        "pintura",
+        "retrato"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "tapete": {
+      "tags": [
+        "tapete",
+        "carpete",
+        "alfombra"
+      ],
+      "cor": "#dc2626",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "folha": {
+      "tags": [
+        "folha",
+        "folhas",
+        "papel"
+      ],
+      "cor": "#22c55e",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "arma": {
+      "tags": [
+        "arma",
+        "armas",
+        "pistola",
+        "revolver"
+      ],
+      "cor": "#334155",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "escudo": {
+      "tags": [
+        "escudo",
+        "escudos",
+        "defesa"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "espada": {
+      "tags": [
+        "espada",
+        "espadas",
+        "sabre"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "nave_mae": {
+      "tags": [
+        "nave mae",
+        "nave-mãe",
+        "mothership",
+        "nave gigante"
+      ],
+      "cor": "#64748b",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "aviao": {
+      "tags": [
+        "aviao",
+        "avião",
+        "avioes",
+        "jato",
+        "aeronave"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "helicoptero": {
+      "tags": [
+        "helicoptero",
+        "helicóptero",
+        "helice"
+      ],
+      "cor": "#334155",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "onibus": {
+      "tags": [
+        "onibus",
+        "ônibus",
+        "bus"
+      ],
+      "cor": "#facc15",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "trem": {
+      "tags": [
+        "trem",
+        "trens",
+        "locomotiva",
+        "vagao"
+      ],
+      "cor": "#7f1d1d",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "bicicleta": {
+      "tags": [
+        "bicicleta",
+        "bike",
+        "bici"
+      ],
+      "cor": "#22d3ee",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "moto": {
+      "tags": [
+        "moto",
+        "motocicleta",
+        "motoca"
+      ],
+      "cor": "#e63946",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "tanque": {
+      "tags": [
+        "tanque",
+        "tanque de guerra",
+        "blindado"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "canhao": {
+      "tags": [
+        "canhao",
+        "canhão",
+        "artilharia"
+      ],
+      "cor": "#334155",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "satelite": {
+      "tags": [
+        "satelite",
+        "satélite",
+        "sonda"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "veiculo"
+    },
+    "asteroide": {
+      "tags": [
+        "asteroide",
+        "asteróide",
+        "meteoro",
+        "meteorito"
+      ],
+      "cor": "#64748b",
+      "escala": 1.0,
+      "categoria": "natureza"
+    },
+    "planeta": {
+      "tags": [
+        "planeta",
+        "planetas",
+        "mundo"
+      ],
+      "cor": "#3b82f6",
+      "escala": 1.0,
+      "categoria": "ceu"
+    },
+    "fonte": {
+      "tags": [
+        "fonte",
+        "chafariz",
+        "repuxo"
+      ],
+      "cor": "#7dd3fc",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "escada": {
+      "tags": [
+        "escada",
+        "escadas",
+        "degrau",
+        "degraus"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "rampa": {
+      "tags": [
+        "rampa",
+        "ladeira",
+        "inclinacao"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "plataforma": {
+      "tags": [
+        "plataforma",
+        "base",
+        "tablado"
+      ],
+      "cor": "#334155",
+      "escala": 1.0,
+      "categoria": "construcao"
+    },
+    "mola": {
+      "tags": [
+        "mola",
+        "trampolim",
+        "pula pula"
+      ],
+      "cor": "#facc15",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "alvo": {
+      "tags": [
+        "alvo",
+        "target",
+        "prato de tiro"
+      ],
+      "cor": "#e63946",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "bandeira": {
+      "tags": [
+        "bandeira",
+        "estandarte",
+        "flamula"
+      ],
+      "cor": "#22c55e",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "trofeu": {
+      "tags": [
+        "trofeu",
+        "troféu",
+        "premio",
+        "prêmio",
+        "copa"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "dado": {
+      "tags": [
+        "dado",
+        "dados",
+        "dado de rpg"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "coracao": {
+      "tags": [
+        "coracao",
+        "coração",
+        "vida",
+        "amor"
+      ],
+      "cor": "#e63946",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "caveira": {
+      "tags": [
+        "caveira",
+        "cranio",
+        "crânio",
+        "skull"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "objeto"
+    },
+    "fantasma": {
+      "tags": [
+        "fantasma",
+        "espirito",
+        "espírito",
+        "ghost"
+      ],
+      "cor": "#e2e8f0",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "zumbi": {
+      "tags": [
+        "zumbi",
+        "zombie",
+        "morto vivo"
+      ],
+      "cor": "#4d7c0f",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "vampiro": {
+      "tags": [
+        "vampiro",
+        "drácula",
+        "dracula"
+      ],
+      "cor": "#7f1d1d",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "bruxa": {
+      "tags": [
+        "bruxa",
+        "feiticeira",
+        "witch"
+      ],
+      "cor": "#8b5cf6",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "mago": {
+      "tags": [
+        "mago",
+        "feiticeiro",
+        "wizard"
+      ],
+      "cor": "#3b82f6",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "cavaleiro": {
+      "tags": [
+        "cavaleiro",
+        "guerreiro",
+        "knight"
+      ],
+      "cor": "#cbd5e1",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "soldado": {
+      "tags": [
+        "soldado",
+        "militar",
+        "exercito"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "ninja": {
+      "tags": [
+        "ninja",
+        "shinobi"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "pirata": {
+      "tags": [
+        "pirata",
+        "corsario"
+      ],
+      "cor": "#7f1d1d",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "sereia": {
+      "tags": [
+        "sereia",
+        "mermaid"
+      ],
+      "cor": "#14b8a6",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "fada": {
+      "tags": [
+        "fada",
+        "fairy"
+      ],
+      "cor": "#ec4899",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "anjo": {
+      "tags": [
+        "anjo",
+        "angel"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "demonio": {
+      "tags": [
+        "demonio",
+        "demônio",
+        "diabo",
+        "capeta"
+      ],
+      "cor": "#dc2626",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "alien": {
+      "tags": [
+        "alien",
+        "alienigena",
+        "et",
+        "extraterrestre"
+      ],
+      "cor": "#84cc16",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "monstro": {
+      "tags": [
+        "monstro",
+        "monstros",
+        "criatura"
+      ],
+      "cor": "#7c3aed",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "slime": {
+      "tags": [
+        "slime",
+        "geleia",
+        "gosma"
+      ],
+      "cor": "#4ade80",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "golem": {
+      "tags": [
+        "golem",
+        "gigante de pedra"
+      ],
+      "cor": "#64748b",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "esqueleto": {
+      "tags": [
+        "esqueleto",
+        "ossada",
+        "skeleton"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "mumia": {
+      "tags": [
+        "mumia",
+        "múmia",
+        "mummy"
+      ],
+      "cor": "#e7d3b3",
+      "escala": 1.0,
+      "categoria": "personagem"
+    },
+    "tigre": {
+      "tags": [
+        "tigre",
+        "tigreza"
+      ],
+      "cor": "#f97316",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "leao": {
+      "tags": [
+        "leao",
+        "leão",
+        "leoa"
+      ],
+      "cor": "#f5b301",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "elefante": {
+      "tags": [
+        "elefante",
+        "elefanta"
+      ],
+      "cor": "#94a3b8",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "cavalo": {
+      "tags": [
+        "cavalo",
+        "cavalos",
+        "egua",
+        "égua"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "vaca": {
+      "tags": [
+        "vaca",
+        "vacas",
+        "boi",
+        "gado"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "porco": {
+      "tags": [
+        "porco",
+        "porcos",
+        "pig"
+      ],
+      "cor": "#fb7185",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "galinha": {
+      "tags": [
+        "galinha",
+        "galo",
+        "frango"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "pato": {
+      "tags": [
+        "pato",
+        "pata",
+        "marreco"
+      ],
+      "cor": "#facc15",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "peixe": {
+      "tags": [
+        "peixe",
+        "peixes",
+        "fish"
+      ],
+      "cor": "#f97316",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "tubarao": {
+      "tags": [
+        "tubarao",
+        "tubarão",
+        "shark"
+      ],
+      "cor": "#64748b",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "polvo": {
+      "tags": [
+        "polvo",
+        "lula",
+        "octopus"
+      ],
+      "cor": "#8b5cf6",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "passaro": {
+      "tags": [
+        "passaro",
+        "pássaro",
+        "ave",
+        "bird"
+      ],
+      "cor": "#22d3ee",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "coruja": {
+      "tags": [
+        "coruja",
+        "owl"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "morcego": {
+      "tags": [
+        "morcego",
+        "bat"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "abelha": {
+      "tags": [
+        "abelha",
+        "bee"
+      ],
+      "cor": "#facc15",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "borboleta": {
+      "tags": [
+        "borboleta",
+        "butterfly"
+      ],
+      "cor": "#ec4899",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "aranha": {
+      "tags": [
+        "aranha",
+        "spider"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "cobra": {
+      "tags": [
+        "cobra",
+        "serpente",
+        "snake"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "sapo": {
+      "tags": [
+        "sapo",
+        "sapa",
+        "frog"
+      ],
+      "cor": "#4ade80",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "tartaruga": {
+      "tags": [
+        "tartaruga",
+        "turtle"
+      ],
+      "cor": "#166534",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "macaco": {
+      "tags": [
+        "macaco",
+        "macaca",
+        "monkey"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "urso": {
+      "tags": [
+        "urso",
+        "ursa",
+        "bear"
+      ],
+      "cor": "#8b5e34",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "lobo": {
+      "tags": [
+        "lobo",
+        "loba",
+        "wolf"
+      ],
+      "cor": "#64748b",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "raposa": {
+      "tags": [
+        "raposa",
+        "fox"
+      ],
+      "cor": "#f97316",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "coelho": {
+      "tags": [
+        "coelho",
+        "coelha",
+        "rabbit"
+      ],
+      "cor": "#f8fafc",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "pinguim": {
+      "tags": [
+        "pinguim",
+        "penguin"
+      ],
+      "cor": "#111827",
+      "escala": 1.0,
+      "categoria": "animal"
+    },
+    "baleia": {
+      "tags": [
+        "baleia",
+        "whale"
+      ],
+      "cor": "#3b82f6",
+      "escala": 1.0,
+      "categoria": "animal"
+    }
+  },
+  "sinonimos_acao": {
+    "criar": [
+      "crie",
+      "cria",
+      "criar",
+      "adicione",
+      "adiciona",
+      "adicionar",
+      "coloque",
+      "coloca",
+      "colocar",
+      "gere",
+      "gera",
+      "gerar",
+      "construa",
+      "construir",
+      "monte",
+      "montar",
+      "quero",
+      "faz",
+      "faca",
+      "faça",
+      "spawn",
+      "insira",
+      "inserir",
+      "poe",
+      "põe",
+      "bota",
+      "botar",
+      "levanta",
+      "levante",
+      "apareca",
+      "apareça"
+    ],
+    "remover": [
+      "apague",
+      "apaga",
+      "apagar",
+      "remova",
+      "remove",
+      "remover",
+      "delete",
+      "deletar",
+      "tire",
+      "tira",
+      "tirar",
+      "exclua",
+      "excluir",
+      "destrua",
+      "destruir",
+      "limpe",
+      "limpar",
+      "zere",
+      "reset",
+      "resetar",
+      "suma",
+      "sumir"
+    ],
+    "modificar": [
+      "modifique",
+      "modificar",
+      "mude",
+      "mudar",
+      "altere",
+      "alterar",
+      "transforme",
+      "transformar",
+      "deixe",
+      "deixa",
+      "torne",
+      "torna",
+      "gire",
+      "girar",
+      "suba",
+      "subir",
+      "desca",
+      "descer",
+      "posicione",
+      "posicionar",
+      "mova",
+      "mover",
+      "aumente",
+      "diminua"
+    ],
+    "pintar": [
+      "pinte",
+      "pinta",
+      "pintar",
+      "cor",
+      "mude a cor",
+      "troque a cor",
+      "deixe"
+    ],
+    "escala": [
+      "aumente",
+      "aumenta",
+      "aumentar",
+      "diminua",
+      "diminui",
+      "diminuir",
+      "maior",
+      "menor",
+      "gigante",
+      "enorme",
+      "pequeno",
+      "pequena",
+      "cresca",
+      "encolha"
+    ],
+    "mover": [
+      "mova",
+      "move",
+      "mover",
+      "leva",
+      "leve",
+      "empurre",
+      "desloque"
+    ],
+    "girar": [
+      "gire",
+      "gira",
+      "girar",
+      "rotacione",
+      "vire",
+      "virar"
+    ],
+    "clima": [
+      "chuva",
+      "chover",
+      "chovendo",
+      "neve",
+      "nevar",
+      "nevando",
+      "noite",
+      "anoitecer",
+      "dia",
+      "amanhecer",
+      "por do sol",
+      "pôr do sol",
+      "tempestade",
+      "trovao",
+      "nublado",
+      "nublar",
+      "neblina",
+      "ensolarado"
+    ],
+    "terreno": [
+      "chao",
+      "chão",
+      "grama",
+      "gramado",
+      "areia",
+      "deserto",
+      "asfalto",
+      "madeira",
+      "agua",
+      "lava"
+    ],
+    "camera": [
+      "camera",
+      "câmera",
+      "visao",
+      "visão",
+      "aproxime",
+      "afaste",
+      "de cima",
+      "panorama"
+    ],
+    "jogo": [
+      "jogo",
+      "game",
+      "fase",
+      "mapa",
+      "mundo",
+      "cenario",
+      "cenário",
+      "level",
+      "plataforma",
+      "corrida",
+      "labirinto"
+    ],
+    "skin": [
+      "skin",
+      "pele",
+      "figurino",
+      "visual do personagem",
+      "trocar o visual"
+    ],
+    "fisica": [
+      "fisica",
+      "física",
+      "gravidade",
+      "cair",
+      "pular",
+      "pulo",
+      "colisao",
+      "colisão"
+    ],
+    "layout": [
+      "layout",
+      "hud",
+      "interface",
+      "tela",
+      "painel",
+      "titulo",
+      "título",
+      "contador",
+      "placar",
+      "mira",
+      "barra de vida",
+      "relogio",
+      "relógio",
+      "icone",
+      "ícone"
+    ]
+  },
+  "layout": {
+    "itens": {
+      "titulo": {
+        "tags": [
+          "titulo",
+          "título",
+          "cabecalho",
+          "cabeçalho",
+          "nome do jogo"
+        ],
+        "padrao": "GAME IA 3D"
+      },
+      "texto": {
+        "tags": [
+          "texto",
+          "mensagem",
+          "frase",
+          "aviso",
+          "legenda",
+          "subtitulo"
+        ],
+        "padrao": "Bem-vindo ao GAME"
+      },
+      "contador": {
+        "tags": [
+          "contador",
+          "placar",
+          "pontos",
+          "score",
+          "pontuacao",
+          "moedas",
+          "vidas"
+        ],
+        "padrao": "0"
+      },
+      "icone": {
+        "tags": [
+          "icone",
+          "ícone",
+          "emoji",
+          "simbolo",
+          "logo"
+        ],
+        "padrao": "✦"
+      },
+      "barra": {
+        "tags": [
+          "barra",
+          "barra de vida",
+          "energia",
+          "progresso",
+          "hp",
+          "medidor"
+        ],
+        "padrao": ""
+      },
+      "mira": {
+        "tags": [
+          "mira",
+          "crosshair",
+          "alvo",
+          "reticulo"
+        ],
+        "padrao": ""
+      },
+      "relogio": {
+        "tags": [
+          "relogio",
+          "relógio",
+          "cronometro",
+          "tempo",
+          "timer"
+        ],
+        "padrao": "00:00"
+      },
+      "painel": {
+        "tags": [
+          "painel",
+          "card",
+          "cartao",
+          "janela"
+        ],
+        "padrao": "Painel"
+      },
+      "botao": {
+        "tags": [
+          "botao",
+          "botão",
+          "button",
+          "tecla"
+        ],
+        "padrao": "OK"
+      }
+    },
+    "posicoes": [
+      "topo",
+      "base",
+      "esq",
+      "dir",
+      "centro"
+    ]
+  },
+  "presets": {
+    "plataforma": {
+      "tags": [
+        "plataforma",
+        "parkour",
+        "obstaculos",
+        "obstáculos"
+      ],
+      "descricao": "fase de plataformas com moedas"
+    },
+    "corrida": {
+      "tags": [
+        "corrida",
+        "pista",
+        "velocidade",
+        "racing"
+      ],
+      "descricao": "pista de corrida com carros"
+    },
+    "labirinto": {
+      "tags": [
+        "labirinto",
+        "maze",
+        "desafio"
+      ],
+      "descricao": "labirinto de paredes"
+    },
+    "fazenda": {
+      "tags": [
+        "fazenda",
+        "sitio",
+        "sítio",
+        "campo",
+        "rural"
+      ],
+      "descricao": "fazenda com casa, cercas e animais"
+    },
+    "cidade": {
+      "tags": [
+        "cidade",
+        "metropole",
+        "metrópole",
+        "urbano",
+        "predios"
+      ],
+      "descricao": "cidade com prédios e ruas"
+    },
+    "ilha": {
+      "tags": [
+        "ilha",
+        "praia",
+        "tropical"
+      ],
+      "descricao": "ilha tropical com palmeiras"
+    },
+    "floresta": {
+      "tags": [
+        "floresta",
+        "mata",
+        "bosque",
+        "selva"
+      ],
+      "descricao": "floresta densa"
+    },
+    "deserto": {
+      "tags": [
+        "deserto",
+        "dunas"
+      ],
+      "descricao": "deserto com pirâmides"
+    },
+    "espaco": {
+      "tags": [
+        "espaco",
+        "espaço",
+        "galaxia",
+        "galáxia",
+        "planeta"
+      ],
+      "descricao": "cenário espacial"
+    },
+    "medieval": {
+      "tags": [
+        "medieval",
+        "reino",
+        "vila"
+      ],
+      "descricao": "vila medieval com castelo"
+    },
+    "surpresa": {
+      "tags": [
+        "surpresa",
+        "aleatorio",
+        "aleatório",
+        "qualquer",
+        "novo"
+      ],
+      "descricao": "um mundo surpresa montado do zero"
+    }
+  },
+  "respostas": {
+    "saudacao": [
+      "Oi! Eu sou a **AMHEEX AI**. O mundo está aberto: chão verde e a bola vermelha. O que eu construo para você?",
+      "Olá! AMHEEX AI pronta. Peça um personagem realista, um mapa, um jogo inteiro ou ative o multiplayer.",
+      "Oi! Fale ou escreva: “crie game” ou “crie um personagem realista”."
+    ],
+    "criar": [
+      "Pronto! Criei {n} {ent} {onde}. Quer que eu adicione mais alguma coisa?",
+      "Feito: {n} {ent} {onde}, na cor {cor}. Posso montar uma vila em volta.",
+      "Adicionei {n} {ent} {onde}. Dá para pedir “pinte de azul” ou “aumente”."
+    ],
+    "criar_livre": [
+      "Não tinha {nome} no meu catálogo, então criei do zero: {n} {nome} em forma de {forma}, {onde}. Ficou bom?",
+      "Criei {n} {nome} {onde} usando geometria {forma}. Peça “maior”, “de outra cor” ou “gire” para ajustar.",
+      "Feito! {n} {nome} {onde}. Eu invento a forma quando não conheço o objeto — agora ele existe no mundo."
+    ],
+    "layout": [
+      "Adicionei {item} na tela: “{texto}”. Quer mudar a posição ou a cor?",
+      "Elemento de layout criado: {item} com o texto “{texto}”.",
+      "Pronto, {item} apareceu no HUD. Posso colocar no topo, na base, à esquerda ou à direita."
+    ],
+    "avatar": [
+      "Criei o avatar {nome} {onde}. Ele já pode andar pelo mundo.",
+      "Avatar {nome} pronto {onde}, com a cor escolhida. Quer trocar a skin?",
+      "Seu personagem {nome} nasceu {onde}. Peça “gire o avatar” ou “pinte o avatar de verde”."
+    ],
+    "modificar": [
+      "Modifiquei {ent}: {props}.",
+      "Pronto, {ent} agora tem {props}.",
+      "Alterei {ent} ({props}). Quer mais alguma mudança?"
+    ],
+    "remover": [
+      "Removi {n} {ent} do mundo.",
+      "Apagado: {ent}. O que entra no lugar?",
+      "Pronto, tirei {ent} da cena."
+    ],
+    "limpar": [
+      "Cena limpa. Deixei só o chão verde e a bola vermelha, como você pediu.",
+      "Tudo apagado. Mundo zerado, pronto para o próximo pedido."
+    ],
+    "pintar": [
+      "Pintei {ent} de {cor}.",
+      "Cor trocada: {ent} agora está {cor}."
+    ],
+    "escala": [
+      "Ajustei o tamanho de {ent}.",
+      "{ent} agora está {escala}."
+    ],
+    "mover": [
+      "Movi {ent} {onde}.",
+      "{ent} deslocado {onde}."
+    ],
+    "clima": [
+      "Clima alterado para {clima}.",
+      "Pronto, o céu agora está em modo {clima}."
+    ],
+    "terreno": [
+      "Chão trocado para {terreno}.",
+      "Terreno atualizado: {terreno}."
+    ],
+    "camera": [
+      "Câmera ajustada: {cmd}.",
+      "Mudei o ângulo da câmera ({cmd})."
+    ],
+    "jogo": [
+      "Montei o cenário “{preset}”: {descricao}. A bola vermelha é você — mova com o mouse/toque.",
+      "Fase “{preset}” criada com {descricao}. Quer adicionar um título na tela?"
+    ],
+    "skin": [
+      "Skin aplicada em {ent}: {cor}.",
+      "Troquei o visual de {ent} para {cor}."
+    ],
+    "fisica": [
+      "Gravidade ativada: os objetos novos caem do céu.",
+      "Física ligada (gravidade simples)."
+    ],
+    "ajuda": [
+      "Eu sou a **AMHEEX AI**, a IA local do **AMHEEX GAME**. Posso criar qualquer coisa 3D, personagens com skin realista procedural, elementos na tela, controles e câmera, ativar multiplayer por IP, montar mapas compartilhados, falar com voz clonada e aprender o que você me ensinar. Exemplos: “crie game”, “crie um personagem realista”, “adicione botão de andar para frente”, “ative o multiplayer”, “câmera primeira pessoa”, “aprenda que ...”."
+    ],
+    "desconhecido": [
+      "Ainda não entendi. Tente “crie game”, “crie um personagem realista”, “adicione botão de andar”, “ative o multiplayer” ou “como funciona física?”.",
+      "Não entendi 100%. Eu crio objetos 3D, personagens, HUD, controles, mapas e multiplayer. O que você quer primeiro?"
+    ],
+    "nome": [
+      "Prazer, {nome}! Vou lembrar do seu nome nesta memória local.",
+      "Anotado, {nome}. Memória salva no servidor."
+    ],
+    "cor_favorita": [
+      "Guardei: sua cor favorita é {cor}. Vou usar nos próximos objetos.",
+      "Anotado! {cor} é a sua cor favorita."
+    ]
+  },
+  "sugestoes": [
+    "Crie game",
+    "Crie um personagem realista",
+    "Adicione botão de andar para frente",
+    "Ative o multiplayer",
+    "Câmera primeira pessoa / modo tiro",
+    "Crie um mapa compartilhado de floresta",
+    "Aprenda que meu jogo favorito é Minecraft",
+    "Como funciona física de personagem?",
+    "Crie 5 dinossauros no centro",
+    "Adicione um contador de pontos"
+  ]
+}
