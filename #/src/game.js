@@ -224,47 +224,84 @@
     var peleTex = skinTexture(peleHex, seed);
     var roupaTex = clothTexture(roupaHex, seed + 11);
     var pele = new BABYLON.StandardMaterial('pele' + seed, scene);
-    pele.diffuseTexture = peleTex; pele.specularColor = new BABYLON.Color3(.12, .12, .12); pele.specularPower = 32;
+    pele.diffuseTexture = peleTex; pele.specularColor = new BABYLON.Color3(.10, .10, .10); pele.specularPower = 48;
     var roupa = new BABYLON.StandardMaterial('roupa' + seed, scene);
-    roupa.diffuseTexture = roupaTex; roupa.specularColor = new BABYLON.Color3(.08, .08, .08);
-    var cabelo = mat(['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c'][seed % 4]);
-    var olho = mat('#f8fafc', { emissive: .08 });
-    var pupila = mat('#111827');
-    var boca = mat('#7f1d1d');
+    roupa.diffuseTexture = roupaTex; roupa.specularColor = new BABYLON.Color3(.06, .06, .06);
+    var cabeloCor = ['#1b1b1b', '#3b2314', '#6b4423', '#d4a24c', '#8b2f2f'][seed % 5];
+    var cabelo = mat(cabeloCor);
+    var olho = mat('#f8fafc', { emissive: .05 });
+    var iris = mat(['#3b82f6', '#22c55e', '#a16207', '#0f172a'][seed % 4], { emissive: .12 });
+    var pupila = mat('#0b0f18');
+    var brilho = mat('#ffffff', { emissive: 1 });
+    var boca = mat('#8f2f3a');
     var sapato = mat('#111827');
+    var detalhe = mat('#e2e8f0');
+    var S = 24, SP = 28;
 
-    /* pernas + sapatos */
-    cyl('pernaE', .24, .22, .95, r, -.19, .55, 0, roupa, 10);
-    cyl('pernaD', .24, .22, .95, r, .19, .55, 0, roupa, 10);
-    box('peE', .28, .16, .46, r, -.19, .10, .10, sapato);
-    box('peD', .28, .16, .46, r, .19, .10, .10, sapato);
-    /* cintura/torso */
-    cyl('quadril', .56, .5, .38, r, 0, 1.02, 0, roupa, 12);
-    cyl('torso', .62, .52, 1.02, r, 0, 1.62, 0, roupa, 14);
-    /* braços + mãos */
-    cyl('bracoE', .17, .15, .92, r, -.42, 1.62, 0, pele, 10);
-    cyl('bracoD', .17, .15, .92, r, .42, 1.62, 0, pele, 10);
-    sph('maoE', .22, r, -.42, 1.14, 0, pele, 8);
-    sph('maoD', .22, r, .42, 1.14, 0, pele, 8);
-    /* pescoço + cabeça */
-    cyl('pescoco', .2, .22, .22, r, 0, 2.19, 0, pele, 10);
-    sph('cabeca', .66, r, 0, 2.55, 0, pele, 16);
-    /* cabelo (calota + franja) */
-    var topo = sph('cabelo', .70, r, 0, 2.62, -.03, cabelo, 14);
-    topo.scaling.y = .62; topo.scaling.z = 1.02;
-    box('franja', .5, .12, .12, r, 0, 2.80, .27, cabelo);
-    /* olhos, sobrancelhas, nariz, boca */
-    sph('olhoE', .11, r, -.14, 2.59, .28, olho, 8);
-    sph('olhoD', .11, r, .14, 2.59, .28, olho, 8);
-    sph('pupilaE', .05, r, -.14, 2.59, .335, pupila, 6);
-    sph('pupilaD', .05, r, .14, 2.59, .335, pupila, 6);
-    box('sobrancelhaE', .14, .035, .04, r, -.14, 2.68, .30, cabelo);
-    box('sobrancelhaD', .14, .035, .04, r, .14, 2.68, .30, cabelo);
-    cyl('nariz', .07, .10, .16, r, 0, 2.51, .33, pele, 6).rotation.x = Math.PI / 2;
-    box('boca', .16, .035, .04, r, 0, 2.40, .31, boca);
-    /* orelhas */
-    sph('orelhaE', .13, r, -.33, 2.55, 0, pele, 6).scaling.z = .6;
-    sph('orelhaD', .13, r, .33, 2.55, 0, pele, 6).scaling.z = .6;
+    /* pernas articuladas: coxa, joelho, canela, pé */
+    cyl('coxaE', .26, .23, .62, r, -.20, .92, 0, roupa, S);
+    cyl('coxaD', .26, .23, .62, r, .20, .92, 0, roupa, S);
+    sph('joelhoE', .21, r, -.20, .60, 0, roupa, 16);
+    sph('joelhoD', .21, r, .20, .60, 0, roupa, 16);
+    cyl('pernaE', .20, .17, .52, r, -.20, .30, 0, pele, S);
+    cyl('pernaD', .20, .17, .52, r, .20, .30, 0, pele, S);
+    box('peE', .28, .15, .46, r, -.20, .08, .09, sapato);
+    box('peD', .28, .15, .46, r, .20, .08, .09, sapato);
+    /* quadril e cintura */
+    cyl('quadril', .58, .52, .34, r, 0, 1.20, 0, roupa, S);
+    cyl('cintura', .55, .57, .16, r, 0, 1.39, 0, detalhe, S);
+    /* torso com peito e costas */
+    cyl('torso', .63, .55, .78, r, 0, 1.80, 0, roupa, S);
+    sph('peitoE', .30, r, -.17, 1.92, .16, roupa, 18).scaling.set(1, .8, .55);
+    sph('peitoD', .30, r, .17, 1.92, .16, roupa, 18).scaling.set(1, .8, .55);
+    /* ombros e braços articulados */
+    sph('ombroE', .24, r, -.50, 2.05, 0, roupa, 18);
+    sph('ombroD', .24, r, .50, 2.05, 0, roupa, 18);
+    cyl('bracoE', .18, .16, .52, r, -.52, 1.76, 0, pele, S);
+    cyl('bracoD', .18, .16, .52, r, .52, 1.76, 0, pele, S);
+    sph('cotoveloE', .16, r, -.52, 1.49, 0, pele, 14);
+    sph('cotoveloD', .16, r, .52, 1.49, 0, pele, 14);
+    cyl('antebracoE', .15, .13, .46, r, -.52, 1.24, 0, pele, S);
+    cyl('antebracoD', .15, .13, .46, r, .52, 1.24, 0, pele, S);
+    sph('maoE', .20, r, -.52, .98, 0, pele, 16).scaling.set(.85, 1.15, .6);
+    sph('maoD', .20, r, .52, .98, 0, pele, 16).scaling.set(.85, 1.15, .6);
+    /* dedos (geometria fina) */
+    for (var f = 0; f < 4; f++) {
+      cyl('dedoE' + f, .028, .024, .16, r, -.60 + f * .055, .84, .02, pele, 8);
+      cyl('dedoD' + f, .028, .024, .16, r, .44 + f * .055, .84, .02, pele, 8);
+    }
+    /* pescoço e cabeça */
+    cyl('pescoco', .21, .24, .22, r, 0, 2.30, 0, pele, S);
+    sph('cabeca', .64, r, 0, 2.70, 0, pele, SP).scaling.set(.94, 1.08, .98);
+    sph('mandibula', .50, r, 0, 2.50, .06, pele, SP).scaling.set(.88, .62, .92);
+    /* cabelo em camadas */
+    var topo = sph('cabelo', .68, r, 0, 2.78, -.02, cabelo, SP);
+    topo.scaling.y = .66; topo.scaling.z = 1.03;
+    box('franja', .52, .13, .14, r, 0, 2.96, .27, cabelo);
+    sph('nuca', .40, r, 0, 2.62, -.30, cabelo, 18).scaling.set(1.05, .9, .6);
+    for (var h = 0; h < 5; h++) {
+      cyl('fio' + h, .05, .03, .30, r, -.30 + h * .15, 2.92, .18, cabelo, 8).rotation.z = (h - 2) * .18;
+    }
+    /* olhos: esclera, íris, pupila, brilho, pálpebra */
+    sph('olhoE', .115, r, -.145, 2.74, .275, olho, 16);
+    sph('olhoD', .115, r, .145, 2.74, .275, olho, 16);
+    sph('irisE', .062, r, -.145, 2.74, .355, iris, 14);
+    sph('irisD', .062, r, .145, 2.74, .355, iris, 14);
+    sph('pupilaE', .032, r, -.145, 2.74, .385, pupila, 12);
+    sph('pupilaD', .032, r, .145, 2.74, .385, pupila, 12);
+    sph('brilhoE', .013, r, -.128, 2.765, .405, brilho, 8);
+    sph('brilhoD', .013, r, .128, 2.765, .405, brilho, 8);
+    box('palpebraE', .20, .045, .07, r, -.145, 2.845, .30, pele).rotation.z = -.12;
+    box('palpebraD', .20, .045, .07, r, .145, 2.845, .30, pele).rotation.z = .12;
+    box('sobrancelhaE', .16, .038, .05, r, -.145, 2.88, .30, cabelo).rotation.z = -.10;
+    box('sobrancelhaD', .16, .038, .05, r, .145, 2.88, .30, cabelo).rotation.z = .10;
+    /* nariz, boca, orelhas */
+    box('narizPonte', .075, .18, .10, r, 0, 2.70, .31, pele);
+    sph('narizPonta', .075, r, 0, 2.63, .35, pele, 12).scaling.set(1, .8, .9);
+    box('labioSup', .19, .04, .05, r, 0, 2.50, .315, boca);
+    box('labioInf', .17, .045, .05, r, 0, 2.455, .312, boca);
+    sph('orelhaE', .13, r, -.33, 2.70, 0, pele, 14).scaling.z = .55;
+    sph('orelhaD', .13, r, .33, 2.70, 0, pele, 14).scaling.z = .55;
     r.metadata = { humanoid: true, seed: seed, pele: peleHex, cor: roupaHex };
     return r;
   };
@@ -660,7 +697,7 @@
   }
 
   function findByEnt(ent) {
-    return WORLD.objects.filter(function (o) { return o.ent === ent; });
+    return WORLD.objects.filter(function (o) { return o.ent === ent && !o.remoto; });
   }
 
   function recolor(ent, cor) {
@@ -892,6 +929,9 @@
     isCharacter: false
   };
   var controlOn = false;
+  var npc = null;
+  var settings = { volume: 0.8, sens: 1, names: true, voiceRange: 16 };
+  window.AMX_SET = settings;
 
   window.addEventListener('keydown', function (e) {
     var k = e.key.toLowerCase();
@@ -1011,6 +1051,9 @@
   })();
 
   scene.onPointerObservable.add(function (info) {
+    if (info.type === BABYLON.PointerEventTypes.POINTERMOVE && settings.sens !== 1 && camera.inputs && camera.inputs.attached.pointers) {
+      /* sensibilidade ajustada nos inputs da câmera */
+    }
     if (info.type !== BABYLON.PointerEventTypes.POINTERTAP) return;
     var pick = scene.pick(scene.pointerX, scene.pointerY, function (m) { return m === ground; });
     if (pick && pick.hit && pick.pickedPoint) {
@@ -1374,6 +1417,9 @@
     camera.target.z += (node.position.z - camera.target.z) * Math.min(1, dt * camLerp);
     camera.target.y += (camY - camera.target.y) * Math.min(1, dt * camLerp);
 
+    /* NPC seguidor */
+    tickNPC(dt);
+
     /* multiplayer: envia posição e atualiza jogadores remotos */
     if (window.MP && window.MP.active) window.MP.tick(dt, node);
 
@@ -1437,6 +1483,100 @@
   engine.runRenderLoop(function () { scene.render(); });
   window.addEventListener('resize', function () { engine.resize(); });
   window.addEventListener('orientationchange', function () { setTimeout(function () { engine.resize(); }, 250); });
+
+  /* ---------------- NPC AMHEEX (segue o jogador, anda e pula) ---------------- */
+  function spawnNPC(nome) {
+    if (npc && npc.node && !npc.node.isDisposed) { try { npc.node.dispose(); } catch (e) {} }
+    var pele = ['#f1c27d', '#c68642', '#8d5524', '#e0ac69'][Math.floor(Math.random() * 4)];
+    var cor = ['#ef4444', '#22c55e', '#a855f7', '#f59e0b'][Math.floor(Math.random() * 4)];
+    var node = B.personagem({ pele: pele, cor: cor, seed: Math.floor(Math.random() * 999999) });
+    var base = player.node ? player.node.position : BABYLON.Vector3.Zero();
+    node.position.set(base.x + 2.4, 0, base.z - 2.4);
+    node.getChildMeshes().forEach(function (m) { m.isPickable = false; registerShadows(m); });
+    var dt = new BABYLON.DynamicTexture('npclbl', { width: 512, height: 128 }, scene, true);
+    dt.hasAlpha = true;
+    dt.drawText(nome || 'AMHEEX BOT', 20, 84, 'bold 54px Arial', '#a5f3fc', 'rgba(0,0,0,0)', true);
+    var lm = new BABYLON.StandardMaterial('npclblm', scene);
+    lm.diffuseTexture = dt; lm.emissiveColor = new BABYLON.Color3(1, 1, 1);
+    lm.opacityTexture = dt; lm.disableLighting = true; lm.backFaceCulling = false;
+    var label = BABYLON.MeshBuilder.CreatePlane('npclblp', { width: 2.4, height: 0.6 }, scene);
+    label.material = lm; label.billboardMode = BABYLON.Mesh.BILLBOARDMODE_ALL;
+    label.position.set(node.position.x, 3.15, node.position.z);
+    label.isPickable = false;
+    label.setEnabled(settings.names);
+    npc = { node: node, label: label, nome: nome || 'AMHEEX BOT', vy: 0, y: 0, grounded: true, nextJump: 0 };
+    WORLD.npc = npc;
+    return { ok: true, npc: npc.nome };
+  }
+  window.spawnNPC = spawnNPC;
+
+  function tickNPC(dt) {
+    if (!npc || !npc.node || npc.node.isDisposed) return;
+    var alvo = player.node || ball;
+    var dx = alvo.position.x - npc.node.position.x;
+    var dz = alvo.position.z - npc.node.position.z;
+    var dist = Math.sqrt(dx * dx + dz * dz);
+    var andando = false;
+    if (dist > 2.6) {
+      var vel = (dist > 8 ? 6.4 : 4.2) * dt;
+      npc.node.position.x += (dx / dist) * vel;
+      npc.node.position.z += (dz / dist) * vel;
+      npc.node.rotation.y += (Math.atan2(dx, dz) - npc.node.rotation.y) * Math.min(1, dt * 8);
+      andando = true;
+    }
+    /* pulo ocasional para acompanhar */
+    var now = performance.now();
+    if (andando && now > npc.nextJump && dist > 5) {
+      npc.vy = 5.4; npc.grounded = false; npc.nextJump = now + 3200;
+    }
+    if (!npc.grounded) {
+      npc.vy -= 18 * dt; npc.y += npc.vy * dt;
+      if (npc.y <= 0) { npc.y = 0; npc.vy = 0; npc.grounded = true; }
+    }
+    npc.node.position.y = npc.y;
+    var t = performance.now() / 1000;
+    var sw = andando ? Math.sin(t * 9) * .55 : 0;
+    var parts = npc.node.getChildMeshes();
+    for (var i = 0; i < parts.length; i++) {
+      var nm = parts[i].name;
+      if (nm === 'coxaE' || nm === 'pernaE') parts[i].rotation.x = sw;
+      else if (nm === 'coxaD' || nm === 'pernaD') parts[i].rotation.x = -sw;
+      else if (nm === 'bracoE' || nm === 'antebracoE') parts[i].rotation.x = -sw * .75;
+      else if (nm === 'bracoD' || nm === 'antebracoD') parts[i].rotation.x = sw * .75;
+    }
+    if (npc.label) {
+      npc.label.position.x = npc.node.position.x;
+      npc.label.position.z = npc.node.position.z;
+      npc.label.position.y = 3.15 + npc.y;
+    }
+  }
+
+  /* ---------------- início do jogo ---------------- */
+  function startGame(nome) {
+    var n = (nome || '').trim() || MP.nome();
+    try { localStorage.setItem('amx_nome', n); } catch (e) {}
+    MP.name = n;
+    if (!player.isCharacter) {
+      createAvatar({ t: 'character', nome: n, pele: player.skin.pele, cor: player.skin.cor, seed: player.skin.seed, x: 0, z: 0 });
+    }
+    setControlMode('third');
+    if (!npc) spawnNPC('AMHEEX BOT');
+    MP._quiet = true;
+    setTimeout(function () { MP._quiet = false; }, 2600);
+    MP.enable(true);
+    var tb = $('topbar'); if (tb) tb.classList.add('on');
+    var vb = $('voiceBar'); if (vb) vb.classList.add('on');
+    return { ok: true, nome: n };
+  }
+  window.AMX_START = startGame;
+
+  function setNames(on) {
+    settings.names = !!on;
+    for (var id in MP.remotes) { var r = MP.remotes[id]; if (r.label) r.label.setEnabled(settings.names); }
+    if (npc && npc.label) npc.label.setEnabled(settings.names);
+    return { ok: true };
+  }
+  window.AMX_NAMES = setNames;
 
   /* ---------------- MULTIPLAYER (por IP, mapa compartilhado) ---------------- */
   var MP = {
@@ -1564,6 +1704,8 @@
     }
     var cnt = $('mpCount');
     if (cnt) cnt.textContent = Math.max(0, list.length);
+    var tc = $('tbCount'); if (tc) tc.textContent = Math.max(0, list.length);
+    var mc = $('menuPlayers'); if (mc) mc.textContent = Math.max(0, list.length);
     MP.renderPlayers();
   };
 
@@ -1629,6 +1771,8 @@
     }
     box.innerHTML = html;
     box.scrollTop = box.scrollHeight;
+    var log = $('chatLog');
+    if (log) { log.innerHTML = html; log.scrollTop = log.scrollHeight; }
   };
 
   MP.sendChat = function (msg) {
@@ -1657,7 +1801,10 @@
       })
     };
     MP.api('mp_world', { cena: data }, function (j) {
-      if (j && j.ok) { MP.worldRev = j.world_revision || MP.worldRev; MP.toast('Mapa compartilhado salvo para todos.'); }
+      if (j && j.ok) {
+        MP.worldRev = j.world_revision || MP.worldRev;
+        if (!MP._quiet) MP.toast('Mapa compartilhado salvo para todos.');
+      }
     });
   };
 
@@ -1696,7 +1843,7 @@
     state: WORLD, spawn: spawn, apply: applyAction, build: buildWorld,
     setTerrain: setTerrain, setWeather: setWeather, clear: clearWorld,
     setLayout: setLayout, clearLayout: clearLayout, avatar: createAvatar, modify: modifyEnt,
-    multiplayer: MP, control: setControlMode, player: player,
+    multiplayer: MP, control: setControlMode, player: player, start: startGame, npc: spawnNPC, settings: settings,
     save: saveScene, restore: restoreScene, setQuality: function (t) {
       if (!TIERS[t]) return;
       tier = t; T = TIERS[t];

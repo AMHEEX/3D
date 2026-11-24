@@ -28,6 +28,7 @@ mantida no servidor), com fallback para `espeak-ng` e para o navegador.
 │   ├── top.php                ← API PHP (chat, TTS, multiplayer, treino)
 │   ├── head.html              ← HTML + CSS da interface
 │   ├── game.js                ← motor do mundo (Babylon.js) + AMHEEX AI actions
+│   ├── ui.js                  ← boot, menu, chat, configurações e voz por proximidade
 │   └── ai.js                  ← ícone flutuante, chat, voz e STT
 ├── ia/
 │   ├── engine.php             ← motor de linguagem natural local (português)
@@ -36,6 +37,7 @@ mantida no servidor), com fallback para `espeak-ng` e para o navegador.
 │   ├── memoria.json           ← memória da IA (nome, cor favorita, histórico)
 │   ├── aprendizado.json       ← tudo que o usuário ensinou (fatos/notas)
 │   ├── multiplayer.json       ← jogadores, chat e revisão do mundo
+│   ├── rtc.json               ← sinalização WebRTC da voz por proximidade
 │   ├── config.php             ← configuração da voz Fish (server-side)
 │   ├── voz_lib.php            ← geração/cache de voz (OGG Opus + MP3)
 │   ├── voz.php                ← endpoint TTS independente
@@ -147,3 +149,54 @@ O `Dockerfile` na raiz instala PHP 8.2 + Apache, Node 20, **ffmpeg** e
 ---
 
 © 2026 **AMHEEX** — Soluções em Tecnologia e Programação.
+
+---
+
+## 8. Interface nova (estilo Roblox) e voz por proximidade
+
+A interface foi refeita para ficar parecida com a de jogos modernos:
+
+- **Tela de carregamento** com a logo oficial
+  (`https://storage.amheex.workers.dev/AMHEEX/icon.png`), nome AMHEEX GAME e
+  **barra RGB animada com porcentagem** (0–100%).
+- **Menu inicial** com logo centralizada, campo de nome, botão
+  **ENTRAR NO MUNDO**, **CONFIGURAÇÕES**, **COMO JOGAR** e contador de
+  jogadores online.
+- **Barra superior** com marca, chat, contador de jogadores, configurações e
+  menu.
+- **Chat do mundo** flutuante (tecla `T`), com histórico compartilhado.
+- **Configurações** (qualidade gráfica, volume, alcance da voz, sensibilidade
+  da câmera, microfone e mostrar nomes) — não alteram o mapa nem o personagem
+  de outros jogadores.
+- **Ícone flutuante da AMHEEX AI** independente do menu: ele não interfere no
+  layout fixo (botões de andar, correr, pular, câmera e mira continuam fixos).
+
+### Voz por proximidade (como Roblox)
+
+A voz usa **WebRTC** com sinalização feita pelo próprio servidor PHP:
+
+- `?api=rtc_send` — envia `offer`, `answer`, `ice` ou `bye` (com `from`, `to`,
+  `kind`, `data`).
+- `?api=rtc_poll&id=SEU_ID` — recebe e remove as mensagens destinadas a você.
+
+O cliente (`src/ui.js`) abre o microfone com `getUserMedia`, negocia peer a peer
+e **só libera o áudio de quem está dentro do alcance configurado**
+(`Alcance da voz`, padrão 16 m). Longe = silêncio; perto = escuta. A tecla `V`
+liga/desliga a voz e muta/desmuta. O botão **Som** também muta/desmuta.
+
+### NPC AMHEEX BOT
+
+Ao entrar no mundo nasce um **NPC fixo** (`AMHEEX BOT`) modelado com o mesmo
+sistema procedural do jogador (mais de 20 mil polígonos somando os segmentos),
+com tons realistas. Ele **segue o jogador andando**, pula para acompanhar e
+anima braços e pernas em tempo real.
+
+### Regras de edição
+
+- A IA pode **criar e modificar formas geométricas 3D** no mapa compartilhado.
+- A IA **não edita o personagem de outros jogadores**: os avatares remotos não
+  entram em `WORLD.objects` e `findByEnt()` filtra `o.remoto`.
+- O **layout fixo do jogo** (botões, HUD, mira, configurações) não é alterado
+  pela IA.
+- Cada novo IP entra no **mapa fixo de chão verde** e passa a aparecer no mapa
+  global para todos os jogadores.

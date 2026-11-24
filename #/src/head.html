@@ -182,6 +182,85 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
   #amxai-fab{right:14px;bottom:14px;width:56px;height:56px}
   #amxai-chips button{font-size:11px}
 }
+
+/* ================= AMHEEX GAME 3.1 — boot, menu, HUD estilo Roblox ================= */
+#boot{position:fixed;inset:0;z-index:9000;background:radial-gradient(120% 120% at 50% 0%,#101a33 0%,#05070d 60%,#000 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;transition:opacity .6s}
+#boot.off{opacity:0;pointer-events:none}
+#bootLogo{width:min(230px,46vw);height:auto;filter:drop-shadow(0 18px 50px rgba(79,124,255,.55));animation:bootFloat 3.4s ease-in-out infinite}
+@keyframes bootFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+#bootName{font-size:clamp(20px,4.4vw,34px);font-weight:900;letter-spacing:.16em;color:#fff;text-transform:uppercase;text-align:center}
+#bootName span{background:linear-gradient(90deg,#4f7cff,#22d3ee,#a855f7,#4f7cff);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgbText 6s linear infinite}
+@keyframes rgbText{to{background-position:300% 0}}
+#bootBarWrap{width:min(420px,78vw);display:flex;flex-direction:column;gap:9px;align-items:center}
+#bootBar{width:100%;height:10px;border-radius:999px;background:rgba(255,255,255,.09);overflow:hidden;border:1px solid rgba(255,255,255,.10)}
+#bootFill{display:block;height:100%;width:0%;border-radius:999px;background:linear-gradient(90deg,#ff004c,#ff8a00,#ffe600,#33ff66,#00e5ff,#4f7cff,#c400ff,#ff004c);background-size:300% 100%;animation:rgbBar 3.2s linear infinite;transition:width .35s ease;box-shadow:0 0 18px rgba(79,124,255,.6)}
+@keyframes rgbBar{to{background-position:300% 0}}
+#bootPct{font-size:12.5px;font-weight:800;letter-spacing:.14em;color:#9fb0d4}
+#bootTip{font-size:11.5px;color:#64719a;max-width:min(420px,80vw);text-align:center;line-height:1.5}
+
+#menu{position:fixed;inset:0;z-index:8000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:radial-gradient(120% 120% at 50% 10%,rgba(16,26,51,.94),rgba(4,6,12,.97) 65%,#000);backdrop-filter:blur(14px);padding:24px}
+#menu.on{display:flex}
+#menuLogo{width:min(180px,40vw);filter:drop-shadow(0 16px 44px rgba(79,124,255,.5))}
+#menuTitle{font-size:clamp(26px,6vw,46px);font-weight:900;letter-spacing:.1em;margin:0;text-align:center;background:linear-gradient(90deg,#fff,#9fc3ff,#22d3ee,#fff);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:rgbText 8s linear infinite}
+#menuSub{font-size:12.5px;color:#8b97b4;letter-spacing:.18em;text-transform:uppercase;margin-top:-8px}
+#menuCard{width:min(420px,92vw);background:rgba(13,18,32,.78);border:1px solid rgba(255,255,255,.10);border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:12px;box-shadow:0 40px 100px -30px #000}
+#menuCard label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#7f8db3;font-weight:800}
+#menuName{width:100%;padding:12px 14px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:#0a0e18;color:#fff;font-size:14px;font-family:inherit;outline:none}
+#menuName:focus{border-color:rgba(79,124,255,.65);box-shadow:0 0 0 3px rgba(79,124,255,.15)}
+#menuPlay{width:100%;padding:15px;border-radius:14px;border:0;cursor:pointer;font-family:inherit;font-size:16px;font-weight:900;letter-spacing:.1em;color:#fff;background:linear-gradient(135deg,#3b63f0,#5b8bff 45%,#22d3ee);box-shadow:0 16px 40px -14px rgba(59,99,240,.9);transition:.18s}
+#menuPlay:hover{transform:translateY(-2px);box-shadow:0 22px 50px -14px rgba(34,211,238,.85)}
+#menuRow{display:flex;gap:8px}
+#menuRow button{flex:1;padding:11px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.04);color:#c3cfe8;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer}
+#menuRow button:hover{background:rgba(79,124,255,.16);color:#fff}
+#menuStats{font-size:11.5px;color:#7f8db3;text-align:center}
+#menuStats b{color:#22d3ee}
+
+#topbar{position:fixed;left:0;right:0;top:0;z-index:9;display:none;align-items:center;gap:8px;padding:10px 12px;pointer-events:none}
+#topbar.on{display:flex}
+#topbar .tb{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(8,11,20,.66);backdrop-filter:blur(12px);color:#dbe4f7;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;transition:.15s}
+#topbar .tb:hover{background:rgba(79,124,255,.22);border-color:rgba(79,124,255,.45);color:#fff}
+#topbar .tb.icon{width:38px;padding:0;justify-content:center;font-size:16px}
+#tbBrand{display:flex;align-items:center;gap:8px;pointer-events:none;margin-right:auto;padding-left:2px}
+#tbBrand img{width:28px;height:28px;border-radius:8px;object-fit:cover}
+#tbBrand b{font-size:12.5px;letter-spacing:.12em;color:#fff}
+#tbBrand small{display:block;font-size:9px;letter-spacing:.16em;color:#7f8db3}
+
+#chatPanel{position:fixed;left:12px;bottom:96px;z-index:9;width:min(340px,calc(100vw - 24px));max-height:min(46vh,360px);display:none;flex-direction:column;background:rgba(10,14,24,.86);border:1px solid rgba(255,255,255,.12);border-radius:16px;backdrop-filter:blur(14px);overflow:hidden;box-shadow:0 24px 70px -24px #000}
+#chatPanel.on{display:flex}
+#chatHead{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid rgba(255,255,255,.08);font-size:11px;letter-spacing:.14em;font-weight:800;color:#9fb0d4}
+#chatHead button{background:none;border:0;color:#8b97b4;font-size:17px;cursor:pointer;line-height:1}
+#chatLog{flex:1;overflow-y:auto;padding:9px 12px;display:flex;flex-direction:column;gap:6px;font-size:12px;line-height:1.45;min-height:80px}
+#chatLog .cm b{color:#22d3ee}
+#chatLog .cm.sys{color:#7f8db3;font-style:italic}
+#chatForm{display:flex;gap:6px;padding:8px;border-top:1px solid rgba(255,255,255,.08)}
+#chatInput{flex:1;min-width:0;background:#0a0e18;border:1px solid rgba(255,255,255,.12);border-radius:10px;color:#e8eefc;padding:9px 11px;font-size:12.5px;font-family:inherit;outline:none}
+#chatForm button{border:1px solid rgba(79,124,255,.5);background:rgba(79,124,255,.22);color:#fff;border-radius:10px;padding:0 12px;font-size:12px;font-weight:800;cursor:pointer;font-family:inherit}
+
+#settings{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;background:rgba(3,5,10,.72);backdrop-filter:blur(8px);padding:20px}
+#settings.on{display:flex}
+#settingsCard{width:min(430px,94vw);max-height:86vh;overflow:auto;background:linear-gradient(180deg,#0d1220,#0a0d16);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:18px;box-shadow:0 40px 100px -24px #000}
+#settingsCard h3{margin:0 0 4px;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
+#settingsCard p.hint{margin:0 0 14px;font-size:11.5px;color:#7f8db3}
+.setRow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid rgba(255,255,255,.07);font-size:12.5px;color:#c7d2e8}
+.setRow select,.setRow input[type=range]{accent-color:#4f7cff}
+.setRow select{background:#0a0e18;color:#e8eefc;border:1px solid rgba(255,255,255,.14);border-radius:9px;padding:7px 9px;font-family:inherit;font-size:12px}
+.setRow input[type=range]{width:130px}
+.setRow .val{min-width:34px;text-align:right;color:#22d3ee;font-weight:800;font-size:11.5px}
+#settingsClose{width:100%;margin-top:14px;padding:12px;border-radius:12px;border:1px solid rgba(79,124,255,.45);background:rgba(79,124,255,.18);color:#fff;font-family:inherit;font-weight:800;font-size:12.5px;letter-spacing:.08em;cursor:pointer}
+
+#voiceBar{position:fixed;right:12px;bottom:88px;z-index:9;display:none;flex-direction:column;gap:6px;align-items:flex-end}
+#voiceBar.on{display:flex}
+#voiceBar button{pointer-events:auto;display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 12px;border-radius:11px;border:1px solid rgba(255,255,255,.12);background:rgba(8,11,20,.7);backdrop-filter:blur(12px);color:#dbe4f7;font-family:inherit;font-size:11.5px;font-weight:700;cursor:pointer}
+#voiceBar button.on{border-color:rgba(34,197,94,.55);background:rgba(34,197,94,.2);color:#b6f7cd}
+#voiceBar button.muted{border-color:rgba(239,68,68,.5);background:rgba(239,68,68,.18);color:#ffb4b4}
+#voiceDot{width:7px;height:7px;border-radius:50%;background:#64719a}
+#voiceBar button.on #voiceDot{background:#22c55e;box-shadow:0 0 9px #22c55e}
+
+@media (max-width:560px){
+  #chatPanel{bottom:82px;width:calc(100vw - 20px)}
+  #voiceBar{bottom:80px}
+  #topbar .tb span.lbl{display:none}
+}
 </style>
 </head>
 <body>
@@ -189,6 +268,72 @@ html,body{height:100%;margin:0;background:var(--bg);color:var(--tx);font-family:
 <div id="vignette"></div>
 
 <div id="hud"></div>
+
+<!-- ===== BOOT / CARREGAMENTO ===== -->
+<div id="boot">
+  <img id="bootLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX GAME">
+  <div id="bootName">AMHEEX <span>GAME</span></div>
+  <div id="bootBarWrap">
+    <div id="bootBar"><i id="bootFill"></i></div>
+    <div id="bootPct">0%</div>
+  </div>
+  <div id="bootTip">Preparando o mundo, carregando a AMHEEX AI…</div>
+</div>
+
+<!-- ===== MENU INICIAL ===== -->
+<div id="menu">
+  <img id="menuLogo" src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt="AMHEEX">
+  <h1 id="menuTitle">AMHEEX GAME</h1>
+  <div id="menuSub">Mundo 3D online • AMHEEX AI</div>
+  <div id="menuCard">
+    <label for="menuName">Seu nome no jogo</label>
+    <input id="menuName" maxlength="18" placeholder="Digite seu nome…" autocomplete="off">
+    <button id="menuPlay" type="button">▶ ENTRAR NO MUNDO</button>
+    <div id="menuRow">
+      <button id="menuCfg" type="button">⚙ CONFIGURAÇÕES</button>
+      <button id="menuHow" type="button">❔ COMO JOGAR</button>
+    </div>
+    <div id="menuStats">Jogadores online: <b id="menuPlayers">0</b> • seu IP identifica seu personagem</div>
+  </div>
+</div>
+
+<!-- ===== BARRA SUPERIOR ===== -->
+<div id="topbar">
+  <div id="tbBrand"><img src="https://storage.amheex.workers.dev/AMHEEX/icon.png" alt=""><div><b>AMHEEX GAME</b><small>AMHEEX AI</small></div></div>
+  <button class="tb icon" id="tbMenu" type="button" title="Menu">☰</button>
+  <button class="tb" id="tbChat" type="button" title="Chat">💬 <span class="lbl">Chat</span></button>
+  <button class="tb" id="tbPlayers" type="button" title="Jogadores">🌐 <b id="tbCount">0</b></button>
+  <button class="tb icon" id="tbSettings" type="button" title="Configurações">⚙</button>
+</div>
+
+<!-- ===== CHAT ===== -->
+<div id="chatPanel">
+  <div id="chatHead"><span>CHAT DO MUNDO</span><button id="chatClose" type="button">×</button></div>
+  <div id="chatLog"></div>
+  <form id="chatForm" autocomplete="off"><input id="chatInput" maxlength="180" placeholder="Digite e pressione Enter…"><button type="submit">Enviar</button></form>
+</div>
+
+<!-- ===== VOZ ===== -->
+<div id="voiceBar">
+  <button id="voiceMic" type="button"><i id="voiceDot"></i> <span id="voiceLbl">VOZ OFF</span></button>
+  <button id="voiceMute" type="button">🔊 <span>Som</span></button>
+</div>
+
+<!-- ===== CONFIGURAÇÕES ===== -->
+<div id="settings">
+  <div id="settingsCard">
+    <h3>Configurações</h3>
+    <p class="hint">Ajustes do jogo. Não alteram o mapa nem o personagem dos outros jogadores.</p>
+    <div class="setRow"><span>Qualidade gráfica</span><select id="setQuality"><option value="low">Baixa</option><option value="mid" selected>Média</option><option value="high">Alta</option></select></div>
+    <div class="setRow"><span>Volume geral</span><input id="setVolume" type="range" min="0" max="100" value="80"><span class="val" id="setVolumeV">80</span></div>
+    <div class="setRow"><span>Alcance da voz</span><input id="setVoiceRange" type="range" min="5" max="40" value="16"><span class="val" id="setVoiceRangeV">16m</span></div>
+    <div class="setRow"><span>Sensibilidade da câmera</span><input id="setSens" type="range" min="20" max="200" value="100"><span class="val" id="setSensV">100</span></div>
+    <div class="setRow"><span>Microfone</span><select id="setMic"><option value="off">Desligado</option><option value="on">Ligado (tecla V)</option></select></div>
+    <div class="setRow"><span>Mostrar nomes</span><select id="setNames"><option value="on" selected>Sim</option><option value="off">Não</option></select></div>
+    <button id="settingsClose" type="button">FECHAR</button>
+  </div>
+</div>
+
 
 <div id="crosshair"></div>
 <div id="health"><span>HP</span><div class="bar"><i id="healthBar"></i></div><b id="healthN">100</b></div>

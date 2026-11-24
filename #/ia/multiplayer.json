@@ -1,7 +1,19 @@
 {
     "revision": 0,
     "world_revision": 0,
-    "players": {},
+    "players": {
+        "5389338d1be7b5cb": {
+            "id": "5389338d1be7b5cb",
+            "name": "Jogador-1591",
+            "ip": "127.0.0.1",
+            "x": -0.36,
+            "z": 0.03,
+            "ry": -0.75,
+            "skin": [],
+            "last": 1795541774,
+            "anim": "idle"
+        }
+    },
     "chat": [],
-    "updated": null
+    "updated": "2026-11-24T17:36:14+00:00"
 }

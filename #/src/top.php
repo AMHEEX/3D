@@ -283,6 +283,46 @@ if ($API !== '') {
             amx_out(['ok' => false, 'erro' => 'ação multiplayer desconhecida'], 400);
         }
 
+        /* ---------- VOZ POR PROXIMIDADE (WebRTC, sinalização por arquivo) ---------- */
+        case 'rtc_send': {
+            $in = amx_body();
+            $de = amx_limpa((string)($in['from'] ?? ''), 40);
+            $para = amx_limpa((string)($in['to'] ?? ''), 40);
+            $tipo = amx_limpa((string)($in['kind'] ?? ''), 12);
+            if ($de === '' || $para === '' || !in_array($tipo, ['offer', 'answer', 'ice', 'bye'], true)) {
+                amx_out(['ok' => false, 'erro' => 'sinal inválido'], 400);
+            }
+            $f = amx_path('rtc.json');
+            $db = amx_read_json($f, ['msgs' => []]);
+            if (!is_array($db) || !isset($db['msgs']) || !is_array($db['msgs'])) $db = ['msgs' => []];
+            $db['msgs'][] = [
+                'from' => $de, 'to' => $para, 'kind' => $tipo,
+                'data' => $in['data'] ?? null, 'ts' => time()
+            ];
+            $agora = time();
+            $db['msgs'] = array_values(array_filter($db['msgs'], function ($m) use ($agora) {
+                return ($agora - (int)($m['ts'] ?? 0)) < 40;
+            }));
+            if (count($db['msgs']) > 300) $db['msgs'] = array_slice($db['msgs'], -300);
+            amx_write_json($f, $db);
+            amx_out(['ok' => true]);
+        }
+
+        case 'rtc_poll': {
+            $id = amx_limpa((string)($_GET['id'] ?? ''), 40);
+            if ($id === '') amx_out(['ok' => false, 'erro' => 'id ausente'], 400);
+            $f = amx_path('rtc.json');
+            $db = amx_read_json($f, ['msgs' => []]);
+            if (!is_array($db) || !isset($db['msgs']) || !is_array($db['msgs'])) $db = ['msgs' => []];
+            $meus = [];
+            $resto = [];
+            foreach ($db['msgs'] as $m) {
+                if (($m['to'] ?? '') === $id) $meus[] = $m; else $resto[] = $m;
+            }
+            if ($meus) { $db['msgs'] = $resto; amx_write_json($f, $db); }
+            amx_out(['ok' => true, 'msgs' => $meus]);
+        }
+
         case 'treino': {
             $a = amx_aprendizado();
             $kb = amx_read_json(amx_path('knowledge.json'), []);

@@ -10,6 +10,9 @@ cd "$(dirname "$0")"
   cat src/game.js
   echo '</script>'
   echo '<script>'
+  cat src/ui.js
+  echo '</script>'
+  echo '<script>'
   cat src/ai.js
   echo '</script>'
   echo '</body>'
